@@ -6,6 +6,10 @@ import type { Database } from "@/types/database";
 export { hasSupabaseEnv } from "@/lib/supabase/config";
 
 export function createClient() {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
   if (!hasSupabaseEnv()) {
     return null;
   }
