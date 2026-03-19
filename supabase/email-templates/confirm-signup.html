@@ -1,0 +1,20 @@
+<!doctype html>
+<html>
+  <body style="margin:0;padding:0;background:#f7f5f2;font-family:Inter,Arial,sans-serif;color:#2a2a2a;">
+    <div style="padding:32px 20px;">
+      <div style="max-width:560px;margin:0 auto;background:#ffffff;border:1px solid rgba(30,42,68,0.08);border-radius:28px;padding:36px;box-shadow:0 24px 60px rgba(30,42,68,0.08);">
+        <p style="margin:0 0 12px;color:#e6b86a;font-size:12px;letter-spacing:0.18em;text-transform:uppercase;">Vault Story</p>
+        <h1 style="margin:0 0 16px;font-family:Georgia,'Times New Roman',serif;font-size:36px;line-height:1.15;color:#1e2a44;">Confirm your email</h1>
+        <p style="margin:0 0 14px;font-size:16px;line-height:1.8;">Welcome to Vault Story.</p>
+        <p style="margin:0 0 24px;font-size:16px;line-height:1.8;">Confirm your email address so you can start preserving memories, opening future messages, and joining the people you love inside your private vault.</p>
+        <div style="margin:0 0 28px;">
+          <a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#1e2a44;color:#ffffff;text-decoration:none;padding:14px 22px;border-radius:999px;font-weight:600;">Confirm your email</a>
+        </div>
+        <div style="padding:18px 20px;border-radius:22px;background:linear-gradient(180deg, rgba(230,184,106,0.14), rgba(230,184,106,0.05));font-size:14px;line-height:1.8;color:#5e5b57;">
+          If the button above does not work, copy and paste this link into your browser:<br />
+          <a href="{{ .ConfirmationURL }}" style="color:#1e2a44;word-break:break-all;">{{ .ConfirmationURL }}</a>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
