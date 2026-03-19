@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { sendUnlockReadyEmail } from "@/lib/email";
-import { env } from "@/lib/env";
 import { getEntryStatus } from "@/lib/entries";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import type { Json } from "@/types/database";
@@ -42,7 +41,9 @@ type ProfileRow = {
 };
 
 function isAuthorized(request: NextRequest) {
-  if (!env.UNLOCK_NOTIFICATIONS_CRON_SECRET) {
+  const cronSecret = process.env.UNLOCK_NOTIFICATIONS_CRON_SECRET;
+
+  if (!cronSecret) {
     return false;
   }
 
@@ -51,7 +52,7 @@ function isAuthorized(request: NextRequest) {
   const querySecret = request.nextUrl.searchParams.get("secret");
   const bearerSecret = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
 
-  return [bearerSecret, headerSecret, querySecret].some((value) => value === env.UNLOCK_NOTIFICATIONS_CRON_SECRET);
+  return [bearerSecret, headerSecret, querySecret].some((value) => value === cronSecret);
 }
 
 function notificationsEnabled(preferences: Json | null) {
@@ -167,8 +168,7 @@ async function runUnlockNotifications() {
     const recipientSet = recipientsByVault.get(entry.vault_id) ?? new Set<string>();
     const unlockedAt = entry.milestone_achieved_at || entry.unlock_at || entry.created_at;
     const coverImageUrl = vault.cover_image_url
-      ? (await supabaseAdmin.storage.from("vault-covers").createSignedUrl(vault.cover_image_url, 60 * 60 * 24 * 7)).data
-          ?.signedUrl ?? null
+      ? (await supabaseAdmin.storage.from("vault-covers").createSignedUrl(vault.cover_image_url, 60 * 60 * 24 * 7)).data?.signedUrl ?? null
       : null;
 
     for (const recipientUserId of recipientSet) {

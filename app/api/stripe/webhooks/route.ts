@@ -2,7 +2,6 @@ import Stripe from "stripe";
 import { NextRequest, NextResponse } from "next/server";
 
 import { syncProfileBillingFromCanceledSubscription, syncProfileBillingFromSubscription, upsertStripeCustomer } from "@/lib/billing";
-import { env } from "@/lib/env";
 import { getStripe } from "@/lib/stripe";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
@@ -62,7 +61,9 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
 }
 
 export async function POST(request: NextRequest) {
-  if (!env.STRIPE_WEBHOOK_SECRET) {
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+  if (!webhookSecret) {
     return NextResponse.json({ error: "Stripe webhook secret is not configured." }, { status: 500 });
   }
 
@@ -77,7 +78,7 @@ export async function POST(request: NextRequest) {
   let event: Stripe.Event;
 
   try {
-    event = stripe.webhooks.constructEvent(body, signature, env.STRIPE_WEBHOOK_SECRET);
+    event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Invalid Stripe signature." },
