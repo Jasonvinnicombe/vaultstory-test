@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowRight, LockKeyhole, Sparkles } from "lucide-react";
@@ -21,6 +21,7 @@ type SignInValues = z.infer<typeof signInSchema>;
 type SignUpValues = z.infer<typeof signUpSchema>;
 type AuthValues = SignInValues & { fullName?: string };
 type OAuthProvider = "google";
+type BrowserSupabaseClient = NonNullable<ReturnType<typeof createClient>>;
 
 const OAUTH_PROVIDERS: Array<{ provider: OAuthProvider; label: string }> = [
   { provider: "google", label: "Google" },
@@ -44,10 +45,10 @@ function buildAuthHref(mode: "login" | "signup", email: string, inviteMode: stri
 function GoogleLogo() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5">
-      <path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.55-.2-2.27H12v4.29h6.44a5.51 5.51 0 0 1-2.39 3.62v3h3.86c2.26-2.08 3.58-5.15 3.58-8.64Z"/>
-      <path fill="#34A853" d="M12 24c3.24 0 5.96-1.07 7.95-2.91l-3.86-3c-1.07.72-2.43 1.15-4.09 1.15-3.14 0-5.8-2.12-6.75-4.97H1.26v3.09A12 12 0 0 0 12 24Z"/>
-      <path fill="#FBBC05" d="M5.25 14.27A7.2 7.2 0 0 1 4.87 12c0-.79.14-1.55.38-2.27V6.64H1.26A12 12 0 0 0 0 12c0 1.94.46 3.78 1.26 5.36l3.99-3.09Z"/>
-      <path fill="#EA4335" d="M12 4.76c1.76 0 3.34.61 4.58 1.8l3.43-3.43C17.95 1.19 15.24 0 12 0A12 12 0 0 0 1.26 6.64l3.99 3.09c.95-2.85 3.61-4.97 6.75-4.97Z"/>
+      <path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.55-.2-2.27H12v4.29h6.44a5.51 5.51 0 0 1-2.39 3.62v3h3.86c2.26-2.08 3.58-5.15 3.58-8.64Z" />
+      <path fill="#34A853" d="M12 24c3.24 0 5.96-1.07 7.95-2.91l-3.86-3c-1.07.72-2.43 1.15-4.09 1.15-3.14 0-5.8-2.12-6.75-4.97H1.26v3.09A12 12 0 0 0 12 24Z" />
+      <path fill="#FBBC05" d="M5.25 14.27A7.2 7.2 0 0 1 4.87 12c0-.79.14-1.55.38-2.27V6.64H1.26A12 12 0 0 0 0 12c0 1.94.46 3.78 1.26 5.36l3.99-3.09Z" />
+      <path fill="#EA4335" d="M12 4.76c1.76 0 3.34.61 4.58 1.8l3.43-3.43C17.95 1.19 15.24 0 12 0A12 12 0 0 0 1.26 6.64l3.99 3.09c.95-2.85 3.61-4.97 6.75-4.97Z" />
     </svg>
   );
 }
@@ -83,7 +84,7 @@ function getFriendlyAuthError(message: string, mode: "login" | "signup" | "reset
   return message;
 }
 
-async function getPostAuthDestination(supabase: NonNullable<ReturnType<typeof createClient>>, nextPath: string) {
+async function getPostAuthDestination(supabase: BrowserSupabaseClient, nextPath: string) {
   const { data } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
 
   if (data?.nextLevel === "aal2" && data.currentLevel !== "aal2") {
@@ -96,7 +97,8 @@ async function getPostAuthDestination(supabase: NonNullable<ReturnType<typeof cr
 export function AuthForm({ mode }: { mode: AuthMode }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const supabase = createClient();
+  const [supabase, setSupabase] = useState<ReturnType<typeof createClient>>(null);
+  const [authClientChecked, setAuthClientChecked] = useState(false);
   const [loading, setLoading] = useState(false);
   const [resetSending, setResetSending] = useState(false);
   const [oauthLoading, setOauthLoading] = useState<OAuthProvider | null>(null);
@@ -105,6 +107,11 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
   const inviteMode = searchParams.get("invite");
   const nextPath = searchParams.get("next") || "/dashboard";
   const alternateAuthHref = buildAuthHref(currentMode === "login" ? "signup" : "login", inviteEmail, inviteMode, nextPath);
+
+  useEffect(() => {
+    setSupabase(createClient());
+    setAuthClientChecked(true);
+  }, []);
 
   const form = useForm<AuthValues>({
     resolver: zodResolver(currentMode === "login" ? signInSchema : signUpSchema),
@@ -219,7 +226,8 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
     router.refresh();
   }
 
-  const showSetupState = !supabase;
+  const showSetupState = authClientChecked && !supabase;
+  const authUnavailable = !authClientChecked || !supabase;
 
   return (
     <Card className="w-full max-w-lg overflow-hidden border-white/60 bg-card/90 shadow-[0_28px_90px_rgba(66,46,31,0.14)] backdrop-blur-xl">
@@ -261,13 +269,13 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
         ) : null}
 
         <div className="space-y-4">
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-1">
             {OAUTH_PROVIDERS.map((item) => (
               <button
                 key={item.provider}
                 type="button"
                 onClick={() => void handleOAuth(item.provider)}
-                disabled={showSetupState || loading || oauthLoading !== null}
+                disabled={authUnavailable || loading || oauthLoading !== null}
                 className="inline-flex items-center justify-center gap-3 rounded-[22px] border border-border/70 bg-background/80 px-4 py-3 text-sm font-medium text-foreground transition hover:bg-background disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <span className="inline-flex h-6 w-6 items-center justify-center">
@@ -293,14 +301,14 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
           {currentMode === "signup" ? (
             <div className="space-y-2.5">
               <Label htmlFor="fullName">Full name</Label>
-              <Input id="fullName" placeholder="Your full name" disabled={showSetupState} aria-invalid={Boolean(form.formState.errors.fullName)} {...form.register("fullName")} />
+              <Input id="fullName" placeholder="Your full name" disabled={authUnavailable} aria-invalid={Boolean(form.formState.errors.fullName)} {...form.register("fullName")} />
               {form.formState.errors.fullName ? <p className="text-xs text-destructive">{String(form.formState.errors.fullName.message)}</p> : <p className="text-xs text-muted-foreground">This helps personalize your vault and family invitations.</p>}
             </div>
           ) : null}
 
           <div className="space-y-2.5">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" placeholder="you@example.com" disabled={showSetupState} aria-invalid={Boolean(form.formState.errors.email)} {...form.register("email")} />
+            <Input id="email" type="email" placeholder="you@example.com" disabled={authUnavailable} aria-invalid={Boolean(form.formState.errors.email)} {...form.register("email")} />
             {form.formState.errors.email ? <p className="text-xs text-destructive">{String(form.formState.errors.email.message)}</p> : null}
           </div>
 
@@ -313,7 +321,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
                   <button
                     type="button"
                     onClick={handleForgotPassword}
-                    disabled={resetSending || showSetupState}
+                    disabled={resetSending || authUnavailable}
                     className="text-xs font-medium text-primary underline-offset-4 transition hover:underline disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {resetSending ? "Sending..." : "Forgot password?"}
@@ -321,7 +329,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
                 ) : null}
               </div>
             </div>
-            <Input id="password" type="password" placeholder="Enter your password" disabled={showSetupState} aria-invalid={Boolean(form.formState.errors.password)} {...form.register("password")} />
+            <Input id="password" type="password" placeholder="Enter your password" disabled={authUnavailable} aria-invalid={Boolean(form.formState.errors.password)} {...form.register("password")} />
             {form.formState.errors.password ? <p className="text-xs text-destructive">{String(form.formState.errors.password.message)}</p> : <p className="text-xs text-muted-foreground">Use something memorable to you, but hard for anyone else to guess.</p>}
           </div>
 
@@ -337,7 +345,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
             </div>
           ) : null}
 
-          <Button type="submit" className="w-full" disabled={loading || showSetupState || oauthLoading !== null}>
+          <Button type="submit" className="w-full" disabled={loading || authUnavailable || oauthLoading !== null}>
             {loading ? "Please wait..." : currentMode === "login" ? "Log in" : "Create account"}
             {!loading ? <ArrowRight className="h-4 w-4" /> : null}
           </Button>

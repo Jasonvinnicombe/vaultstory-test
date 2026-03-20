@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -14,7 +14,7 @@ import { createClient } from "@/lib/supabase/client";
 export function MfaChallengeForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const supabase = createClient();
+  const [supabase, setSupabase] = useState<ReturnType<typeof createClient>>(null);
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [factorId, setFactorId] = useState<string | null>(null);
@@ -24,6 +24,10 @@ export function MfaChallengeForm() {
     const path = searchParams.get("next") || "/dashboard";
     return path.startsWith("/") ? path : "/dashboard";
   }, [searchParams]);
+
+  useEffect(() => {
+    setSupabase(createClient());
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -157,3 +161,5 @@ export function MfaChallengeForm() {
     </Card>
   );
 }
+
+

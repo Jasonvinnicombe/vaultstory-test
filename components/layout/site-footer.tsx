@@ -8,6 +8,7 @@ const footerGroups = [
       { href: "/#features", label: "Features" },
       { href: "/pricing", label: "Pricing" },
       { href: "/reviews", label: "Reviews" },
+      { href: "/faq", label: "FAQ" },
       { href: "/signup", label: "Start free" },
     ],
   },
@@ -68,10 +69,11 @@ export function SiteFooter() {
         </div>
 
         <div className="flex flex-col gap-3 border-t border-white/60 pt-6 text-xs uppercase tracking-[0.14em] text-muted-foreground/85 sm:flex-row sm:items-center sm:justify-between">
-          <p>© {year} Vault Story</p>
+          <p>Copyright {year} Vault Story</p>
           <div className="flex flex-wrap gap-4">
             <Link href="/pricing" className="transition-colors hover:text-foreground">Pricing</Link>
             <Link href="/reviews" className="transition-colors hover:text-foreground">Reviews</Link>
+            <Link href="/faq" className="transition-colors hover:text-foreground">FAQ</Link>
             <Link href="/login" className="transition-colors hover:text-foreground">Log in</Link>
             <Link href="/signup" className="transition-colors hover:text-foreground">Create account</Link>
           </div>
@@ -80,4 +82,3 @@ export function SiteFooter() {
     </footer>
   );
 }
-

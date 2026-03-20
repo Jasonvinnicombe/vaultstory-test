@@ -14,12 +14,12 @@ export function SiteHeader() {
           VAULT STORY
         </Link>
         <nav className="hidden items-center gap-7 text-sm text-muted-foreground lg:flex">
-          <Link href="/#how-it-works" className="transition-colors hover:text-foreground">How it works</Link>
-          <Link href="/#features" className="transition-colors hover:text-foreground">Features</Link>
-          <Link href="/#use-cases" className="transition-colors hover:text-foreground">Use cases</Link>
+          <a href="/#how-it-works" className="transition-colors hover:text-foreground">How it works</a>
+          <a href="/#features" className="transition-colors hover:text-foreground">Features</a>
+          <a href="/#use-cases" className="transition-colors hover:text-foreground">Use cases</a>
           <Link href="/pricing" className="transition-colors hover:text-foreground">Pricing</Link>
           <Link href="/reviews" className="transition-colors hover:text-foreground">Reviews</Link>
-          <Link href="/#faq" className="transition-colors hover:text-foreground">FAQ</Link>
+          <Link href="/faq" className="transition-colors hover:text-foreground">FAQ</Link>
         </nav>
         <div className="flex items-center gap-2 sm:gap-3">
           <Button asChild variant="ghost" className="hidden sm:inline-flex"><Link href="/login">Log in</Link></Button>

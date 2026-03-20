@@ -13,7 +13,8 @@ import { createClient } from "@/lib/supabase/client";
 
 export function ResetPasswordForm() {
   const router = useRouter();
-  const supabase = createClient();
+  const [supabase, setSupabase] = useState<ReturnType<typeof createClient>>(null);
+  const [authClientChecked, setAuthClientChecked] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -21,11 +22,16 @@ export function ResetPasswordForm() {
   const [sessionChecked, setSessionChecked] = useState(false);
 
   useEffect(() => {
+    setSupabase(createClient());
+    setAuthClientChecked(true);
+  }, []);
+
+  useEffect(() => {
     let active = true;
 
     async function checkSession() {
       if (!supabase) {
-        if (active) {
+        if (active && authClientChecked) {
           setSessionChecked(true);
         }
         return;
@@ -38,12 +44,12 @@ export function ResetPasswordForm() {
       }
     }
 
-    checkSession();
+    void checkSession();
 
     return () => {
       active = false;
     };
-  }, [supabase]);
+  }, [authClientChecked, supabase]);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -77,7 +83,8 @@ export function ResetPasswordForm() {
     router.refresh();
   }
 
-  const showSetupState = !supabase;
+  const showSetupState = authClientChecked && !supabase;
+  const authUnavailable = !authClientChecked || !supabase;
 
   return (
     <Card className="w-full max-w-lg overflow-hidden border-white/60 bg-card/90 shadow-[0_28px_90px_rgba(66,46,31,0.14)] backdrop-blur-xl">
@@ -124,7 +131,7 @@ export function ResetPasswordForm() {
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               placeholder="Enter your new password"
-              disabled={!sessionReady || showSetupState}
+              disabled={!sessionReady || authUnavailable}
             />
           </div>
 
@@ -136,12 +143,12 @@ export function ResetPasswordForm() {
               value={confirmPassword}
               onChange={(event) => setConfirmPassword(event.target.value)}
               placeholder="Repeat your new password"
-              disabled={!sessionReady || showSetupState}
+              disabled={!sessionReady || authUnavailable}
             />
             <p className="text-xs text-muted-foreground">Use at least 8 characters so your vault stays protected.</p>
           </div>
 
-          <Button type="submit" className="w-full" disabled={loading || !sessionReady || showSetupState}>
+          <Button type="submit" className="w-full" disabled={loading || !sessionReady || authUnavailable}>
             {loading ? "Updating..." : "Save new password"}
             {!loading ? <ArrowRight className="h-4 w-4" /> : null}
           </Button>

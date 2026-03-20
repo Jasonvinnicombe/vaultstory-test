@@ -1,4 +1,4 @@
-function normalizeEnvValue(value: string | undefined) {
+export function normalizeEnvValue(value: string | undefined) {
   if (typeof value !== "string") {
     return value;
   }
@@ -26,3 +26,4 @@ export function getSupabaseEnv() {
 
   return { url, anonKey };
 }
+

@@ -41,7 +41,11 @@ export default async function AdminUsersPage({
     searchParams ?? Promise.resolve({}),
   ]);
 
-  const [{ data: users }, { data: pendingInvites }] = await Promise.all([
+  const [
+    { data: profileRows, error: usersError },
+    { data: pendingInvites, error: pendingInvitesError },
+    { data: authUsersPage, error: authUsersError },
+  ] = await Promise.all([
     supabaseAdmin
       .from("profiles")
       .select("id,email,full_name,is_admin,membership_plan,membership_status,storage_quota_gb,created_at")
@@ -51,7 +55,42 @@ export default async function AdminUsersPage({
       .select("id,email,status,created_at")
       .eq("status", "pending")
       .order("created_at", { ascending: false }),
+    supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 }),
   ]);
+
+  const profileMap = new Map((profileRows ?? []).map((entry) => [entry.id, entry]));
+  const mergedUsers = (authUsersPage?.users ?? []).map((authUser) => {
+    const profileEntry = profileMap.get(authUser.id);
+    profileMap.delete(authUser.id);
+
+    return {
+      id: authUser.id,
+      email: profileEntry?.email ?? authUser.email ?? "",
+      full_name:
+        profileEntry?.full_name ??
+        authUser.user_metadata?.full_name ??
+        authUser.user_metadata?.name ??
+        authUser.email?.split("@")[0] ??
+        "Unknown user",
+      is_admin: profileEntry?.is_admin ?? false,
+      membership_plan: profileEntry?.membership_plan ?? "free",
+      membership_status: profileEntry?.membership_status ?? "active",
+      storage_quota_gb: profileEntry?.storage_quota_gb ?? null,
+      created_at: profileEntry?.created_at ?? authUser.created_at ?? null,
+    };
+  });
+
+  const orphanedProfiles = [...profileMap.values()].map((entry) => ({
+    ...entry,
+    membership_plan: entry.membership_plan ?? "free",
+    membership_status: entry.membership_status ?? "active",
+  }));
+
+  const users = [...mergedUsers, ...orphanedProfiles].sort((a, b) => {
+    const aTime = a.created_at ? new Date(a.created_at).getTime() : 0;
+    const bTime = b.created_at ? new Date(b.created_at).getTime() : 0;
+    return bTime - aTime;
+  });
 
   const feedback = resolvedSearchParams.adminError
     ? { type: "error" as const, message: resolvedSearchParams.adminError }
@@ -59,8 +98,13 @@ export default async function AdminUsersPage({
       ? { type: "success" as const, message: resolvedSearchParams.adminSuccess }
       : null;
 
+  const dataWarning =
+    usersError || pendingInvitesError || authUsersError
+      ? "Some admin data could not be loaded completely. User counts may be incomplete until the Supabase connection is healthy again."
+      : null;
+
   const query = resolvedSearchParams.q?.trim().toLowerCase() ?? "";
-  const filteredUsers = (users ?? []).filter((entry) => {
+  const filteredUsers = users.filter((entry) => {
     if (!query) return true;
     const haystack = `${entry.full_name ?? ""} ${entry.email}`.toLowerCase();
     return haystack.includes(query);
@@ -87,10 +131,10 @@ export default async function AdminUsersPage({
             </p>
             <div className="mt-5 flex flex-wrap gap-3 text-sm text-muted-foreground">
               <span className="inline-flex items-center gap-2 rounded-full bg-secondary/55 px-3 py-1.5">
-                {users?.length ?? 0} total users
+                {users.length} total users
               </span>
               <span className="inline-flex items-center gap-2 rounded-full bg-secondary/55 px-3 py-1.5">
-                {(users ?? []).filter((entry) => entry.is_admin).length} admins
+                {users.filter((entry) => entry.is_admin).length} admins
               </span>
               <span className="inline-flex items-center gap-2 rounded-full bg-secondary/55 px-3 py-1.5">
                 {pendingInvites?.length ?? 0} pending admin invites
@@ -102,6 +146,12 @@ export default async function AdminUsersPage({
         {feedback ? (
           <Card className={feedback.type === "error" ? "border-red-200 bg-red-50/90" : "border-emerald-200 bg-emerald-50/90"}>
             <CardContent className="p-5 text-sm leading-7 text-foreground">{feedback.message}</CardContent>
+          </Card>
+        ) : null}
+
+        {dataWarning ? (
+          <Card className="border-amber-200 bg-amber-50/90">
+            <CardContent className="p-5 text-sm leading-7 text-foreground">{dataWarning}</CardContent>
           </Card>
         ) : null}
 
@@ -292,3 +342,4 @@ export default async function AdminUsersPage({
     </AppShell>
   );
 }
+

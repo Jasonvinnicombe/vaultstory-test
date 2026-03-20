@@ -14,7 +14,10 @@ export function createClient() {
     return null;
   }
 
-  const { anonKey, url } = getSupabaseEnv();
-
-  return createBrowserClient<Database>(url, anonKey);
+  try {
+    const { anonKey, url } = getSupabaseEnv();
+    return createBrowserClient<Database>(url, anonKey);
+  } catch {
+    return null;
+  }
 }

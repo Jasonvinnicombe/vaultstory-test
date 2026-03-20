@@ -1,6 +1,6 @@
-"use client";
+﻿"use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -27,7 +27,7 @@ export function UserSettingsForm(props: {
   notifications: { emailReminders: boolean; unlockDigest: boolean };
 }) {
   const router = useRouter();
-  const supabase = createClient();
+  const [supabase, setSupabase] = useState<ReturnType<typeof createClient>>(null);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -44,8 +44,16 @@ export function UserSettingsForm(props: {
 
   const previewUrl = useMemo(() => (avatarFile ? URL.createObjectURL(avatarFile) : null), [avatarFile]);
 
+  useEffect(() => {
+    setSupabase(createClient());
+  }, []);
+
   async function onSubmit(values: UserSettingsValues) {
-    if (!supabase) return;
+    if (!supabase) {
+      toast.error("Add your Supabase URL and anon key in .env.local to enable authentication.");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -190,4 +198,3 @@ export function UserSettingsForm(props: {
     </Card>
   );
 }
-

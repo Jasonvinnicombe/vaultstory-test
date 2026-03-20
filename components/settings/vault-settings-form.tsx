@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -33,7 +33,7 @@ export function VaultSettingsForm(props: {
   coverImagePreviewUrl: string | null;
 }) {
   const router = useRouter();
-  const supabase = createClient();
+  const [supabase, setSupabase] = useState<ReturnType<typeof createClient>>(null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -49,10 +49,19 @@ export function VaultSettingsForm(props: {
   });
 
   const previewUrl = useMemo(() => (coverFile ? URL.createObjectURL(coverFile) : null), [coverFile]);
+
+  useEffect(() => {
+    setSupabase(createClient());
+  }, []);
+
   const resolvedCoverPreviewUrl = previewUrl ?? props.coverImagePreviewUrl;
 
   async function onSubmit(values: VaultValues) {
-    if (!supabase) return;
+    if (!supabase) {
+      toast.error("Add your Supabase URL and anon key in .env.local to enable authentication.");
+      return;
+    }
+
     setLoading(true);
     try {
       let coverImageUrl = props.coverImageUrl;
@@ -119,8 +128,20 @@ export function VaultSettingsForm(props: {
             <div className="space-y-2.5">
               <Label htmlFor="cover">Cover image</Label>
               <label className="flex min-h-12 cursor-pointer items-center justify-center rounded-[22px] border border-dashed border-border bg-background/78 px-4 text-sm text-muted-foreground transition hover:bg-background/92 sm:justify-start">
-                <input id="cover" type="file" className="hidden" accept="image/png,image/jpeg,image/webp" onChange={(e) => { const file = e.target.files?.[0]; if (file) setCoverFile(file); }} />
-                <span className="inline-flex items-center gap-2"><ImagePlus className="h-4 w-4 text-primary" />{coverFile ? coverFile.name : "Update cover image"}</span>
+                <input
+                  id="cover"
+                  type="file"
+                  className="hidden"
+                  accept="image/png,image/jpeg,image/webp"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) setCoverFile(file);
+                  }}
+                />
+                <span className="inline-flex items-center gap-2">
+                  <ImagePlus className="h-4 w-4 text-primary" />
+                  {coverFile ? coverFile.name : "Update cover image"}
+                </span>
               </label>
             </div>
           </section>
@@ -166,6 +187,3 @@ export function VaultSettingsForm(props: {
     </Card>
   );
 }
-
-
-

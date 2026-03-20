@@ -1,7 +1,7 @@
-"use client";
+﻿"use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
@@ -119,7 +119,7 @@ export function EntryCreateForm({
 }: EntryCreateFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const supabase = createClient();
+  const [supabase, setSupabase] = useState<ReturnType<typeof createClient>>(null);
   const isEditing = Boolean(entryId);
   const [step, setStep] = useState(clampStep(startStep));
   const [loading, setLoading] = useState(false);
@@ -151,6 +151,10 @@ export function EntryCreateForm({
     if (!existingAssets.length) return newFileLabel;
     return `${existingAssets.length} saved, ${mediaFiles.length} new`;
   }, [existingAssets.length, mediaFiles.length]);
+
+  useEffect(() => {
+    setSupabase(createClient());
+  }, []);
 
   const unlockTypeOptions = useMemo(
     () =>
@@ -664,3 +668,6 @@ export function EntryCreateForm({
     </Card>
   );
 }
+
+
+

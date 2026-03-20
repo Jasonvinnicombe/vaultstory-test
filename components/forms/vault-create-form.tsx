@@ -1,9 +1,8 @@
 "use client";
 
 import Link from "next/link";
-
+import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertTriangle, CalendarHeart, ImagePlus, Loader2, UploadCloud } from "lucide-react";
@@ -32,7 +31,7 @@ type VaultCreateFormProps = {
 export function VaultCreateForm({ currentPlan, currentVaultCount }: VaultCreateFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const supabase = createClient();
+  const [supabase, setSupabase] = useState<ReturnType<typeof createClient>>(null);
   const [loading, setLoading] = useState(false);
   const [coverFile, setCoverFile] = useState<File | null>(null);
 
@@ -51,6 +50,10 @@ export function VaultCreateForm({ currentPlan, currentVaultCount }: VaultCreateF
   const normalizedPlan = normalizeMembershipPlan(currentPlan);
   const vaultLimit = getVaultLimit(currentPlan);
   const hasReachedVaultLimit = !canCreateAnotherVault(currentPlan, "active", currentVaultCount);
+
+  useEffect(() => {
+    setSupabase(createClient());
+  }, []);
 
   async function onSubmit(values: VaultValues) {
     if (!supabase) {

@@ -1,18 +1,19 @@
-import Link from "next/link";
-import { CalendarClock, FolderLock, LockKeyhole, Mailbox, Sparkles, Vault } from "lucide-react";
+﻿import Link from "next/link";
+import { CalendarClock, FolderLock, LockKeyhole, Mailbox, Search, Sparkles, Vault } from "lucide-react";
 
 import { AppShell } from "@/components/layout/app-shell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Input } from "@/components/ui/input";
 import { getProfile } from "@/lib/auth";
 import { getEntryStatus } from "@/lib/entries";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { VaultCard } from "@/components/vaults/vault-card";
 
-export default async function DashboardPage({ searchParams }: { searchParams?: Promise<{ onboarding?: string }> }) {
+export default async function DashboardPage({ searchParams }: { searchParams?: Promise<{ onboarding?: string; q?: string }> }) {
   const [resolvedSearchParams, { profile, user, avatarPreviewUrl }] = await Promise.all([
     searchParams ?? Promise.resolve({}),
     getProfile(),
@@ -66,6 +67,12 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
   );
 
   const firstVault = vaults?.[0] ?? null;
+  const query = resolvedSearchParams.q?.trim().toLowerCase() ?? "";
+  const filteredVaultCards = vaultCards.filter((vault) => {
+    if (!query) return true;
+    const haystack = `${vault.name} ${vault.vaultType} ${vault.subjectName ?? ""}`.toLowerCase();
+    return haystack.includes(query);
+  });
 
   return (
     <AppShell fullName={profile?.full_name ?? user.user_metadata.full_name ?? null} email={user.email ?? ""} isAdmin={profile?.is_admin ?? false} avatarUrl={avatarPreviewUrl}>
@@ -106,8 +113,46 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
         </section>
 
         <section id="vaults" className="space-y-4">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div className="section-stack"><h2 className="font-display text-3xl sm:text-4xl">Your vaults</h2><p className="text-sm leading-7 text-muted-foreground">Each card shows the person it holds, how full it is, and the next moment waiting to arrive.</p></div><Button asChild variant="outline"><Link href="/vaults/new">New vault</Link></Button></div>
-          {vaultCards.length ? <div className="grid gap-4 xl:grid-cols-2">{vaultCards.map((vault) => <VaultCard key={vault.id} {...vault} />)}</div> : <EmptyState icon={Vault} title="No vaults yet" body="Start with one vault for yourself or someone you love, then fill it with memories worth delivering later." action={<Button asChild><Link href="/vaults/new">Create your first vault</Link></Button>} />}
+          <Card className="overflow-hidden border-white/60 bg-card/86 shadow-[0_18px_48px_rgba(66,46,31,0.08)]">
+            <CardContent className="grid gap-4 p-5 sm:p-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+              <form className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-end">
+                <label className="space-y-2 text-sm font-medium text-foreground">
+                  <span className="uppercase tracking-[0.22em] text-muted-foreground">Search vaults</span>
+                  <div className="relative">
+                    <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      type="search"
+                      name="q"
+                      defaultValue={resolvedSearchParams.q ?? ""}
+                      placeholder="Search by vault name, type, or person"
+                      className="pl-11"
+                    />
+                  </div>
+                </label>
+                <Button type="submit" className="h-12 px-6">Search</Button>
+                {query ? <Button asChild type="button" variant="outline" className="h-12 px-6"><a href="/dashboard#vaults">Clear</a></Button> : null}
+              </form>
+              <div className="flex justify-start lg:justify-end">
+                <Button asChild variant="outline"><Link href="/vaults/new">New vault</Link></Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div className="section-stack">
+              <h2 className="font-display text-3xl sm:text-4xl">Your vaults</h2>
+              <p className="text-sm leading-7 text-muted-foreground">Each card shows the person it holds, how full it is, and the next moment waiting to arrive.</p>
+            </div>
+            {query ? <p className="text-sm leading-7 text-muted-foreground">Showing <strong className="text-foreground">{filteredVaultCards.length}</strong> vault{filteredVaultCards.length === 1 ? "" : "s"} for "{resolvedSearchParams.q}".</p> : null}
+          </div>
+
+          {vaultCards.length ? (
+            filteredVaultCards.length ? (
+              <div className="grid gap-4 xl:grid-cols-2">{filteredVaultCards.map((vault) => <VaultCard key={vault.id} {...vault} />)}</div>
+            ) : (
+              <Card className="border-white/60 bg-card/88 shadow-[0_20px_64px_rgba(66,46,31,0.08)]"><CardContent className="p-6 text-sm leading-7 text-muted-foreground">No vaults match that search yet.</CardContent></Card>
+            )
+          ) : <EmptyState icon={Vault} title="No vaults yet" body="Start with one vault for yourself or someone you love, then fill it with memories worth delivering later." action={<Button asChild><Link href="/vaults/new">Create your first vault</Link></Button>} />}
         </section>
 
         <section id="upcoming" className="space-y-4">

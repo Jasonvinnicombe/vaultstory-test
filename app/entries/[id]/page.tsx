@@ -32,19 +32,37 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
 
   if (!vault) notFound();
 
-  const signedAssets = await Promise.all(
-    (assetRows ?? []).map(async (asset) => {
-      const signedUrl =
-        (await supabaseAdmin.storage.from("entry-assets").createSignedUrl(asset.file_url, 60 * 10)).data
-          ?.signedUrl ?? null;
+  const signedAssets = (
+    await Promise.all(
+      (assetRows ?? []).map(async (asset) => {
+        if (/^https?:\/\//i.test(asset.file_url)) {
+          return {
+            id: asset.id,
+            fileUrl: asset.file_url,
+            fileType: asset.file_type,
+          };
+        }
 
-      return {
-        id: asset.id,
-        fileUrl: signedUrl ?? asset.file_url,
-        fileType: asset.file_type,
-      };
-    }),
-  );
+        try {
+          const { data, error } = await supabaseAdmin.storage
+            .from("entry-assets")
+            .createSignedUrl(asset.file_url, 60 * 10);
+
+          if (error || !data?.signedUrl) {
+            return null;
+          }
+
+          return {
+            id: asset.id,
+            fileUrl: data.signedUrl,
+            fileType: asset.file_type,
+          };
+        } catch {
+          return null;
+        }
+      }),
+    )
+  ).filter((asset): asset is { id: string; fileUrl: string; fileType: string } => Boolean(asset));
 
   const tags = (tagRows ?? []).map((tag) => tag.tag);
   const status = getEntryStatus(entry);
@@ -167,3 +185,4 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
     </AppShell>
   );
 }
+

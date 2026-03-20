@@ -26,15 +26,35 @@ type RevealExperienceProps = {
 
 const screens = ["intro", "recorded", "unlock", "content"] as const;
 
+function normalizeAssetType(fileType: string) {
+  return fileType.trim().toLowerCase();
+}
+
+function isPhotoAsset(fileType: string) {
+  const normalized = normalizeAssetType(fileType);
+  return normalized === "photo" || normalized === "image" || normalized.startsWith("image/");
+}
+
+function isAudioAsset(fileType: string) {
+  const normalized = normalizeAssetType(fileType);
+  return normalized === "audio" || normalized.startsWith("audio/");
+}
+
+function isVideoAsset(fileType: string) {
+  const normalized = normalizeAssetType(fileType);
+  return normalized === "video" || normalized.startsWith("video/");
+}
+
 export function RevealExperience(props: RevealExperienceProps) {
   const [screen, setScreen] = useState<(typeof screens)[number]>("intro");
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
   const stepLabel = screen === "unlock" ? "Reveal now" : "Continue";
+  const panelButtonVariant = screen === "unlock" ? "default" : "secondary";
 
   const { photos, audioAssets, videoAssets } = useMemo(() => {
-    const photos = props.assets.filter((asset) => asset.fileType === "photo");
-    const audioAssets = props.assets.filter((asset) => asset.fileType === "audio");
-    const videoAssets = props.assets.filter((asset) => asset.fileType === "video");
+    const photos = props.assets.filter((asset) => isPhotoAsset(asset.fileType));
+    const audioAssets = props.assets.filter((asset) => isAudioAsset(asset.fileType));
+    const videoAssets = props.assets.filter((asset) => isVideoAsset(asset.fileType));
     return { photos, audioAssets, videoAssets };
   }, [props.assets]);
 
@@ -71,40 +91,82 @@ export function RevealExperience(props: RevealExperienceProps) {
     <>
       <div className="space-y-6 sm:space-y-7">
         {screen !== "content" ? (
-          <Card className="overflow-hidden border-white/10 bg-[radial-gradient(circle_at_top,rgba(233,211,182,0.18),transparent_30%),linear-gradient(180deg,rgba(29,22,18,0.98),rgba(74,50,36,0.92))] text-white shadow-[0_30px_84px_rgba(42,29,20,0.3)]">
-            <CardContent className="flex min-h-[460px] flex-col items-center justify-center p-8 text-center sm:p-10 lg:min-h-[520px] lg:p-14">
+          <Card className="overflow-hidden border-white/12 bg-[radial-gradient(circle_at_18%_20%,rgba(113,157,255,0.22),transparent_28%),radial-gradient(circle_at_82%_14%,rgba(230,184,106,0.18),transparent_22%),radial-gradient(circle_at_50%_120%,rgba(117,203,255,0.18),transparent_34%),linear-gradient(180deg,rgba(17,28,52,0.98),rgba(28,44,82,0.96)_58%,rgba(38,58,106,0.94))] text-white shadow-[0_34px_92px_rgba(30,42,68,0.28)]">
+            <CardContent className="relative flex min-h-[460px] flex-col items-center justify-center overflow-hidden p-8 text-center sm:p-10 lg:min-h-[520px] lg:p-14">
+              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.08),transparent_28%,transparent_72%,rgba(255,255,255,0.04))]" />
+              <motion.div
+                aria-hidden
+                className="pointer-events-none absolute left-[10%] top-[18%] h-28 w-28 rounded-full border border-white/8 bg-[radial-gradient(circle,rgba(255,255,255,0.22),rgba(255,255,255,0.02)_68%,transparent_74%)] blur-sm"
+                animate={{ y: [0, -8, 0], opacity: [0.4, 0.75, 0.4], scale: [1, 1.08, 1] }}
+                transition={{ duration: 6.2, repeat: Infinity, ease: "easeInOut" }}
+              />
+              <motion.div
+                aria-hidden
+                className="pointer-events-none absolute bottom-[14%] right-[12%] h-36 w-36 rounded-full border border-white/8 bg-[radial-gradient(circle,rgba(117,203,255,0.18),rgba(117,203,255,0.02)_72%,transparent_78%)] blur-sm"
+                animate={{ y: [0, 10, 0], opacity: [0.25, 0.55, 0.25], scale: [1, 1.12, 1] }}
+                transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+              />
+
               {screen === "intro" ? (
-                <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} className="max-w-3xl section-stack">
-                  <p className="text-sm uppercase tracking-[0.24em] text-white/58">Vault Story</p>
+                <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} className="relative z-10 max-w-3xl section-stack">
+                  <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/8 px-4 py-2 text-sm uppercase tracking-[0.24em] text-white/70 backdrop-blur-sm">
+                    <Sparkles className="h-4 w-4 text-secondary" />
+                    Vault Story
+                  </div>
                   <h1 className="text-balance font-display text-5xl leading-tight lg:text-6xl">{props.title}</h1>
-                  <p className="mx-auto max-w-2xl text-lg leading-8 text-white/74">
-                    A preserved moment is ready to return with all the emotional context time created around it.
+                  <p className="mx-auto max-w-2xl text-lg leading-8 text-white/78">
+                    A preserved moment is ready to return, wrapped in the years, anticipation, and meaning that built up around it.
                   </p>
                 </motion.div>
               ) : null}
+
               {screen === "recorded" ? (
-                <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="max-w-2xl section-stack">
-                  <CalendarClock className="mx-auto h-10 w-10 text-amber-200" />
-                  <p className="text-sm uppercase tracking-[0.24em] text-white/58">Recorded</p>
+                <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="relative z-10 max-w-2xl section-stack">
+                  <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-white/12 bg-white/8 shadow-[0_20px_50px_rgba(12,18,36,0.24)]">
+                    <CalendarClock className="h-9 w-9 text-secondary" />
+                  </div>
+                  <p className="text-sm uppercase tracking-[0.24em] text-white/60">Recorded</p>
                   <h2 className="font-display text-4xl lg:text-5xl">{getRecordedAgoLabel(props.createdAt)}</h2>
-                  <p className="text-sm leading-7 text-white/72">Created on {formatDateTime(props.createdAt)}</p>
+                  <p className="text-sm leading-7 text-white/74">Created on {formatDateTime(props.createdAt)}</p>
                 </motion.div>
               ) : null}
+
               {screen === "unlock" ? (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="relative flex flex-col items-center">
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="relative z-10 flex flex-col items-center">
+                  <motion.div
+                    aria-hidden
+                    className="absolute top-12 h-48 w-48 rounded-full bg-[radial-gradient(circle,rgba(230,184,106,0.28),rgba(117,203,255,0.06)_58%,transparent_72%)] blur-2xl"
+                    animate={{ scale: [0.92, 1.08, 0.96], opacity: [0.42, 0.82, 0.5] }}
+                    transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+                  />
                   <motion.div
                     initial={{ scale: 0.76, opacity: 0.5 }}
-                    animate={{ scale: [0.76, 1.12, 1], opacity: [0.5, 1, 1], rotate: [0, -5, 0] }}
+                    animate={{ scale: [0.76, 1.16, 1], opacity: [0.5, 1, 1], rotate: [0, -4, 0] }}
                     transition={{ duration: 1.4, ease: "easeInOut" }}
-                    className="flex h-32 w-32 items-center justify-center rounded-full border border-white/12 bg-white/10 shadow-[0_18px_50px_rgba(0,0,0,0.16)]"
+                    className="relative flex h-36 w-36 items-center justify-center rounded-full border border-white/16 bg-[radial-gradient(circle,rgba(255,255,255,0.16),rgba(255,255,255,0.06))] shadow-[0_24px_68px_rgba(13,21,39,0.3)]"
                   >
-                    <Stars className="h-14 w-14 text-amber-200" />
+                    <motion.div
+                      aria-hidden
+                      className="absolute inset-3 rounded-full border border-white/10"
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+                    />
+                    <Stars className="h-14 w-14 text-secondary" />
                   </motion.div>
-                  <p className="mt-8 text-sm uppercase tracking-[0.24em] text-white/58">Unlocking memory</p>
-                  <h2 className="mt-4 font-display text-4xl lg:text-5xl">Let the moment arrive.</h2>
+                  <div className="mt-8 inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/8 px-4 py-2 text-sm uppercase tracking-[0.24em] text-white/66">
+                    <span className="h-2 w-2 rounded-full bg-secondary shadow-[0_0_18px_rgba(230,184,106,0.8)]" />
+                    Unlocking memory
+                  </div>
+                  <h2 className="mt-5 max-w-[14ch] text-balance font-display text-4xl leading-tight lg:text-5xl">
+                    The moment is ready to surface.
+                  </h2>
+                  <p className="mt-4 max-w-xl text-base leading-7 text-white/72 sm:text-lg sm:leading-8">
+                    Open it slowly and let the past step back into the room with all its detail intact.
+                  </p>
                 </motion.div>
               ) : null}
-              <Button onClick={goNext} variant="secondary" className="mt-10 min-w-44">
+
+              <Button onClick={goNext} variant={panelButtonVariant} className="relative z-10 mt-10 min-w-44">
                 {stepLabel}
               </Button>
             </CardContent>
@@ -236,7 +298,7 @@ export function RevealExperience(props: RevealExperienceProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(18,14,11,0.88)] p-4 backdrop-blur-md sm:p-6"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(12,18,34,0.84)] p-4 backdrop-blur-md sm:p-6"
             onClick={closePhoto}
           >
             <motion.div
@@ -244,7 +306,7 @@ export function RevealExperience(props: RevealExperienceProps) {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.96, y: 10 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
-              className="relative w-full max-w-6xl overflow-hidden rounded-[34px] border border-white/10 bg-[linear-gradient(180deg,rgba(29,22,18,0.98),rgba(60,40,30,0.94))] p-3 shadow-[0_30px_90px_rgba(0,0,0,0.36)] sm:p-4"
+              className="relative w-full max-w-6xl overflow-hidden rounded-[34px] border border-white/10 bg-[radial-gradient(circle_at_top,rgba(113,157,255,0.18),transparent_24%),linear-gradient(180deg,rgba(18,28,50,0.98),rgba(30,45,76,0.95))] p-3 shadow-[0_30px_90px_rgba(0,0,0,0.36)] sm:p-4"
               onClick={(event) => event.stopPropagation()}
             >
               <button

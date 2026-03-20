@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BookHeart, Check, LockKeyhole, ShieldCheck, Sparkles, Users, X } from "lucide-react";
+import { Check, LockKeyhole, ShieldCheck, Sparkles, Users, X } from "lucide-react";
 
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { getMembershipLabel } from "@/lib/billing";
 import { getUser } from "@/lib/auth";
-import { MEMBERSHIP_PLANS, PLAN_COMPARISON_ROWS, UPSELL_OFFERS } from "@/lib/pricing";
+import { MEMBERSHIP_PLANS, PLAN_COMPARISON_ROWS } from "@/lib/pricing";
 import { createClient } from "@/lib/supabase/server";
 
 const comparisonPoints = [
@@ -173,35 +173,6 @@ export default async function PricingPage(props: PricingPageProps) {
               );
             })}
           </div>
-        </section>
-
-        <section className="page-wrap pb-12 lg:pb-16">
-          <Card className="overflow-hidden border-white/60 bg-card/90 shadow-[0_22px_64px_rgba(66,46,31,0.1)]">
-            <CardContent className="p-8 sm:p-10 lg:p-12">
-              <div className="max-w-4xl section-stack">
-                <Badge className="w-fit bg-secondary/85">Emotional upsells</Badge>
-                <h2 className="text-balance font-display text-4xl sm:text-5xl">Additional revenue layers families genuinely want.</h2>
-                <p className="text-base leading-8 text-muted-foreground sm:text-lg">
-                  Memory products grow when the archive becomes useful in more formats: printed keepsakes, guided story capture, and storage expansion all deepen value without feeling transactional.
-                </p>
-              </div>
-
-              <div className="mt-8 grid gap-4 lg:grid-cols-3">
-                {UPSELL_OFFERS.map((offer) => (
-                  <Card key={offer.name} className="border-white/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(248,244,237,0.92))] shadow-[0_18px_44px_rgba(66,46,31,0.08)]">
-                    <CardContent className="p-6">
-                      <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-full bg-secondary/18 text-primary">
-                        <BookHeart className="h-5 w-5" />
-                      </div>
-                      <p className="text-sm uppercase tracking-[0.18em] text-muted-foreground">{offer.priceLabel}</p>
-                      <h3 className="mt-3 font-display text-3xl text-foreground">{offer.name}</h3>
-                      <p className="mt-4 text-sm leading-7 text-muted-foreground">{offer.description}</p>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
         </section>
 
         <section className="page-wrap pb-24 lg:pb-32">

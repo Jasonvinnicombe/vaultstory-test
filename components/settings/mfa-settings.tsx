@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
 
 export function MfaSettings() {
-  const supabase = createClient();
+  const [supabase, setSupabase] = useState<ReturnType<typeof createClient>>(null);
   const [loading, setLoading] = useState(true);
   const [enrolling, setEnrolling] = useState(false);
   const [disabling, setDisabling] = useState(false);
@@ -23,6 +23,10 @@ export function MfaSettings() {
   const [verificationCode, setVerificationCode] = useState("");
 
   const isEnabled = Boolean(verifiedFactorId);
+
+  useEffect(() => {
+    setSupabase(createClient());
+  }, []);
 
   useEffect(() => {
     let active = true;
