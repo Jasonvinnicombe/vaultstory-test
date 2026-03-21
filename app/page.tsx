@@ -269,7 +269,6 @@ export default function HomePage() {
 
         <section id="pricing" className="page-wrap section-space soft-divider scroll-mt-28">
           <PricingPlans
-            compact
             title="Start simply, then grow into richer media, more family access, and a deeper archive as the story becomes more valuable."
             description="The pricing is designed to let people begin with one meaningful vault, then expand once the archive becomes something they truly want to keep building."
           />

@@ -25,6 +25,7 @@ const envSchema = z.object({
   STRIPE_SECRET_KEY: z.string().min(1).optional(),
   STRIPE_WEBHOOK_SECRET: z.string().min(1).optional(),
   STRIPE_PREMIUM_PRICE_ID: z.string().min(1).optional(),
+  STRIPE_FAMILY_PRICE_ID: z.string().min(1).optional(),
 });
 
 type Env = z.infer<typeof envSchema>;
@@ -47,6 +48,7 @@ function loadEnv() {
     STRIPE_SECRET_KEY: normalizeEnvValue(process.env.STRIPE_SECRET_KEY),
     STRIPE_WEBHOOK_SECRET: normalizeEnvValue(process.env.STRIPE_WEBHOOK_SECRET),
     STRIPE_PREMIUM_PRICE_ID: normalizeEnvValue(process.env.STRIPE_PREMIUM_PRICE_ID),
+    STRIPE_FAMILY_PRICE_ID: normalizeEnvValue(process.env.STRIPE_FAMILY_PRICE_ID),
   });
 
   return cachedEnv;

@@ -11,6 +11,7 @@ export function PricingPlans(props: {
   compact?: boolean;
   currentPlan?: string | null;
   isAuthenticated?: boolean;
+  familyCheckoutEnabled?: boolean;
 }) {
   const title = props.title ?? "Choose the membership that fits how your family preserves memories.";
   const description = props.description ?? "Start free, then move up when you want richer media, milestone unlocks, and shared family access.";
@@ -23,46 +24,48 @@ export function PricingPlans(props: {
         <p className="text-base leading-8 text-muted-foreground sm:text-lg">{description}</p>
       </div>
 
-      <div className={`grid gap-5 ${props.compact ? "xl:grid-cols-2" : "xl:grid-cols-2 2xl:grid-cols-4"}`}>
+      <div className={props.compact ? "grid gap-4 lg:grid-cols-2" : "grid gap-4 md:grid-cols-3"}>
         {MEMBERSHIP_PLANS.map((plan) => {
           const isCurrent = props.currentPlan?.toLowerCase() === plan.name.toLowerCase();
 
           return (
             <Card
               key={plan.id}
-              className={plan.highlight
-                ? "overflow-hidden border-primary/18 bg-[linear-gradient(180deg,rgba(30,42,68,0.98),rgba(49,63,95,0.94))] text-white shadow-[0_26px_72px_rgba(30,42,68,0.22)]"
-                : "overflow-hidden border-white/65 bg-card/88 shadow-[0_20px_56px_rgba(66,46,31,0.09)]"
+              className={
+                `${plan.highlight
+                  ? "overflow-hidden border-primary/18 bg-[linear-gradient(180deg,rgba(30,42,68,0.98),rgba(49,63,95,0.94))] text-white shadow-[0_26px_72px_rgba(30,42,68,0.22)]"
+                  : "overflow-hidden border-white/65 bg-card/88 shadow-[0_20px_56px_rgba(66,46,31,0.09)]"
+                } h-full min-w-0`
               }
             >
-              <CardContent className="p-7 sm:p-8">
+              <CardContent className="flex h-full flex-col p-5 sm:p-6">
                 <div className="flex items-start justify-between gap-4">
-                  <div className="space-y-2">
+                  <div className="min-w-0 space-y-2">
                     <div className="flex flex-wrap items-center gap-3">
-                      <h3 className={`font-display text-3xl ${plan.highlight ? "text-white" : "text-foreground"}`}>{plan.name}</h3>
+                      <h3 className={`font-display text-2xl ${plan.highlight ? "text-white" : "text-foreground"}`}>{plan.name}</h3>
                       {plan.badge ? <Badge className={plan.highlight ? "bg-secondary text-secondary-foreground" : "bg-secondary/80"}>{plan.badge}</Badge> : null}
                       {isCurrent ? <Badge variant="outline" className={plan.highlight ? "border-white/25 text-white" : "border-primary/20 text-primary"}>Current</Badge> : null}
                     </div>
                     <p className={plan.highlight ? "text-white/78" : "text-muted-foreground"}>{plan.description}</p>
                   </div>
-                  {plan.highlight ? <Sparkles className="h-5 w-5 text-secondary" /> : null}
+                  {plan.highlight ? <Sparkles className="h-5 w-5 shrink-0 text-secondary" /> : null}
                 </div>
 
-                <div className="mt-8 flex items-end gap-2">
-                  <span className={`font-display text-5xl ${plan.highlight ? "text-white" : "text-foreground"}`}>{plan.priceLabel}</span>
+                <div className="mt-6 flex items-end gap-2">
+                  <span className={`font-display text-4xl ${plan.highlight ? "text-white" : "text-foreground"}`}>{plan.priceLabel}</span>
                   <span className={plan.highlight ? "pb-1 text-white/62" : "pb-1 text-muted-foreground"}>{plan.cadence}</span>
                 </div>
                 {plan.annualLabel ? (
                   <p className={`mt-2 text-sm ${plan.highlight ? "text-white/88" : "text-muted-foreground"}`}>{plan.annualLabel}</p>
                 ) : null}
 
-                <div className={`mt-8 rounded-[24px] p-4 text-sm leading-7 ${plan.highlight ? "border border-white/18 bg-white/8 text-white/88" : "border border-secondary/20 bg-secondary/10 text-muted-foreground"}`}>
+                <div className={`mt-6 rounded-[24px] p-4 text-sm leading-6 ${plan.highlight ? "border border-white/18 bg-white/8 text-white/88" : "border border-secondary/20 bg-secondary/10 text-muted-foreground"}`}>
                   <p className={`font-medium ${plan.highlight ? "text-white" : "text-foreground"}`}>This plan includes:</p>
-                  <div className="mt-3 space-y-3">
+                  <div className="mt-3 space-y-2.5">
                     {plan.features.map((feature) => (
                       <div key={feature} className="flex items-start gap-3">
-                        <span className={plan.highlight ? "mt-1 inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/12 text-secondary" : "mt-1 inline-flex h-6 w-6 items-center justify-center rounded-full bg-secondary/18 text-primary"}>
-                          <Check className="h-4 w-4" />
+                        <span className={plan.highlight ? "mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/12 text-secondary" : "mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-secondary/18 text-primary"}>
+                          <Check className="h-3.5 w-3.5" />
                         </span>
                         <span className={plan.highlight ? "text-white" : "text-foreground/82"}>{feature}</span>
                       </div>
@@ -70,14 +73,17 @@ export function PricingPlans(props: {
                   </div>
                 </div>
 
-                <PlanActionButton
-                  planId={plan.id}
-                  ctaLabel={plan.ctaLabel}
-                  ctaHref={plan.ctaHref}
-                  isCurrent={isCurrent}
-                  isAuthenticated={props.isAuthenticated ?? false}
-                  highlight={plan.highlight}
-                />
+                <div className="mt-6">
+                  <PlanActionButton
+                    planId={plan.id}
+                    ctaLabel={plan.ctaLabel}
+                    ctaHref={plan.ctaHref}
+                    isCurrent={isCurrent}
+                    isAuthenticated={props.isAuthenticated ?? false}
+                    highlight={plan.highlight}
+                    checkoutEnabled={plan.id === "family" ? props.familyCheckoutEnabled : plan.id === "premium"}
+                  />
+                </div>
               </CardContent>
             </Card>
           );

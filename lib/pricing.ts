@@ -51,9 +51,7 @@ export const MEMBERSHIP_PLANS: MembershipPlan[] = [
       "Unlimited vaults",
       "50GB storage",
       "Video and voice memories",
-      "Family invites",
       "Milestone unlocks",
-      "AI summaries",
       "Timeline view",
     ],
     ctaLabel: "Choose Premium",
@@ -64,7 +62,7 @@ export const MEMBERSHIP_PLANS: MembershipPlan[] = [
   {
     id: "family",
     name: "Family",
-    priceLabel: "$15",
+    priceLabel: "$14.99",
     cadence: "/month",
     description: "Built for households preserving stories together across generations, milestones, and shared vault care.",
     features: [
@@ -75,27 +73,9 @@ export const MEMBERSHIP_PLANS: MembershipPlan[] = [
       "Child milestone vaults",
       "Designed for the highest-value shared archive use case",
     ],
-    ctaLabel: "Join Family waitlist",
+    ctaLabel: "Choose Family plan",
     ctaHref: "mailto:hello@vaultstory.app?subject=Family%20Plan%20Interest",
     badge: "High-value family tier",
-  },
-  {
-    id: "lifetime",
-    name: "Lifetime Vault",
-    priceLabel: "$299",
-    cadence: "one time",
-    description: "A legacy purchase for families who never want to wonder where the archive will live or who will keep it safe.",
-    features: [
-      "Lifetime storage",
-      "Legacy messages",
-      "Time capsules",
-      "Future unlock events",
-      "Inheritance release planning",
-      "Long-term family archive preservation",
-    ],
-    ctaLabel: "Talk to us about Lifetime",
-    ctaHref: "mailto:hello@vaultstory.app?subject=Lifetime%20Vault%20Interest",
-    badge: "Once in a lifetime",
   },
 ];
 
@@ -167,17 +147,8 @@ export const PLAN_COMPARISON_ROWS: PlanComparisonRow[] = [
     label: "Family invites",
     values: {
       free: "No",
-      premium: "Included",
+      premium: "No",
       family: "Up to 6 members",
-      lifetime: "Included",
-    },
-  },
-  {
-    label: "AI summaries",
-    values: {
-      free: "No",
-      premium: "Included",
-      family: "Included",
       lifetime: "Included",
     },
   },
@@ -196,15 +167,6 @@ export const PLAN_COMPARISON_ROWS: PlanComparisonRow[] = [
       free: "No",
       premium: "Limited",
       family: "Included",
-      lifetime: "Included",
-    },
-  },
-  {
-    label: "Inheritance release / legacy planning",
-    values: {
-      free: "No",
-      premium: "No",
-      family: "No",
       lifetime: "Included",
     },
   },

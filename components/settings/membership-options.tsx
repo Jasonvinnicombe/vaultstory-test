@@ -11,8 +11,11 @@ export function MembershipOptions(props: {
   currentStatus?: string | null;
   billingError?: string | null;
   billingSuccess?: string | null;
+  billingPlan?: string | null;
+  familyCheckoutEnabled?: boolean;
 }) {
   const hasBillingSuccess = props.billingSuccess === "1";
+  const planLabel = props.billingPlan === "family" ? "Family" : "Premium";
 
   return (
     <Card className="overflow-hidden border-white/60 bg-card/88 shadow-[0_26px_80px_rgba(66,46,31,0.12)]">
@@ -23,7 +26,7 @@ export function MembershipOptions(props: {
             <div className="section-stack max-w-3xl">
               <h2 className="font-display text-3xl sm:text-4xl">Choose how your family archive grows.</h2>
               <p className="text-sm leading-7 text-muted-foreground sm:text-base">
-                Premium checkout is live now. Family and Lifetime are mapped out as the next expansion tiers so your membership area already reflects the bigger roadmap.
+                Premium checkout is live today, and Family can run through Stripe too whenever its price id is configured.
               </p>
             </div>
             <Button asChild variant="outline">
@@ -34,7 +37,7 @@ export function MembershipOptions(props: {
 
         {hasBillingSuccess ? (
           <div className="mt-6 rounded-[28px] border border-emerald-200 bg-emerald-50 p-5 text-sm leading-7 text-emerald-900">
-            Premium is active. Stripe finished successfully and your plan will refresh here as soon as the webhook lands.
+            {planLabel} checkout completed. Your membership will refresh here as soon as the Stripe webhook lands.
           </div>
         ) : null}
 
@@ -44,14 +47,14 @@ export function MembershipOptions(props: {
           </div>
         ) : null}
 
-        <div className="mt-8 rounded-[28px] border border-secondary/20 bg-secondary/10 p-5 text-sm leading-7 text-muted-foreground">
+        <div className="mt-6 rounded-[28px] border border-secondary/20 bg-secondary/10 p-5 text-sm leading-7 text-muted-foreground">
           <p className="inline-flex items-center gap-2 font-medium text-foreground"><Sparkles className="h-4 w-4 text-primary" />Current membership</p>
           <p className="mt-2">
             You are currently on <strong className="text-foreground">{props.currentPlan ?? "Free"}</strong>
             {props.currentStatus ? <> with a status of <strong className="text-foreground">{props.currentStatus.replaceAll("_", " ")}</strong></> : null}.
           </p>
           <p className="mt-3">
-            Today, Stripe is wired for Premium first. Family and Lifetime can now be marketed, waitlisted, or launched next without rethinking the pricing structure.
+            Premium is fully wired today. Family checkout will use the same Stripe flow as soon as the Family price id is configured in the environment.
           </p>
         </div>
 
@@ -60,8 +63,9 @@ export function MembershipOptions(props: {
             compact
             currentPlan={props.currentPlan ?? "Free"}
             isAuthenticated
+            familyCheckoutEnabled={props.familyCheckoutEnabled ?? false}
             title="Membership options"
-            description="Start free, upgrade to Premium through Stripe today, and use the Family and Lifetime tiers as the next revenue layers in the roadmap."
+            description="Start free, upgrade to Premium now, and use Family when you need shared vault care across a household."
           />
         </div>
       </CardContent>

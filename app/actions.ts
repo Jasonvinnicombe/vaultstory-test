@@ -1,6 +1,6 @@
 "use server";
 
-import { canUseFamilyInvites, getFamilyInviteUpgradeMessage } from "@/lib/billing";
+import { canInviteAnotherFamilyMember, canUseFamilyInvites, getFamilyInviteUpgradeMessage, getFamilyMemberLimitMessage } from "@/lib/billing";
 export async function signOutAction() {
   const { redirect } = await import("next/navigation");
   const { createClient } = await import("@/lib/supabase/server");
@@ -99,7 +99,7 @@ export async function inviteVaultMemberAction(formData: FormData) {
 
     const { data: existingInvite, error: inviteLookupError } = await supabase
       .from("vault_invites")
-      .select("id")
+      .select("id,status")
       .eq("vault_id", vaultId)
       .eq("email", email)
       .maybeSingle();
@@ -109,6 +109,26 @@ export async function inviteVaultMemberAction(formData: FormData) {
     }
 
     const { data: profileMatch } = await supabaseAdmin.from("profiles").select("id,email,full_name").eq("email", email).maybeSingle();
+    const { data: existingMember } = profileMatch?.id
+      ? await supabase
+          .from("vault_members")
+          .select("id")
+          .eq("vault_id", vaultId)
+          .eq("user_id", profileMatch.id)
+          .maybeSingle()
+      : { data: null };
+    const [{ count: memberCount }, { count: pendingInviteCount }] = await Promise.all([
+      supabase.from("vault_members").select("id", { head: true, count: "exact" }).eq("vault_id", vaultId),
+      supabase.from("vault_invites").select("id", { head: true, count: "exact" }).eq("vault_id", vaultId).eq("status", "pending"),
+    ]);
+
+    const consumesNewSlot = profileMatch?.id
+      ? !existingMember && existingInvite?.status !== "pending"
+      : !existingInvite?.id;
+
+    if (consumesNewSlot && !canInviteAnotherFamilyMember(profile?.membership_plan, profile?.membership_status, memberCount ?? 0, pendingInviteCount ?? 0)) {
+      redirectWithMessage(getFamilyMemberLimitMessage(), "inviteError");
+    }
 
     let successMessage = "Invite saved. It will stay pending until they join.";
     let inviteStatus: "accepted" | "pending" = "pending";
@@ -345,7 +365,7 @@ export async function deleteVaultAction(formData: FormData) {
   }
 }
 
-export async function createCheckoutSessionAction() {
+export async function createCheckoutSessionAction(formData: FormData) {
   const { redirect } = await import("next/navigation");
   const { createClient } = await import("@/lib/supabase/server");
   const { env } = await import("@/lib/env");
@@ -357,8 +377,14 @@ export async function createCheckoutSessionAction() {
   };
 
   try {
-    if (!env.STRIPE_SECRET_KEY || !env.STRIPE_PREMIUM_PRICE_ID) {
-      redirectWithMessage("Stripe is not configured yet. Add your Stripe keys and price id first.");
+    const requestedPlan = String(formData.get("planId") ?? "premium").toLowerCase();
+    const selectedPlan = requestedPlan === "family" ? "family" : "premium";
+    const selectedPriceId = selectedPlan === "family" ? env.STRIPE_FAMILY_PRICE_ID : env.STRIPE_PREMIUM_PRICE_ID;
+
+    if (!env.STRIPE_SECRET_KEY || !selectedPriceId) {
+      redirectWithMessage(selectedPlan === "family"
+        ? "Family checkout is not configured yet. Add STRIPE_FAMILY_PRICE_ID first."
+        : "Stripe is not configured yet. Add STRIPE_PREMIUM_PRICE_ID first.");
     }
 
     const supabase = await createClient();
@@ -381,8 +407,12 @@ export async function createCheckoutSessionAction() {
       redirectWithMessage("We could not find an email address for your account.");
     }
 
-    if (profile?.membership_plan === "premium") {
-      redirectWithMessage("Your account is already on Premium. Use Manage billing instead.");
+    if (profile?.membership_plan === selectedPlan) {
+      redirectWithMessage(`Your account is already on ${selectedPlan === "family" ? "Family" : "Premium"}. Use Manage billing instead.`);
+    }
+
+    if (profile?.membership_plan && profile.membership_plan !== "free") {
+      redirectWithMessage("Plan changes for existing paid memberships should go through billing management so you do not end up with two subscriptions.");
     }
 
     const stripe = getStripe();
@@ -408,22 +438,24 @@ export async function createCheckoutSessionAction() {
       mode: "subscription",
       customer: customerId,
       client_reference_id: user.id,
-      success_url: `${env.NEXT_PUBLIC_APP_URL}/settings?billingSuccess=1`,
+      success_url: `${env.NEXT_PUBLIC_APP_URL}/settings?billingSuccess=1&billingPlan=${selectedPlan}`,
       cancel_url: `${env.NEXT_PUBLIC_APP_URL}/pricing?billingCanceled=1`,
       billing_address_collection: "auto",
       allow_promotion_codes: true,
       line_items: [
         {
-          price: env.STRIPE_PREMIUM_PRICE_ID,
+          price: selectedPriceId,
           quantity: 1,
         },
       ],
       metadata: {
         supabaseUserId: user.id,
+        membershipPlan: selectedPlan,
       },
       subscription_data: {
         metadata: {
           supabaseUserId: user.id,
+          membershipPlan: selectedPlan,
         },
       },
     });

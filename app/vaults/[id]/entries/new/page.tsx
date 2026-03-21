@@ -28,7 +28,7 @@ export default async function NewEntryPage({ params }: { params: Promise<{ id: s
               Capture the message, media, and timing for the exact moment this memory should return inside {vault.name}.
             </p>
             <p className="mt-4 text-sm leading-7 text-muted-foreground">
-              Your current plan is <strong className="text-foreground">{getMembershipLabel(profile?.membership_plan)}</strong>. Rich media, family invites, and milestone unlocks unlock on paid plans.
+              Your current plan is <strong className="text-foreground">{getMembershipLabel(profile?.membership_plan)}</strong>. Rich media and milestone unlocks unlock on paid plans. Family invites are part of the Family plan.
             </p>
           </CardContent>
         </Card>

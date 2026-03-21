@@ -1,4 +1,4 @@
-﻿import type Stripe from "stripe";
+import type Stripe from "stripe";
 
 export type MembershipPlanId = "free" | "premium" | "family" | "lifetime";
 
@@ -15,6 +15,7 @@ export type BillingProfile = {
 };
 
 const ENTITLED_STATUSES = new Set(["active", "trialing", "past_due"]);
+export const FAMILY_MEMBER_LIMIT = 6;
 
 export function normalizeMembershipPlan(plan?: string | null): MembershipPlanId {
   switch (plan?.toLowerCase()) {
@@ -48,6 +49,10 @@ export function getMembershipPlanForPrice(priceId?: string | null) {
 
   if (priceId && env.STRIPE_PREMIUM_PRICE_ID && priceId === env.STRIPE_PREMIUM_PRICE_ID) {
     return "premium";
+  }
+
+  if (priceId && env.STRIPE_FAMILY_PRICE_ID && priceId === env.STRIPE_FAMILY_PRICE_ID) {
+    return "family";
   }
 
   return "free";
@@ -104,7 +109,40 @@ export function canUseMediaKind(plan: string | null | undefined, status: string 
 }
 
 export function canUseFamilyInvites(plan?: string | null, status?: string | null) {
-  return resolveEntitledPlan(plan, status) !== "free";
+  const entitledPlan = resolveEntitledPlan(plan, status);
+  return entitledPlan === "family" || entitledPlan === "lifetime";
+}
+
+export function getFamilyMemberLimit(plan?: string | null, status?: string | null) {
+  const entitledPlan = resolveEntitledPlan(plan, status);
+
+  if (entitledPlan === "family") {
+    return FAMILY_MEMBER_LIMIT;
+  }
+
+  if (entitledPlan === "lifetime") {
+    return Number.POSITIVE_INFINITY;
+  }
+
+  return 0;
+}
+
+export function canInviteAnotherFamilyMember(
+  plan: string | null | undefined,
+  status: string | null | undefined,
+  currentMemberCount: number,
+  pendingInviteCount: number,
+) {
+  if (!canUseFamilyInvites(plan, status)) {
+    return false;
+  }
+
+  const limit = getFamilyMemberLimit(plan, status);
+  if (!Number.isFinite(limit)) {
+    return true;
+  }
+
+  return currentMemberCount + pendingInviteCount < limit;
 }
 
 export function canUseMilestoneUnlocks(plan?: string | null, status?: string | null) {
@@ -126,7 +164,11 @@ export function getRichMediaUpgradeMessage() {
 }
 
 export function getFamilyInviteUpgradeMessage() {
-  return "Family invites are available on Premium, Family, or Lifetime.";
+  return "Family invites are available on the Family plan.";
+}
+
+export function getFamilyMemberLimitMessage() {
+  return `Family includes up to ${FAMILY_MEMBER_LIMIT} people per vault. Remove a member or pending invite before adding another.`;
 }
 
 export function getMilestoneUnlockUpgradeMessage() {
@@ -169,6 +211,11 @@ export async function upsertStripeCustomer(input: {
   }
 }
 
+function getSubscriptionCurrentPeriodEnd(subscription: Stripe.Subscription) {
+  const periodEnd = subscription.items.data[0]?.current_period_end;
+  return typeof periodEnd === "number" ? new Date(periodEnd * 1000).toISOString() : null;
+}
+
 export async function syncProfileBillingFromSubscription(options: {
   subscription: Stripe.Subscription;
   userId?: string | null;
@@ -183,7 +230,7 @@ export async function syncProfileBillingFromSubscription(options: {
     stripe_customer_id: options.customerId ?? (typeof options.subscription.customer === "string" ? options.subscription.customer : null),
     stripe_subscription_id: options.subscription.id,
     stripe_price_id: priceId,
-    stripe_current_period_end: new Date(options.subscription.current_period_end * 1000).toISOString(),
+    stripe_current_period_end: getSubscriptionCurrentPeriodEnd(options.subscription),
   };
 
   let query = supabaseAdmin.from("profiles").update(payload);

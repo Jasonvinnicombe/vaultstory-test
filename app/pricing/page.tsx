@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Check, LockKeyhole, ShieldCheck, Sparkles, Users, X } from "lucide-react";
+import { Check, LockKeyhole, Sparkles, Users, X } from "lucide-react";
 
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { getMembershipLabel } from "@/lib/billing";
 import { getUser } from "@/lib/auth";
+import { env } from "@/lib/env";
 import { MEMBERSHIP_PLANS, PLAN_COMPARISON_ROWS } from "@/lib/pricing";
 import { createClient } from "@/lib/supabase/server";
 
@@ -20,18 +21,13 @@ const comparisonPoints = [
   },
   {
     title: "Premium is the main revenue engine",
-    body: "This is where richer media, AI summaries, collaboration, and milestone unlocks make the archive feel meaningfully deeper.",
+    body: "This is where richer media, collaboration and milestone unlocks make the archive feel meaningfully deeper.",
     icon: Sparkles,
   },
   {
     title: "Family is the highest shared-value tier",
     body: "Once multiple relatives are contributing stories, a household plan becomes easier to justify and harder to leave.",
     icon: Users,
-  },
-  {
-    title: "Lifetime is the legacy purchase",
-    body: "Emotional products win when families want permanence. Legacy messages and archives are where one-time purchases can become transformative.",
-    icon: ShieldCheck,
   },
 ];
 
@@ -72,6 +68,7 @@ export default async function PricingPage(props: PricingPageProps) {
     : { data: null };
   const currentPlan = getMembershipLabel(profile?.membership_plan ?? null);
   const billingCanceled = typeof searchParams.billingCanceled === "string" ? searchParams.billingCanceled : null;
+  const familyCheckoutEnabled = Boolean(env.STRIPE_SECRET_KEY && env.STRIPE_FAMILY_PRICE_ID);
 
   return (
     <div className="grain min-h-screen overflow-x-hidden">
@@ -84,10 +81,10 @@ export default async function PricingPage(props: PricingPageProps) {
               <div className="relative max-w-4xl section-stack">
                 <Badge className="w-fit bg-secondary/88">Pricing</Badge>
                 <h1 className="text-balance font-display text-4xl leading-tight text-foreground sm:text-5xl lg:text-6xl">
-                  Build a pricing ladder that starts with emotion and grows into legacy.
+                  Build a pricing ladder that starts with emotion and grows into family value.
                 </h1>
                 <p className="max-w-3xl text-base leading-8 text-muted-foreground sm:text-lg">
-                  Free gets families recording. Premium becomes the main revenue layer. Family expands the household use case. Lifetime turns preservation into a once-in-a-generation purchase.
+                  Free gets families recording. Premium becomes the main revenue layer. Family expands the household use case when more loved ones start contributing.
                 </p>
                 <div className="flex flex-wrap gap-3 pt-2">
                   <Button asChild><Link href={user ? "/settings" : "/signup"}>{user ? "Manage membership" : "Start free"}</Link></Button>
@@ -106,8 +103,8 @@ export default async function PricingPage(props: PricingPageProps) {
           </section>
         ) : null}
 
-        <section className="page-wrap pb-8 sm:pb-12">
-          <PricingPlans currentPlan={currentPlan} isAuthenticated={Boolean(user)} title="Membership plans" description="Premium is live through Stripe today. Family and Lifetime are structured as the next expansion paths so the pricing page already reflects the long-term business model." />
+        <section className="mx-auto w-full max-w-[1500px] px-5 pb-8 sm:px-6 sm:pb-12 lg:px-8">
+          <PricingPlans currentPlan={currentPlan} isAuthenticated={Boolean(user)} familyCheckoutEnabled={familyCheckoutEnabled} title="Membership plans" description={familyCheckoutEnabled ? "Premium and Family are both ready to run through Stripe. Choose the plan that fits how many people will care for the archive together." : "Premium is live through Stripe today. Family is fully modelled in-product and can be switched on as soon as its Stripe price id is configured."} />
         </section>
 
         <section className="page-wrap pb-12">
@@ -150,14 +147,16 @@ export default async function PricingPage(props: PricingPageProps) {
               </div>
 
               <div className="mt-8 rounded-[28px] border border-secondary/20 bg-secondary/10 p-5 text-sm leading-7 text-muted-foreground">
-                Premium is the only Stripe-enabled checkout tier today. Family and Lifetime are clearly defined in the pricing model now, but they still need separate checkout and feature gating work before they are enforceable in product.
+                {familyCheckoutEnabled
+                  ? "Premium and Family checkout both run through Stripe now, so the pricing table and in-product gates finally tell the same story."
+                  : "Premium checkout is live now. Family is already gated correctly in-product and can use the same Stripe flow as soon as its Family price id is configured."}
               </div>
             </CardContent>
           </Card>
         </section>
 
         <section className="page-wrap section-space soft-divider">
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {comparisonPoints.map((point) => {
               const Icon = point.icon;
               return (

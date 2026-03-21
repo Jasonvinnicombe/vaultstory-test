@@ -8,7 +8,7 @@ import { VaultSettingsForm } from "@/components/settings/vault-settings-form";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { canUseFamilyInvites, getFamilyInviteUpgradeMessage } from "@/lib/billing";
+import { canInviteAnotherFamilyMember, canUseFamilyInvites, getFamilyInviteUpgradeMessage, getFamilyMemberLimitMessage } from "@/lib/billing";
 import { getProfile } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -70,6 +70,14 @@ export default async function VaultSettingsPage({
     }),
   );
 
+  const canUseInvites = canUseFamilyInvites(profile?.membership_plan, profile?.membership_status);
+  const canInviteMore = canInviteAnotherFamilyMember(
+    profile?.membership_plan,
+    profile?.membership_status,
+    memberRows.length,
+    safeInvites.filter((invite) => invite.status === "pending").length,
+  );
+
   return (
     <AppShell fullName={profile?.full_name ?? user.user_metadata.full_name ?? null} email={user.email ?? ""} isAdmin={profile?.is_admin ?? false} avatarUrl={avatarPreviewUrl}>
       <div className="section-stack">
@@ -109,8 +117,8 @@ export default async function VaultSettingsPage({
             role: invite.role,
             status: invite.status,
           }))}
-          canInvite={canUseFamilyInvites(profile?.membership_plan, profile?.membership_status)}
-          inviteUpgradeMessage={canUseFamilyInvites(profile?.membership_plan, profile?.membership_status) ? null : getFamilyInviteUpgradeMessage()}
+          canInvite={canUseInvites && canInviteMore}
+          inviteUpgradeMessage={!canUseInvites ? getFamilyInviteUpgradeMessage() : !canInviteMore ? getFamilyMemberLimitMessage() : null}
           feedback={inviteFeedback}
         />
 

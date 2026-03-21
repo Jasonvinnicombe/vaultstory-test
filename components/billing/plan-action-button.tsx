@@ -10,10 +10,12 @@ export function PlanActionButton(props: {
   isCurrent: boolean;
   isAuthenticated: boolean;
   highlight?: boolean;
+  checkoutEnabled?: boolean;
 }) {
   const variant = props.highlight ? "secondary" : "default";
+  const isStripePlan = props.planId === "premium" || props.planId === "family";
 
-  if (props.planId === "premium") {
+  if (isStripePlan) {
     if (props.isCurrent) {
       return (
         <form action={createBillingPortalSessionAction}>
@@ -24,21 +26,16 @@ export function PlanActionButton(props: {
       );
     }
 
-    if (props.isAuthenticated) {
+    if (props.isAuthenticated && props.checkoutEnabled) {
       return (
         <form action={createCheckoutSessionAction}>
+          <input type="hidden" name="planId" value={props.planId} />
           <Button className="mt-8 w-full" variant={variant}>
             {props.ctaLabel}
           </Button>
         </form>
       );
     }
-
-    return (
-      <Button asChild className="mt-8 w-full" variant={variant}>
-        <Link href={props.ctaHref}>{props.ctaLabel}</Link>
-      </Button>
-    );
   }
 
   if (props.isCurrent) {

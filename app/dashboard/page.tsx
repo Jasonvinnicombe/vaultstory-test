@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import { CalendarClock, FolderLock, LockKeyhole, Mailbox, Search, Sparkles, Vault } from "lucide-react";
 
 import { AppShell } from "@/components/layout/app-shell";
@@ -105,7 +105,7 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
           </Card>
         ) : null}
 
-        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        <section className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-5">
           {stats.map((stat) => {
             const Icon = stat.icon;
             return <Card key={stat.label} className="glass-panel"><CardContent className="p-6"><div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-secondary/90 text-primary"><Icon className="h-5 w-5" /></div><p className="text-sm text-muted-foreground">{stat.label}</p><p className="mt-2 font-display text-3xl">{stat.value}</p></CardContent></Card>;
