@@ -350,15 +350,11 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
             {form.formState.errors.password ? <p className="text-xs text-destructive">{String(form.formState.errors.password.message)}</p> : <p className="text-xs text-muted-foreground">Use something memorable to you, but hard for anyone else to guess.</p>}
           </div>
 
-          <div className="rounded-[28px] border border-border/70 bg-background/65 p-4 text-sm leading-7 text-muted-foreground">
-            {currentMode === "login"
-              ? "Your memories stay private. Once you are in, you will land back inside your dashboard."
-              : "After sign up, we will guide you into creating your first vault and your first future memory."}
-          </div>
-
-          <div className="rounded-[24px] border border-secondary/25 bg-secondary/10 p-4 text-sm leading-7 text-foreground/85">
-            Stronger sign-in protection is available with one-time verification codes from an authenticator app in Settings after login. This is generally safer than SMS codes.
-          </div>
+          {currentMode === "login" ? (
+            <div className="rounded-[28px] border border-border/70 bg-background/65 p-4 text-sm leading-7 text-muted-foreground">
+              Your memories stay private. Once you are in, you will land back inside your dashboard.
+            </div>
+          ) : null}
 
           {currentMode === "signup" ? (
             <>
@@ -382,9 +378,6 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
                 {form.formState.errors.acceptTerms ? <p className="text-xs text-destructive">{String(form.formState.errors.acceptTerms.message)}</p> : null}
               </div>
 
-              <div className="rounded-[24px] border border-secondary/25 bg-secondary/10 p-4 text-sm leading-7 text-foreground/85">
-                If you have already signed up, check your inbox or spam folder for your confirmation email before trying again.
-              </div>
             </>
           ) : null}
 
