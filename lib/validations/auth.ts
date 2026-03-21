@@ -7,6 +7,9 @@ export const signInSchema = z.object({
 
 export const signUpSchema = signInSchema.extend({
   fullName: z.string().min(2, "Tell us your name"),
+  acceptTerms: z.literal(true, {
+    errorMap: () => ({ message: "You need to accept the Terms & Conditions to create an account" }),
+  }),
 });
 
 export const onboardingSchema = z.object({

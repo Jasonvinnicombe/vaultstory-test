@@ -11,6 +11,7 @@ import type { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
@@ -19,7 +20,7 @@ import { signInSchema, signUpSchema } from "@/lib/validations/auth";
 type AuthMode = "login" | "signup" | "sign-in" | "sign-up";
 type SignInValues = z.infer<typeof signInSchema>;
 type SignUpValues = z.infer<typeof signUpSchema>;
-type AuthValues = SignInValues & { fullName?: string };
+type AuthValues = SignInValues & { fullName?: string; acceptTerms?: boolean };
 type OAuthProvider = "google";
 type BrowserSupabaseClient = NonNullable<ReturnType<typeof createClient>>;
 
@@ -123,7 +124,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
 
   const form = useForm<AuthValues>({
     resolver: zodResolver(currentMode === "login" ? signInSchema : signUpSchema),
-    defaultValues: { fullName: "", email: inviteEmail, password: "" },
+    defaultValues: { fullName: "", email: inviteEmail, password: "", acceptTerms: false },
   });
 
   async function handleForgotPassword() {
@@ -360,9 +361,31 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
           </div>
 
           {currentMode === "signup" ? (
-            <div className="rounded-[24px] border border-secondary/25 bg-secondary/10 p-4 text-sm leading-7 text-foreground/85">
-              If you have already signed up, check your inbox or spam folder for your confirmation email before trying again.
-            </div>
+            <>
+              <div className="space-y-3 rounded-[24px] border border-border/70 bg-background/65 p-4">
+                <div className="flex items-start gap-3">
+                  <Checkbox
+                    id="acceptTerms"
+                    checked={Boolean(form.watch("acceptTerms"))}
+                    onCheckedChange={(checked) => form.setValue("acceptTerms", Boolean(checked), { shouldValidate: true })}
+                    aria-invalid={Boolean(form.formState.errors.acceptTerms)}
+                  />
+                  <div className="space-y-1.5 text-sm leading-7 text-muted-foreground">
+                    <Label htmlFor="acceptTerms" className="cursor-pointer text-sm font-normal text-foreground">
+                      I agree to the Terms & Conditions
+                    </Label>
+                    <p>
+                      By creating an account, you agree to the <Link href="/terms" className="font-medium text-primary underline-offset-4 hover:underline">Terms & Conditions</Link> for Vault Story.
+                    </p>
+                  </div>
+                </div>
+                {form.formState.errors.acceptTerms ? <p className="text-xs text-destructive">{String(form.formState.errors.acceptTerms.message)}</p> : null}
+              </div>
+
+              <div className="rounded-[24px] border border-secondary/25 bg-secondary/10 p-4 text-sm leading-7 text-foreground/85">
+                If you have already signed up, check your inbox or spam folder for your confirmation email before trying again.
+              </div>
+            </>
           ) : null}
 
           <Button type="submit" className="w-full" disabled={loading || authUnavailable || oauthLoading !== null}>
