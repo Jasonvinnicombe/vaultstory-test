@@ -202,6 +202,27 @@ export function EntryCreateForm({
     );
   }
 
+
+  function handleFormKeyDown(event: React.KeyboardEvent<HTMLFormElement>) {
+    if (event.key !== "Enter") {
+      return;
+    }
+
+    const target = event.target as HTMLElement | null;
+    if (!target) {
+      return;
+    }
+
+    const tagName = target.tagName;
+    const isTextarea = tagName === "TEXTAREA";
+    const isSubmitButton = tagName === "BUTTON" && (target as HTMLButtonElement).type === "submit";
+
+    if (isTextarea || isSubmitButton) {
+      return;
+    }
+
+    event.preventDefault();
+  }
   async function onSubmit(values: EntryValues) {
     if (!supabase) {
       toast.error("Add Supabase env vars to create entries.");
@@ -419,7 +440,7 @@ export function EntryCreateForm({
         </div>
       </CardHeader>
       <CardContent className="p-7 pt-0 sm:p-9 sm:pt-0">
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-7" noValidate>
+        <form onSubmit={form.handleSubmit(onSubmit)} onKeyDown={handleFormKeyDown} className="space-y-7" noValidate>
           <motion.div
             key={step}
             initial={{ opacity: 0, y: 10 }}
@@ -674,6 +695,7 @@ export function EntryCreateForm({
     </Card>
   );
 }
+
 
 
 
