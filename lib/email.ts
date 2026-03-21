@@ -27,9 +27,18 @@ type UnlockReadyEmailInput = {
   coverImageUrl?: string | null;
 };
 
+type SupportEmailInput = {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+};
+
 type EmailResult =
   | { status: "sent" }
   | { status: "skipped"; reason: "not-configured" };
+
+const SUPPORT_EMAIL = "support@vaultstory.app";
 
 function formatRole(role: string) {
   return role.charAt(0).toUpperCase() + role.slice(1);
@@ -186,6 +195,51 @@ export async function sendAdminInviteEmail(input: AdminInviteEmailInput): Promis
   return sendEmail({ to: input.to, subject, html, text });
 }
 
+
+
+export async function sendSupportRequestEmail(input: SupportEmailInput): Promise<EmailResult> {
+  const safeName = input.name.trim();
+  const safeEmail = input.email.trim().toLowerCase();
+  const safeSubject = input.subject.trim();
+  const safeMessage = input.message.trim();
+
+  const subject = `Support request: ${safeSubject}`;
+  const text = [
+    "A new support request was submitted for Vault Story.",
+    "",
+    `Name: ${safeName}`,
+    `Email: ${safeEmail}`,
+    `Subject: ${safeSubject}`,
+    "",
+    "Message:",
+    safeMessage,
+  ].join("\n");
+
+  const html = `
+    <div style="background:#f7f5f2;padding:32px 20px;font-family:Inter,Arial,sans-serif;color:#2a2a2a;">
+      <div style="max-width:640px;margin:0 auto;background:#ffffff;border:1px solid rgba(30,42,68,0.08);border-radius:28px;padding:36px;box-shadow:0 24px 60px rgba(30,42,68,0.08);">
+        <p style="margin:0 0 12px;color:#e6b86a;font-size:12px;letter-spacing:0.18em;text-transform:uppercase;">Vault Story Support</p>
+        <h1 style="margin:0 0 18px;font-family:'Playfair Display',Georgia,serif;font-size:34px;line-height:1.15;color:#1e2a44;">New support request</h1>
+        <div style="margin:0 0 24px;padding:20px;border-radius:24px;background:linear-gradient(180deg, rgba(30,42,68,0.05), rgba(230,184,106,0.08));border:1px solid rgba(30,42,68,0.08);">
+          <p style="margin:0 0 8px;font-size:14px;line-height:1.8;color:#5e5b57;"><strong>Name:</strong> ${safeName}</p>
+          <p style="margin:0 0 8px;font-size:14px;line-height:1.8;color:#5e5b57;"><strong>Email:</strong> ${safeEmail}</p>
+          <p style="margin:0;font-size:14px;line-height:1.8;color:#5e5b57;"><strong>Subject:</strong> ${safeSubject}</p>
+        </div>
+        <div style="padding:22px;border-radius:24px;border:1px solid rgba(30,42,68,0.08);background:#fbfaf8;">
+          <p style="margin:0 0 10px;color:#7d7469;font-size:12px;letter-spacing:0.16em;text-transform:uppercase;">Message</p>
+          <p style="margin:0;font-size:16px;line-height:1.85;color:#2a2a2a;white-space:pre-wrap;">${safeMessage}</p>
+        </div>
+      </div>
+    </div>
+  `;
+
+  return sendEmail({
+    to: SUPPORT_EMAIL,
+    subject,
+    html,
+    text,
+  });
+}
 export async function sendUnlockReadyEmail(input: UnlockReadyEmailInput): Promise<EmailResult> {
   const entryUrl = buildEntryLink(input.entryId, input.to);
   const recipientLabel = input.recipientName?.trim() || input.to;
