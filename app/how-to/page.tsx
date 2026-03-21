@@ -173,7 +173,7 @@ export default async function HowToPage() {
                         </div>
                       </div>
 
-                      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start">
+                      <div className="grid gap-4 2xl:grid-cols-[minmax(0,1fr)_320px] 2xl:items-start">
                         <div className="rounded-[28px] border border-border/70 bg-background/65 p-5 shadow-[0_14px_34px_rgba(66,46,31,0.05)]">
                           <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                             {item.clickPath.map((segment, index) => (
@@ -183,15 +183,15 @@ export default async function HowToPage() {
                               </div>
                             ))}
                           </div>
-                          <div className="mt-4 rounded-[24px] border border-secondary/20 bg-secondary/10 p-4">
+                          <div className="mt-4 rounded-[24px] border border-secondary/20 bg-secondary/10 p-5">
                             <p className="text-sm font-medium text-foreground">{item.clickTitle}</p>
-                            <p className="mt-2 text-sm leading-7 text-muted-foreground">{item.clickLabel}</p>
+                            <p className="mt-2 max-w-2xl text-sm leading-7 text-muted-foreground">{item.clickLabel}</p>
                             <div className="mt-4 flex flex-wrap gap-2">
-                              <span className="inline-flex items-center rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-[0_12px_24px_rgba(48,32,23,0.12)]">
+                              <span className="inline-flex min-h-11 items-center rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-[0_12px_24px_rgba(48,32,23,0.12)]">
                                 {item.clickPrimary}
                               </span>
                               {item.clickSecondary.map((chip) => (
-                                <span key={chip} className="inline-flex items-center rounded-full border border-border/70 bg-card px-3 py-2 text-sm text-muted-foreground">
+                                <span key={chip} className="inline-flex min-h-11 items-center rounded-full border border-border/70 bg-card px-3 py-2 text-sm text-muted-foreground">
                                   {chip}
                                 </span>
                               ))}
@@ -199,7 +199,7 @@ export default async function HowToPage() {
                           </div>
                         </div>
 
-                        <div className="rounded-[26px] border border-secondary/20 bg-secondary/10 p-5 text-sm leading-7 text-muted-foreground xl:self-start">
+                        <div className="rounded-[26px] border border-secondary/20 bg-secondary/10 p-5 text-sm leading-7 text-muted-foreground 2xl:self-start">
                           <p className="font-medium text-foreground">{item.snippetTitle}</p>
                           <div className="mt-3 space-y-3">
                             {item.snippet.map((line) => (
