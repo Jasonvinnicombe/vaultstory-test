@@ -359,15 +359,16 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
           {currentMode === "signup" ? (
             <>
               <div className="space-y-3 rounded-[24px] border border-border/70 bg-background/65 p-4">
-                <div className="flex items-start gap-3">
+                <div className="flex items-start gap-4">
                   <Checkbox
                     id="acceptTerms"
+                    className="mt-1 h-7 w-7 rounded-full border-2 border-primary/50 bg-white shadow-[0_8px_18px_rgba(66,46,31,0.08)] data-[state=checked]:border-primary"
                     checked={Boolean(form.watch("acceptTerms"))}
                     onCheckedChange={(checked) => form.setValue("acceptTerms", Boolean(checked), { shouldValidate: true })}
                     aria-invalid={Boolean(form.formState.errors.acceptTerms)}
                   />
                   <div className="space-y-1.5 text-sm leading-7 text-muted-foreground">
-                    <Label htmlFor="acceptTerms" className="cursor-pointer text-sm font-normal text-foreground">
+                    <Label htmlFor="acceptTerms" className="cursor-pointer text-sm font-semibold uppercase tracking-[0.16em] text-foreground">
                       I agree to the Terms & Conditions
                     </Label>
                     <p>
