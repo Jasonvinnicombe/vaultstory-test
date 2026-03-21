@@ -66,26 +66,25 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
 
   const tags = (tagRows ?? []).map((tag) => tag.tag);
   const status = getEntryStatus(entry);
-  const isLockedExperience = status !== "unlocked" && status !== "draft";
   const canCompleteMilestone =
     entry.unlock_type === "manual_milestone" && !entry.milestone_achieved_at && !isDraftEntry(entry);
 
   return (
-    <AppShell fullName={profile?.full_name ?? user.user_metadata.full_name ?? null} email={user.email ?? ""} isAdmin={profile?.is_admin ?? false} avatarUrl={avatarPreviewUrl} variant={isLockedExperience ? "reveal" : "default"}>
-      <div className={isLockedExperience ? "space-y-6 rounded-[40px] border border-white/10 bg-[radial-gradient(circle_at_top,rgba(233,211,182,0.12),transparent_28%),linear-gradient(180deg,rgba(23,18,15,0.98),rgba(52,37,29,0.95))] p-4 shadow-[0_30px_90px_rgba(28,20,15,0.24)] sm:space-y-7 sm:p-5" : "space-y-6 sm:space-y-7"}>
-        <Card className={isLockedExperience ? "overflow-hidden border-white/10 bg-white/5 text-white shadow-[0_24px_64px_rgba(20,14,10,0.22)]" : "overflow-hidden border-white/60 bg-card/84 shadow-[0_24px_64px_rgba(66,46,31,0.1)]"}>
+    <AppShell fullName={profile?.full_name ?? user.user_metadata.full_name ?? null} email={user.email ?? ""} isAdmin={profile?.is_admin ?? false} avatarUrl={avatarPreviewUrl}>
+      <div className="space-y-6 sm:space-y-7">
+        <Card className="overflow-hidden border-white/60 bg-card/84 shadow-[0_24px_64px_rgba(66,46,31,0.1)]">
           <CardContent className="flex flex-col gap-5 p-7 sm:p-8 lg:flex-row lg:items-end lg:justify-between lg:p-10">
             <div className="section-stack max-w-3xl">
               <div className="flex flex-wrap items-center gap-3">
-                <Badge className={isLockedExperience ? "w-fit border border-amber-200/18 bg-amber-200/14 text-amber-100" : "w-fit bg-secondary/88"}>Memory reveal</Badge>
+                <Badge className="w-fit bg-secondary/88">Memory reveal</Badge>
                 <EntryStatusBadge entry={entry} />
               </div>
-              <h1 className={isLockedExperience ? "text-balance font-display text-4xl leading-tight text-white sm:text-5xl" : "text-balance font-display text-4xl leading-tight text-foreground sm:text-5xl"}>{entry.title}</h1>
-              <p className={isLockedExperience ? "text-sm leading-7 text-white/68 sm:text-base" : "text-sm leading-7 text-muted-foreground sm:text-base"}>
+              <h1 className="text-balance font-display text-4xl leading-tight text-foreground sm:text-5xl">{entry.title}</h1>
+              <p className="text-sm leading-7 text-muted-foreground sm:text-base">
                 Inside {vault.name} for {vault.subject_name ?? "the future"}.
               </p>
-              <div className={isLockedExperience ? "flex flex-wrap gap-3 text-sm text-white/72" : "flex flex-wrap gap-3 text-sm text-muted-foreground"}>
-                <span className={isLockedExperience ? "inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/6 px-3 py-1.5" : "inline-flex items-center gap-2 rounded-full bg-secondary/55 px-3 py-1.5"}>
+              <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
+                <span className="inline-flex items-center gap-2 rounded-full bg-secondary/55 px-3 py-1.5">
                   <CalendarClock className="h-4 w-4" />
                   {status === "draft"
                     ? "Draft - not sealed yet"
@@ -93,27 +92,27 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
                       ? formatDateTime(entry.unlock_at)
                       : entry.milestone_label ?? "Manual milestone"}
                 </span>
-                <span className={isLockedExperience ? "inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/6 px-3 py-1.5" : "inline-flex items-center gap-2 rounded-full bg-secondary/55 px-3 py-1.5"}>
+                <span className="inline-flex items-center gap-2 rounded-full bg-secondary/55 px-3 py-1.5">
                   Recorded {formatDateTime(entry.created_at)}
                 </span>
               </div>
             </div>
             <div className="flex flex-wrap gap-3">
-              <Button asChild variant="outline" className={isLockedExperience ? "border-white/10 bg-white/6 text-white hover:bg-white/10 hover:border-white/16" : undefined}>
+              <Button asChild variant="outline">
                 <Link href={`/vaults/${vault.id}`}>
                   <ArrowLeft className="h-4 w-4" />
                   Back to vault
                 </Link>
               </Button>
               {status === "draft" ? (
-                <Button asChild className={isLockedExperience ? "bg-[linear-gradient(180deg,rgba(32,46,82,0.98),rgba(28,40,70,0.95))] text-white shadow-[0_18px_36px_rgba(17,24,39,0.28)] hover:brightness-110" : undefined}>
+                <Button asChild>
                   <Link href={`/entries/${entry.id}/edit`}>
                     <FilePenLine className="h-4 w-4" />
                     Continue editing
                   </Link>
                 </Button>
               ) : (
-                <Button asChild className={isLockedExperience ? "bg-[linear-gradient(180deg,rgba(32,46,82,0.98),rgba(28,40,70,0.95))] text-white shadow-[0_18px_36px_rgba(17,24,39,0.28)] hover:brightness-110" : undefined}>
+                <Button asChild>
                   <Link href={`/vaults/${vault.id}/entries/new`}>Add another memory</Link>
                 </Button>
               )}
@@ -186,5 +185,4 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
     </AppShell>
   );
 }
-
 
