@@ -65,7 +65,7 @@ function buildAuthCallbackHref(nextPath: string, inviteMode: string | null, emai
   return query ? `/auth/callback?${query}` : "/auth/callback";
 }
 
-function getFriendlyAuthError(message: string, mode: "login" | "signup" | "reset") {
+function getFriendlyAuthError(message: string, mode: "login" | "signup" | "reset" | "otp") {
   if (/email rate limit exceeded/i.test(message)) {
     if (mode === "signup") {
       return "Too many confirmation emails were requested. Wait a few minutes, then try again, or check whether a confirmation email already arrived in your inbox or spam folder.";
@@ -75,7 +75,15 @@ function getFriendlyAuthError(message: string, mode: "login" | "signup" | "reset
       return "Too many password reset emails were requested. Wait a few minutes, then try again, or use the most recent reset email you already received.";
     }
 
+    if (mode === "otp") {
+      return "Too many one-time sign-in emails were requested. Wait a few minutes, then try again, or use the most recent code or link you already received.";
+    }
+
     return "Too many email attempts were made recently. Wait a few minutes, then try again.";
+  }
+
+  if (/invalid otp|token has expired|otp expired|token expired/i.test(message)) {
+    return "That one-time code is invalid or has expired. Request a fresh code and try again.";
   }
 
   if (/user already registered|already been registered/i.test(message)) {
@@ -84,6 +92,10 @@ function getFriendlyAuthError(message: string, mode: "login" | "signup" | "reset
 
   if (/email.*confirm/i.test(message)) {
     return "Please confirm your email first, then log in.";
+  }
+
+  if (/user not found|invalid login credentials|signup disabled/i.test(message) && mode === "otp") {
+    return "That email address does not have an account yet. Create an account first, then you can use one-time sign-in codes too.";
   }
 
   return message;
@@ -111,6 +123,10 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
   const [loading, setLoading] = useState(false);
   const [resetSending, setResetSending] = useState(false);
   const [oauthLoading, setOauthLoading] = useState<OAuthProvider | null>(null);
+  const [otpSending, setOtpSending] = useState(false);
+  const [otpVerifying, setOtpVerifying] = useState(false);
+  const [otpRequested, setOtpRequested] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
   const currentMode = normalizeMode(mode);
   const inviteEmail = searchParams.get("email") ?? "";
   const inviteMode = searchParams.get("invite");
@@ -155,6 +171,79 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
     }
 
     toast.success("Password reset email sent. Use the link in that email to choose a new password.");
+  }
+
+  async function handleSendOtp() {
+    if (!supabase) {
+      toast.error("Add your Supabase URL and anon key in .env.local to enable authentication.");
+      return;
+    }
+
+    const email = form.getValues("email").trim();
+    const emailCheck = signInSchema.shape.email.safeParse(email);
+
+    if (!emailCheck.success) {
+      toast.error("Enter your email address first so we know where to send the one-time code.");
+      return;
+    }
+
+    setOtpSending(true);
+    const redirectTo = `${window.location.origin}${buildAuthCallbackHref(nextPath, inviteMode, email)}`;
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        shouldCreateUser: false,
+        emailRedirectTo: redirectTo,
+      },
+    });
+    setOtpSending(false);
+
+    if (error) {
+      toast.error(getFriendlyAuthError(error.message, "otp"));
+      return;
+    }
+
+    setOtpRequested(true);
+    setOtpCode("");
+    toast.success("We sent a one-time sign-in email. Enter the code from that email here, or use the secure sign-in link if it arrives as a magic link.");
+  }
+
+  async function handleVerifyOtp() {
+    if (!supabase) {
+      toast.error("Add your Supabase URL and anon key in .env.local to enable authentication.");
+      return;
+    }
+
+    const email = form.getValues("email").trim();
+    const emailCheck = signInSchema.shape.email.safeParse(email);
+
+    if (!emailCheck.success) {
+      toast.error("Enter your email address first.");
+      return;
+    }
+
+    if (!otpCode.trim()) {
+      toast.error("Enter the one-time code from your email.");
+      return;
+    }
+
+    setOtpVerifying(true);
+    const { error } = await supabase.auth.verifyOtp({
+      email,
+      token: otpCode.trim(),
+      type: "email",
+    });
+    setOtpVerifying(false);
+
+    if (error) {
+      toast.error(getFriendlyAuthError(error.message, "otp"));
+      return;
+    }
+
+    toast.success("Signed in with your one-time code.");
+    const destination = await getPostAuthDestination(supabase, nextPath);
+    router.push(destination);
+    router.refresh();
   }
 
   async function handleOAuth(provider: OAuthProvider) {
@@ -292,7 +381,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
                 key={item.provider}
                 type="button"
                 onClick={() => void handleOAuth(item.provider)}
-                disabled={authUnavailable || loading || oauthLoading !== null}
+                disabled={authUnavailable || loading || oauthLoading !== null || otpSending || otpVerifying}
                 className="inline-flex items-center justify-center gap-3 rounded-[22px] border border-border/70 bg-background/80 px-4 py-3 text-sm font-medium text-foreground transition hover:bg-background disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <span className="inline-flex h-6 w-6 items-center justify-center">
@@ -325,7 +414,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
 
           <div className="space-y-2.5">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" placeholder="you@example.com" disabled={authUnavailable} aria-invalid={Boolean(form.formState.errors.email)} {...form.register("email")} />
+            <Input id="email" type="email" placeholder="you@example.com" disabled={authUnavailable || otpSending || otpVerifying} aria-invalid={Boolean(form.formState.errors.email)} {...form.register("email")} />
             {form.formState.errors.email ? <p className="text-xs text-destructive">{String(form.formState.errors.email.message)}</p> : null}
           </div>
 
@@ -338,7 +427,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
                   <button
                     type="button"
                     onClick={handleForgotPassword}
-                    disabled={resetSending || authUnavailable}
+                    disabled={resetSending || authUnavailable || otpSending || otpVerifying}
                     className="text-xs font-medium text-primary underline-offset-4 transition hover:underline disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {resetSending ? "Sending..." : "Forgot password?"}
@@ -346,43 +435,75 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
                 ) : null}
               </div>
             </div>
-            <Input id="password" type="password" placeholder="Enter your password" disabled={authUnavailable} aria-invalid={Boolean(form.formState.errors.password)} {...form.register("password")} />
+            <Input id="password" type="password" placeholder="Enter your password" disabled={authUnavailable || otpSending || otpVerifying} aria-invalid={Boolean(form.formState.errors.password)} {...form.register("password")} />
             {form.formState.errors.password ? <p className="text-xs text-destructive">{String(form.formState.errors.password.message)}</p> : <p className="text-xs text-muted-foreground">Use something memorable to you, but hard for anyone else to guess.</p>}
           </div>
 
           {currentMode === "login" ? (
-            <div className="rounded-[28px] border border-border/70 bg-background/65 p-4 text-sm leading-7 text-muted-foreground">
-              Your memories stay private. Once you are in, you will land back inside your dashboard.
+            <div className="space-y-3 rounded-[28px] border border-border/70 bg-background/65 p-4">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-foreground">Prefer a one-time sign-in code?</p>
+                  <p className="text-xs leading-6 text-muted-foreground">We can email you a secure one-time code for this account instead of using your password.</p>
+                </div>
+                <Button type="button" variant="outline" onClick={handleSendOtp} disabled={authUnavailable || loading || oauthLoading !== null || otpSending || otpVerifying}>
+                  {otpSending ? "Sending code..." : otpRequested ? "Resend sign-in code" : "Email me a sign-in code"}
+                </Button>
+              </div>
+
+              {otpRequested ? (
+                <div className="space-y-3 rounded-[22px] border border-secondary/30 bg-secondary/10 p-4">
+                  <p className="text-xs leading-6 text-foreground">
+                    Check your inbox for the latest one-time sign-in email. If your Supabase email template is still configured for magic links, the secure link in that email will work too.
+                  </p>
+                  <div className="flex flex-col gap-3 sm:flex-row">
+                    <Input
+                      value={otpCode}
+                      onChange={(event) => setOtpCode(event.target.value.replace(/\s+/g, ""))}
+                      inputMode="numeric"
+                      autoComplete="one-time-code"
+                      maxLength={6}
+                      placeholder="Enter 6-digit code"
+                      disabled={otpVerifying || otpSending}
+                      className="sm:flex-1"
+                    />
+                    <Button type="button" onClick={handleVerifyOtp} disabled={otpVerifying || otpSending || !otpCode.trim()}>
+                      {otpVerifying ? "Verifying..." : "Verify code"}
+                    </Button>
+                  </div>
+                </div>
+              ) : null}
+
+              <div className="text-sm leading-7 text-muted-foreground">
+                Your memories stay private. Once you are in, you will land back inside your dashboard.
+              </div>
             </div>
           ) : null}
 
           {currentMode === "signup" ? (
-            <>
-              <div className="space-y-3 rounded-[24px] border border-border/70 bg-background/65 p-4">
-                <div className="flex items-start gap-4">
-                  <Checkbox
-                    id="acceptTerms"
-                    className="mt-1 h-7 w-7 rounded-full border-2 border-primary/50 bg-white shadow-[0_8px_18px_rgba(66,46,31,0.08)] data-[state=checked]:border-primary"
-                    checked={Boolean(form.watch("acceptTerms"))}
-                    onCheckedChange={(checked) => form.setValue("acceptTerms", Boolean(checked), { shouldValidate: true })}
-                    aria-invalid={Boolean(form.formState.errors.acceptTerms)}
-                  />
-                  <div className="space-y-1.5 text-sm leading-7 text-muted-foreground">
-                    <Label htmlFor="acceptTerms" className="cursor-pointer text-sm font-semibold uppercase tracking-[0.16em] text-foreground">
-                      I agree to the Terms & Conditions
-                    </Label>
-                    <p>
-                      By creating an account, you agree to the <Link href="/terms" className="font-medium text-primary underline-offset-4 hover:underline">Terms & Conditions</Link> for Vault Story.
-                    </p>
-                  </div>
+            <div className="space-y-3 rounded-[24px] border border-border/70 bg-background/65 p-4">
+              <div className="flex items-start gap-4">
+                <Checkbox
+                  id="acceptTerms"
+                  className="mt-1 h-7 w-7 rounded-full border-2 border-primary/50 bg-white shadow-[0_8px_18px_rgba(66,46,31,0.08)] data-[state=checked]:border-primary"
+                  checked={Boolean(form.watch("acceptTerms"))}
+                  onCheckedChange={(checked) => form.setValue("acceptTerms", Boolean(checked), { shouldValidate: true })}
+                  aria-invalid={Boolean(form.formState.errors.acceptTerms)}
+                />
+                <div className="space-y-1.5 text-sm leading-7 text-muted-foreground">
+                  <Label htmlFor="acceptTerms" className="cursor-pointer text-sm font-semibold uppercase tracking-[0.16em] text-foreground">
+                    I agree to the Terms & Conditions
+                  </Label>
+                  <p>
+                    By creating an account, you agree to the <Link href="/terms" className="font-medium text-primary underline-offset-4 hover:underline">Terms & Conditions</Link> for Vault Story.
+                  </p>
                 </div>
-                {form.formState.errors.acceptTerms ? <p className="text-xs text-destructive">{String(form.formState.errors.acceptTerms.message)}</p> : null}
               </div>
-
-            </>
+              {form.formState.errors.acceptTerms ? <p className="text-xs text-destructive">{String(form.formState.errors.acceptTerms.message)}</p> : null}
+            </div>
           ) : null}
 
-          <Button type="submit" className="w-full" disabled={loading || authUnavailable || oauthLoading !== null}>
+          <Button type="submit" className="w-full" disabled={loading || authUnavailable || oauthLoading !== null || otpSending || otpVerifying}>
             {loading ? "Please wait..." : currentMode === "login" ? "Log in" : "Create account"}
             {!loading ? <ArrowRight className="h-4 w-4" /> : null}
           </Button>
