@@ -16,6 +16,12 @@ export function MembershipOptions(props: {
 }) {
   const hasBillingSuccess = props.billingSuccess === "1";
   const planLabel = props.billingPlan === "family" ? "Family" : "Premium";
+  const headingCopy = props.familyCheckoutEnabled
+    ? "Premium and Family checkout are both live through Stripe today."
+    : "Premium checkout is live today, and Family will use Stripe once its price id is configured.";
+  const currentMembershipCopy = props.familyCheckoutEnabled
+    ? "Premium and Family both use the same Stripe billing flow, and your access updates as soon as checkout is confirmed."
+    : "Premium is fully wired today. Family checkout will use the same Stripe flow as soon as the Family price id is configured in the environment.";
 
   return (
     <Card className="overflow-hidden border-white/60 bg-card/88 shadow-[0_26px_80px_rgba(66,46,31,0.12)]">
@@ -26,7 +32,7 @@ export function MembershipOptions(props: {
             <div className="section-stack max-w-3xl">
               <h2 className="font-display text-3xl sm:text-4xl">Choose how your family archive grows.</h2>
               <p className="text-sm leading-7 text-muted-foreground sm:text-base">
-                Premium checkout is live today, and Family can run through Stripe too whenever its price id is configured.
+                {headingCopy}
               </p>
             </div>
             <Button asChild variant="outline">
@@ -37,7 +43,7 @@ export function MembershipOptions(props: {
 
         {hasBillingSuccess ? (
           <div className="mt-6 rounded-[28px] border border-emerald-200 bg-emerald-50 p-5 text-sm leading-7 text-emerald-900">
-            {planLabel} checkout completed. Your membership will refresh here as soon as the Stripe webhook lands.
+            {planLabel} checkout completed. Your membership has been refreshed for this account.
           </div>
         ) : null}
 
@@ -54,7 +60,7 @@ export function MembershipOptions(props: {
             {props.currentStatus ? <> with a status of <strong className="text-foreground">{props.currentStatus.replaceAll("_", " ")}</strong></> : null}.
           </p>
           <p className="mt-3">
-            Premium is fully wired today. Family checkout will use the same Stripe flow as soon as the Family price id is configured in the environment.
+            {currentMembershipCopy}
           </p>
         </div>
 
