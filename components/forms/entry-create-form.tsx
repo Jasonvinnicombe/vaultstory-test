@@ -679,12 +679,12 @@ export function EntryCreateForm({
               Back
             </Button>
             {step < steps.length - 1 ? (
-              <Button type="button" onClick={nextStep} disabled={loading} className="w-full sm:w-auto">
+              <Button key="entry-next-step" type="button" onClick={nextStep} disabled={loading} className="w-full sm:w-auto">
                 Next
                 <ArrowRight className="h-4 w-4" />
               </Button>
             ) : (
-              <Button type="submit" disabled={loading} className="w-full sm:w-auto">
+              <Button key="entry-submit-step" type="submit" disabled={loading} className="w-full sm:w-auto">
                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
                 {getSubmitLabel(isEditing, unlockType, loading)}
               </Button>
@@ -695,6 +695,7 @@ export function EntryCreateForm({
     </Card>
   );
 }
+
 
 
 
