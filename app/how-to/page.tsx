@@ -173,7 +173,7 @@ export default async function HowToPage() {
                         </div>
                       </div>
 
-                      <div className="grid gap-4 2xl:grid-cols-[minmax(0,1fr)_320px] 2xl:items-start">
+                      <div className="space-y-4">
                         <div className="rounded-[28px] border border-border/70 bg-background/65 p-5 shadow-[0_14px_34px_rgba(66,46,31,0.05)]">
                           <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                             {item.clickPath.map((segment, index) => (
@@ -185,7 +185,7 @@ export default async function HowToPage() {
                           </div>
                           <div className="mt-4 rounded-[24px] border border-secondary/20 bg-secondary/10 p-5">
                             <p className="text-sm font-medium text-foreground">{item.clickTitle}</p>
-                            <p className="mt-2 max-w-2xl text-sm leading-7 text-muted-foreground">{item.clickLabel}</p>
+                            <p className="mt-2 max-w-3xl text-sm leading-7 text-muted-foreground">{item.clickLabel}</p>
                             <div className="mt-4 flex flex-wrap gap-2">
                               <span className="inline-flex min-h-11 items-center rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-[0_12px_24px_rgba(48,32,23,0.12)]">
                                 {item.clickPrimary}
@@ -199,11 +199,11 @@ export default async function HowToPage() {
                           </div>
                         </div>
 
-                        <div className="rounded-[26px] border border-secondary/20 bg-secondary/10 p-5 text-sm leading-7 text-muted-foreground 2xl:self-start">
+                        <div className="rounded-[26px] border border-secondary/20 bg-secondary/10 p-5 text-sm leading-7 text-muted-foreground">
                           <p className="font-medium text-foreground">{item.snippetTitle}</p>
-                          <div className="mt-3 space-y-3">
+                          <div className="mt-3 grid gap-3 sm:grid-cols-2">
                             {item.snippet.map((line) => (
-                              <div key={line} className="flex items-start gap-3">
+                              <div key={line} className="flex items-start gap-3 rounded-[18px] border border-border/60 bg-background/55 px-4 py-3">
                                 <CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-primary" />
                                 <span>{line}</span>
                               </div>
@@ -217,7 +217,6 @@ export default async function HowToPage() {
               );
             })}
           </div>
-
           <div className="space-y-5 2xl:sticky 2xl:top-6 2xl:self-start">
             <Card className="overflow-hidden bg-primary text-primary-foreground shadow-[0_22px_56px_rgba(48,32,23,0.18)]">
               <CardContent className="p-7 sm:p-8">
