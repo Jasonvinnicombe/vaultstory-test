@@ -1,7 +1,7 @@
-﻿"use client";
+"use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
@@ -123,6 +123,7 @@ export function EntryCreateForm({
   const isEditing = Boolean(entryId);
   const [step, setStep] = useState(clampStep(startStep));
   const [loading, setLoading] = useState(false);
+  const stepContentRef = useRef<HTMLDivElement | null>(null);
   const [mediaFiles, setMediaFiles] = useState<File[]>([]);
 
   const form = useForm<EntryValues>({
@@ -155,6 +156,10 @@ export function EntryCreateForm({
   useEffect(() => {
     setSupabase(createClient());
   }, []);
+
+  useEffect(() => {
+    stepContentRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [step]);
 
   const unlockTypeOptions = useMemo(
     () =>
@@ -420,6 +425,7 @@ export function EntryCreateForm({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.22, ease: "easeOut" }}
+            ref={stepContentRef}
             className="rounded-[32px] border border-border/70 bg-background/60 p-5 sm:p-6"
           >
             {step === 0 ? (
@@ -668,6 +674,8 @@ export function EntryCreateForm({
     </Card>
   );
 }
+
+
 
 
 
