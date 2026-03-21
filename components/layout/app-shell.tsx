@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CalendarClock, FolderLock, Home, Menu, PlusCircle, Settings, ShieldCheck } from "lucide-react";
+import { BookOpenText, CalendarClock, FolderLock, Home, Menu, PlusCircle, Settings, ShieldCheck } from "lucide-react";
 
 import { LogoutButton } from "@/components/auth/logout-button";
 import { Badge } from "@/components/ui/badge";
@@ -27,6 +27,7 @@ const baseNavItems: NavItem[] = [
   { href: "/dashboard#vaults", label: "Vaults", icon: FolderLock },
   { href: "/dashboard#upcoming", label: "Upcoming", icon: CalendarClock },
   { href: "/settings", label: "Settings", icon: Settings },
+  { href: "/how-to", label: "How to", icon: BookOpenText },
 ];
 
 function getInitials(fullName?: string | null, email?: string) {
@@ -176,12 +177,20 @@ export function AppShell({ children, fullName, email, avatarUrl, isAdmin = false
               <p className="text-sm uppercase tracking-[0.22em] text-primary-foreground/68">Core workflow</p>
               <h2 className="mt-3 text-balance font-display text-2xl">Vaults, entries, and future unlocks.</h2>
               <p className="mt-3 text-sm leading-7 text-primary-foreground/80">Create vaults, collaborate with family, and move through memories in a way that feels warm, private, and intentional.</p>
-              <Button asChild variant="secondary" className="mt-5 w-full justify-start">
-                <Link href="/vaults/new">
-                  <PlusCircle className="h-4 w-4" />
-                  Create a vault
-                </Link>
-              </Button>
+              <div className="mt-5 grid gap-3">
+                <Button asChild variant="secondary" className="w-full justify-start">
+                  <Link href="/vaults/new">
+                    <PlusCircle className="h-4 w-4" />
+                    Create a vault
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" className="w-full justify-start border-white/20 bg-transparent text-white hover:bg-white/10">
+                  <Link href="/how-to">
+                    <BookOpenText className="h-4 w-4" />
+                    Open how-to guide
+                  </Link>
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </aside>
