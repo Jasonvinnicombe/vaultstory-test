@@ -71,7 +71,7 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
     entry.unlock_type === "manual_milestone" && !entry.milestone_achieved_at && !isDraftEntry(entry);
 
   return (
-    <AppShell fullName={profile?.full_name ?? user.user_metadata.full_name ?? null} email={user.email ?? ""} isAdmin={profile?.is_admin ?? false} avatarUrl={avatarPreviewUrl}>
+    <AppShell fullName={profile?.full_name ?? user.user_metadata.full_name ?? null} email={user.email ?? ""} isAdmin={profile?.is_admin ?? false} avatarUrl={avatarPreviewUrl} variant={isLockedExperience ? "reveal" : "default"}>
       <div className={isLockedExperience ? "space-y-6 rounded-[40px] border border-white/10 bg-[radial-gradient(circle_at_top,rgba(233,211,182,0.12),transparent_28%),linear-gradient(180deg,rgba(23,18,15,0.98),rgba(52,37,29,0.95))] p-4 shadow-[0_30px_90px_rgba(28,20,15,0.24)] sm:space-y-7 sm:p-5" : "space-y-6 sm:space-y-7"}>
         <Card className={isLockedExperience ? "overflow-hidden border-white/10 bg-white/5 text-white shadow-[0_24px_64px_rgba(20,14,10,0.22)]" : "overflow-hidden border-white/60 bg-card/84 shadow-[0_24px_64px_rgba(66,46,31,0.1)]"}>
           <CardContent className="flex flex-col gap-5 p-7 sm:p-8 lg:flex-row lg:items-end lg:justify-between lg:p-10">
@@ -186,4 +186,5 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
     </AppShell>
   );
 }
+
 
