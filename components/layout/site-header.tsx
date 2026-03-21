@@ -18,6 +18,7 @@ const marketingLinks = [
   { href: "/pricing", label: "Pricing" },
   { href: "/reviews", label: "Reviews" },
   { href: "/faq", label: "FAQ" },
+  { href: "/support", label: "Support" },
 ];
 
 export function SiteHeader() {
