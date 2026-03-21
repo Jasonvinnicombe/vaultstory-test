@@ -159,24 +159,21 @@ export default async function HowToPage() {
               return (
                 <Card key={item.step} className="overflow-hidden border-white/60 bg-card/88 shadow-[0_22px_64px_rgba(66,46,31,0.1)]">
                   <CardContent className="p-7 sm:p-8">
-                    <div className="grid gap-6 2xl:grid-cols-[120px_minmax(0,1fr)_320px] 2xl:items-start">
-                      <div className="flex items-center gap-4 2xl:block 2xl:space-y-4">
-                        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-secondary/90 text-primary">
+                    <div className="space-y-6">
+                      <div className="flex items-start gap-5">
+                        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-secondary/90 text-primary">
                           <Icon className="h-4.5 w-4.5" />
                         </div>
-                        <div>
+                        <div className="min-w-0 space-y-4">
                           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">Step {item.step}</p>
-                        </div>
-                      </div>
-
-                      <div className="space-y-5 2xl:min-w-0">
-                        <div className="space-y-4">
-                          <h3 className="text-balance font-display text-3xl leading-tight text-foreground">{item.title}</h3>
-                          <p className="max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">
+                          <h3 className="text-balance font-display text-2xl leading-tight text-foreground sm:text-3xl">{item.title}</h3>
+                          <p className="max-w-3xl text-sm leading-7 text-muted-foreground sm:text-base">
                             {item.body}
                           </p>
                         </div>
+                      </div>
 
+                      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start">
                         <div className="rounded-[28px] border border-border/70 bg-background/65 p-5 shadow-[0_14px_34px_rgba(66,46,31,0.05)]">
                           <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                             {item.clickPath.map((segment, index) => (
@@ -201,17 +198,17 @@ export default async function HowToPage() {
                             </div>
                           </div>
                         </div>
-                      </div>
 
-                      <div className="rounded-[26px] border border-secondary/20 bg-secondary/10 p-5 text-sm leading-7 text-muted-foreground 2xl:self-start">
-                        <p className="font-medium text-foreground">{item.snippetTitle}</p>
-                        <div className="mt-3 space-y-3">
-                          {item.snippet.map((line) => (
-                            <div key={line} className="flex items-start gap-3">
-                              <CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-primary" />
-                              <span>{line}</span>
-                            </div>
-                          ))}
+                        <div className="rounded-[26px] border border-secondary/20 bg-secondary/10 p-5 text-sm leading-7 text-muted-foreground xl:self-start">
+                          <p className="font-medium text-foreground">{item.snippetTitle}</p>
+                          <div className="mt-3 space-y-3">
+                            {item.snippet.map((line) => (
+                              <div key={line} className="flex items-start gap-3">
+                                <CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-primary" />
+                                <span>{line}</span>
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       </div>
                     </div>
