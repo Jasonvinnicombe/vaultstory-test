@@ -44,6 +44,34 @@ async function syncAdminInvite(profile: { id: string; email: string; is_admin: b
   return { ...profile, is_admin: true };
 }
 
+async function syncVaultInvites(profile: { id: string; email: string } | null) {
+  if (!profile?.email) {
+    return;
+  }
+
+  const normalizedEmail = profile.email.trim().toLowerCase();
+  const { data: pendingInvites, error: pendingInvitesError } = await supabaseAdmin
+    .from("vault_invites")
+    .select("id,vault_id,role")
+    .eq("email", normalizedEmail)
+    .eq("status", "pending");
+
+  if (pendingInvitesError || !pendingInvites?.length) {
+    return;
+  }
+
+  for (const invite of pendingInvites) {
+    await supabaseAdmin
+      .from("vault_members")
+      .upsert({ vault_id: invite.vault_id, user_id: profile.id, role: invite.role }, { onConflict: "vault_id,user_id" });
+
+    await supabaseAdmin
+      .from("vault_invites")
+      .update({ status: "accepted" })
+      .eq("id", invite.id);
+  }
+}
+
 export async function getUser() {
   if (!hasSupabaseEnv()) {
     return null;
@@ -78,6 +106,7 @@ export async function getProfile() {
   const user = await requireUser();
   const supabase = await createClient();
   const { data } = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle();
+  await syncVaultInvites(data);
   const profile = await syncAdminInvite(data);
 
   const avatarPreviewUrl = profile?.avatar_url

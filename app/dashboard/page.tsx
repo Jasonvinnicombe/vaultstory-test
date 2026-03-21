@@ -108,7 +108,7 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
         <section className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-5">
           {stats.map((stat) => {
             const Icon = stat.icon;
-            return <Card key={stat.label} className="glass-panel"><CardContent className="p-6"><div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-secondary/90 text-primary"><Icon className="h-5 w-5" /></div><p className="text-sm text-muted-foreground">{stat.label}</p><p className="mt-2 font-display text-3xl">{stat.value}</p></CardContent></Card>;
+            return <Card key={stat.label} className="glass-panel"><CardContent className="flex h-full flex-col items-center justify-center p-6 text-center"><div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-secondary/90 text-primary"><Icon className="h-5 w-5" /></div><p className="text-sm text-muted-foreground">{stat.label}</p><p className="mt-2 font-display text-3xl">{stat.value}</p></CardContent></Card>;
           })}
         </section>
 
