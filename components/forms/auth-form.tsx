@@ -77,11 +77,19 @@ function getFriendlyAuthError(message: string, mode: "login" | "signup" | "reset
     return "Too many email attempts were made recently. Wait a few minutes, then try again.";
   }
 
+  if (/user already registered|already been registered/i.test(message)) {
+    return "That email address is already registered. Try logging in instead, or use Forgot password if you need to reset access.";
+  }
+
   if (/email.*confirm/i.test(message)) {
     return "Please confirm your email first, then log in.";
   }
 
   return message;
+}
+
+function isExistingAccountSignUp(data: { session: unknown; user: { identities?: Array<unknown> | null } | null }) {
+  return Boolean(data.user && !data.session && Array.isArray(data.user.identities) && data.user.identities.length === 0);
 }
 
 async function getPostAuthDestination(supabase: BrowserSupabaseClient, nextPath: string) {
@@ -212,6 +220,14 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
     setLoading(false);
     if (error) return toast.error(getFriendlyAuthError(error.message, "signup"));
 
+    if (isExistingAccountSignUp(data)) {
+      const loginHref = buildAuthHref("login", signUpValues.email, inviteMode, nextPath);
+      toast.error("That email address is already registered. Try logging in instead, or use Forgot password if you need to reset access.");
+      router.push(loginHref);
+      router.refresh();
+      return;
+    }
+
     if (data.session) {
       toast.success(inviteMode === "vault" ? "Account created. You can now open the invited vault." : inviteMode === "admin" ? "Account created. Your admin access will be available once you land inside the app." : "Account created successfully.");
       const destination = await getPostAuthDestination(supabase, nextPath);
@@ -337,6 +353,10 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
             {currentMode === "login"
               ? "Your memories stay private. Once you are in, you will land back inside your dashboard."
               : "After sign up, we will guide you into creating your first vault and your first future memory."}
+          </div>
+
+          <div className="rounded-[24px] border border-secondary/25 bg-secondary/10 p-4 text-sm leading-7 text-foreground/85">
+            Stronger sign-in protection is available with one-time verification codes from an authenticator app in Settings after login. This is generally safer than SMS codes.
           </div>
 
           {currentMode === "signup" ? (
