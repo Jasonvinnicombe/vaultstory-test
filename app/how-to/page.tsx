@@ -159,8 +159,8 @@ export default async function HowToPage() {
               return (
                 <Card key={item.step} className="overflow-hidden border-white/60 bg-card/88 shadow-[0_22px_64px_rgba(66,46,31,0.1)]">
                   <CardContent className="p-7 sm:p-8">
-                    <div className="grid gap-6 xl:grid-cols-[auto_minmax(0,1fr)_320px] xl:items-start">
-                      <div className="flex items-center gap-4 xl:block xl:space-y-4">
+                    <div className="grid gap-6 2xl:grid-cols-[120px_minmax(0,1fr)_320px] 2xl:items-start">
+                      <div className="flex items-center gap-4 2xl:block 2xl:space-y-4">
                         <div className="flex h-14 w-14 items-center justify-center rounded-full bg-secondary/90 text-primary">
                           <Icon className="h-4.5 w-4.5" />
                         </div>
@@ -169,7 +169,7 @@ export default async function HowToPage() {
                         </div>
                       </div>
 
-                      <div className="space-y-5">
+                      <div className="space-y-5 2xl:min-w-0">
                         <div className="space-y-4">
                           <h3 className="text-balance font-display text-3xl leading-tight text-foreground">{item.title}</h3>
                           <p className="max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">
@@ -203,7 +203,7 @@ export default async function HowToPage() {
                         </div>
                       </div>
 
-                      <div className="rounded-[26px] border border-secondary/20 bg-secondary/10 p-5 text-sm leading-7 text-muted-foreground">
+                      <div className="rounded-[26px] border border-secondary/20 bg-secondary/10 p-5 text-sm leading-7 text-muted-foreground 2xl:self-start">
                         <p className="font-medium text-foreground">{item.snippetTitle}</p>
                         <div className="mt-3 space-y-3">
                           {item.snippet.map((line) => (
