@@ -22,7 +22,7 @@ export function CountdownTimer({ unlockAt }: { unlockAt: string | null }) {
   }, [unlockAt]);
 
   if (!countdown) {
-    return <p className="text-sm text-muted-foreground">Unlocks when the milestone is completed.</p>;
+    return <p className="text-sm leading-7 text-white/78">Unlocks when the milestone is completed.</p>;
   }
 
   const items = [
