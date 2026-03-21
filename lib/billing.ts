@@ -268,3 +268,73 @@ export async function syncProfileBillingFromCanceledSubscription(customerId: str
     throw new Error(error.message);
   }
 }
+
+export async function verifyCheckoutSessionAndSync(options: {
+  sessionId: string;
+  userId: string;
+  expectedPlan?: string | null;
+}) {
+  const { getStripe } = await import("@/lib/stripe");
+  const { supabaseAdmin } = await import("@/lib/supabase/admin");
+
+  const stripe = getStripe();
+  const session = await stripe.checkout.sessions.retrieve(options.sessionId, {
+    expand: ["subscription"],
+  });
+
+  if (session.mode !== "subscription") {
+    throw new Error("Stripe returned a non-subscription checkout session.");
+  }
+
+  if (session.status !== "complete") {
+    throw new Error("Stripe checkout has not completed yet.");
+  }
+
+  const sessionUserId = session.client_reference_id ?? session.metadata?.supabaseUserId ?? null;
+  if (sessionUserId !== options.userId) {
+    throw new Error("This checkout session does not belong to the signed-in account.");
+  }
+
+  const customerId = typeof session.customer === "string" ? session.customer : null;
+  const subscription = typeof session.subscription === "string"
+    ? await stripe.subscriptions.retrieve(session.subscription)
+    : session.subscription;
+
+  if (!subscription) {
+    throw new Error("Stripe checkout completed without a subscription to sync.");
+  }
+
+  const expectedPlan = normalizeMembershipPlan(options.expectedPlan);
+  const actualPlan = getMembershipPlanForPrice(subscription.items.data[0]?.price?.id ?? null);
+  if (expectedPlan !== "free" && actualPlan !== expectedPlan) {
+    throw new Error(`Stripe returned a ${getMembershipLabel(actualPlan)} subscription instead of ${getMembershipLabel(expectedPlan)}.`);
+  }
+
+  if (customerId) {
+    const { data: profile } = await supabaseAdmin
+      .from("profiles")
+      .select("email, full_name")
+      .eq("id", options.userId)
+      .maybeSingle();
+
+    if (profile?.email) {
+      await upsertStripeCustomer({
+        userId: options.userId,
+        email: profile.email,
+        fullName: profile.full_name,
+        stripeCustomerId: customerId,
+      });
+    }
+  }
+
+  await syncProfileBillingFromSubscription({
+    subscription,
+    userId: options.userId,
+    customerId,
+  });
+
+  return {
+    membershipPlan: actualPlan,
+    membershipStatus: mapStripeStatus(subscription.status),
+  };
+}

@@ -4,7 +4,7 @@ import { MfaSettings } from "@/components/settings/mfa-settings";
 import { UserSettingsForm } from "@/components/settings/user-settings-form";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { getMembershipLabel } from "@/lib/billing";
+import { getMembershipLabel, verifyCheckoutSessionAndSync } from "@/lib/billing";
 import { getProfile } from "@/lib/auth";
 import { env } from "@/lib/env";
 
@@ -13,11 +13,33 @@ type SettingsPageProps = {
 };
 
 export default async function SettingsPage(props: SettingsPageProps) {
-  const { profile, user, avatarPreviewUrl } = await getProfile();
   const searchParams = props.searchParams ? await props.searchParams : {};
-  const preferences = (profile?.notification_preferences as { emailReminders?: boolean; unlockDigest?: boolean } | null) ?? {};
   const billingError = typeof searchParams.billingError === "string" ? searchParams.billingError : null;
   const billingSuccess = typeof searchParams.billingSuccess === "string" ? searchParams.billingSuccess : null;
+  const billingPlan = typeof searchParams.billingPlan === "string" ? searchParams.billingPlan : null;
+  const sessionId = typeof searchParams.session_id === "string" ? searchParams.session_id : null;
+  const initialProfileResult = await getProfile();
+
+  let resolvedBillingError = billingError;
+  let resolvedBillingSuccess = billingSuccess;
+
+  if (!resolvedBillingError && resolvedBillingSuccess === "1" && sessionId) {
+    try {
+      await verifyCheckoutSessionAndSync({
+        sessionId,
+        userId: initialProfileResult.user.id,
+        expectedPlan: billingPlan,
+      });
+    } catch (error) {
+      resolvedBillingError = error instanceof Error ? error.message : "We could not confirm the Stripe checkout yet.";
+      resolvedBillingSuccess = null;
+    }
+  }
+
+  const { profile, user, avatarPreviewUrl } = resolvedBillingSuccess === "1" && sessionId
+    ? await getProfile()
+    : initialProfileResult;
+  const preferences = (profile?.notification_preferences as { emailReminders?: boolean; unlockDigest?: boolean } | null) ?? {};
   const currentPlan = getMembershipLabel(profile?.membership_plan ?? "free");
   const currentStatus = profile?.membership_status ?? "active";
   const familyCheckoutEnabled = Boolean(env.STRIPE_SECRET_KEY && env.STRIPE_FAMILY_PRICE_ID);
@@ -45,7 +67,7 @@ export default async function SettingsPage(props: SettingsPageProps) {
           }}
         />
         <MfaSettings />
-        <MembershipOptions currentPlan={currentPlan} currentStatus={currentStatus} billingError={billingError} billingSuccess={billingSuccess} billingPlan={typeof searchParams.billingPlan === "string" ? searchParams.billingPlan : null} familyCheckoutEnabled={familyCheckoutEnabled} />
+        <MembershipOptions currentPlan={currentPlan} currentStatus={currentStatus} billingError={resolvedBillingError} billingSuccess={resolvedBillingSuccess} billingPlan={billingPlan} familyCheckoutEnabled={familyCheckoutEnabled} />
       </div>
     </AppShell>
   );

@@ -438,7 +438,7 @@ export async function createCheckoutSessionAction(formData: FormData) {
       mode: "subscription",
       customer: customerId,
       client_reference_id: user.id,
-      success_url: `${env.NEXT_PUBLIC_APP_URL}/settings?billingSuccess=1&billingPlan=${selectedPlan}`,
+      success_url: `${env.NEXT_PUBLIC_APP_URL}/settings?billingSuccess=1&billingPlan=${selectedPlan}&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${env.NEXT_PUBLIC_APP_URL}/pricing?billingCanceled=1`,
       billing_address_collection: "auto",
       allow_promotion_codes: true,
