@@ -5,6 +5,13 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
 const STORAGE_BUCKETS = ["avatars", "vault-covers", "entry-assets"];
+const STORAGE_PAGE_SIZE = 100;
+
+type StorageListFile = {
+  id?: string;
+  name?: string;
+  metadata?: unknown;
+};
 
 function extractObjectSizeBytes(metadata: unknown) {
   if (!metadata || typeof metadata !== "object") {
@@ -17,29 +24,31 @@ function extractObjectSizeBytes(metadata: unknown) {
 }
 
 async function getBucketUsageBytes(bucketId: string, userId: string) {
-  const storageQuery = (supabaseAdmin as unknown as {
-    schema: (schema: string) => {
-      from: (table: string) => {
-        select: (columns: string) => {
-          eq: (column: string, value: string) => {
-            like: (column: string, pattern: string) => Promise<{ data: Array<{ metadata: unknown }> | null; error: { message: string } | null }>;
-          };
-        };
-      };
-    };
-  }).schema("storage");
+  let usedBytes = 0;
+  let offset = 0;
 
-  const { data, error } = await storageQuery
-    .from("objects")
-    .select("metadata")
-    .eq("bucket_id", bucketId)
-    .like("name", `${userId}/%`);
+  while (true) {
+    const { data, error } = await supabaseAdmin.storage.from(bucketId).list(userId, {
+      limit: STORAGE_PAGE_SIZE,
+      offset,
+      sortBy: { column: "name", order: "asc" },
+    });
 
-  if (error) {
-    throw new Error(error.message);
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    const files = (data ?? []) as StorageListFile[];
+    usedBytes += files.reduce((total, file) => total + extractObjectSizeBytes(file.metadata), 0);
+
+    if (files.length < STORAGE_PAGE_SIZE) {
+      break;
+    }
+
+    offset += STORAGE_PAGE_SIZE;
   }
 
-  return (data ?? []).reduce((total, object) => total + extractObjectSizeBytes(object.metadata), 0);
+  return usedBytes;
 }
 
 export async function POST(request: Request) {
