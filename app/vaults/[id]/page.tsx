@@ -11,13 +11,14 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { getProfile } from "@/lib/auth";
 import { formatDateTime } from "@/lib/date";
 import { getEntryStatus } from "@/lib/entries";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
 const filters = new Set(["all", "locked", "unlocked", "upcoming"]);
 
 export default async function VaultPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams?: Promise<{ filter?: string }> }) {
   const [{ id }, resolvedSearchParams, { profile, user, avatarPreviewUrl }] = await Promise.all([params, searchParams ?? Promise.resolve({}), getProfile()]);
-  const supabase = await createClient();
+  const supabase = profile?.is_admin ? supabaseAdmin : await createClient();
   const [{ data: vault }, { data: entries }] = await Promise.all([
     supabase.from("vaults").select("*").eq("id", id).maybeSingle(),
     supabase.from("vault_entries").select("*").eq("vault_id", id).order("created_at", { ascending: false }),
@@ -103,4 +104,6 @@ export default async function VaultPage({ params, searchParams }: { params: Prom
     </AppShell>
   );
 }
+
+
 
