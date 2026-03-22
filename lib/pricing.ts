@@ -74,7 +74,7 @@ export const MEMBERSHIP_PLANS: MembershipPlan[] = [
       "Designed for the highest-value shared archive use case",
     ],
     ctaLabel: "Choose Family plan",
-    ctaHref: "mailto:hello@vaultstory.app?subject=Family%20Plan%20Interest",
+    ctaHref: "/signup?plan=family",
     badge: "High-value family tier",
   },
 ];
@@ -189,3 +189,4 @@ export const UPSELL_OFFERS: UpsellOffer[] = [
     description: "A simple expansion for growing family archives with more video, audio, and scanned history.",
   },
 ];
+
