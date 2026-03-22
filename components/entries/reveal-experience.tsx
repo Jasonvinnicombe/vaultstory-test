@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { CalendarClock, Sparkles, Stars, X } from "lucide-react";
+import { CalendarClock, LockKeyhole, LockOpen, Sparkles, X } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
@@ -50,6 +50,7 @@ export function RevealExperience(props: RevealExperienceProps) {
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
   const stepLabel = screen === "unlock" ? "Reveal now" : "Continue";
   const panelButtonVariant = screen === "unlock" ? "default" : "secondary";
+  const unlockPulse = screen === "unlock";
 
   const { photos, audioAssets, videoAssets } = useMemo(() => {
     const photos = props.assets.filter((asset) => isPhotoAsset(asset.fileType));
@@ -91,7 +92,7 @@ export function RevealExperience(props: RevealExperienceProps) {
     <>
       <div className="space-y-6 sm:space-y-7">
         {screen !== "content" ? (
-          <Card className="overflow-hidden border-white/12 bg-[radial-gradient(circle_at_18%_20%,rgba(113,157,255,0.22),transparent_28%),radial-gradient(circle_at_82%_14%,rgba(230,184,106,0.18),transparent_22%),radial-gradient(circle_at_50%_120%,rgba(117,203,255,0.18),transparent_34%),linear-gradient(180deg,rgba(17,28,52,0.98),rgba(28,44,82,0.96)_58%,rgba(38,58,106,0.94))] text-white shadow-[0_34px_92px_rgba(30,42,68,0.28)]">
+          <Card className="micro-fade overflow-hidden border-white/12 bg-[radial-gradient(circle_at_18%_20%,rgba(113,157,255,0.22),transparent_28%),radial-gradient(circle_at_82%_14%,rgba(230,184,106,0.18),transparent_22%),radial-gradient(circle_at_50%_120%,rgba(117,203,255,0.18),transparent_34%),linear-gradient(180deg,rgba(17,28,52,0.98),rgba(28,44,82,0.96)_58%,rgba(38,58,106,0.94))] text-white shadow-[0_34px_92px_rgba(30,42,68,0.28)]">
             <CardContent className="relative flex min-h-[460px] flex-col items-center justify-center overflow-hidden p-8 text-center sm:p-10 lg:min-h-[520px] lg:p-14">
               <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.08),transparent_28%,transparent_72%,rgba(255,255,255,0.04))]" />
               <motion.div
@@ -136,22 +137,37 @@ export function RevealExperience(props: RevealExperienceProps) {
                   <motion.div
                     aria-hidden
                     className="absolute top-12 h-48 w-48 rounded-full bg-[radial-gradient(circle,rgba(230,184,106,0.28),rgba(117,203,255,0.06)_58%,transparent_72%)] blur-2xl"
-                    animate={{ scale: [0.92, 1.08, 0.96], opacity: [0.42, 0.82, 0.5] }}
-                    transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+                    animate={{ scale: [0.92, 1.06, 1], opacity: [0.42, 0.8, 0.6] }}
+                    transition={{ duration: 1.8, ease: "easeOut" }}
                   />
                   <motion.div
                     initial={{ scale: 0.76, opacity: 0.5 }}
-                    animate={{ scale: [0.76, 1.16, 1], opacity: [0.5, 1, 1], rotate: [0, -4, 0] }}
+                    animate={{ scale: [0.82, 1.08, 1], opacity: [0.6, 1, 1], rotate: [-10, 0, 0], y: [0, -6, 0] }}
                     transition={{ duration: 1.4, ease: "easeInOut" }}
                     className="relative flex h-36 w-36 items-center justify-center rounded-full border border-white/16 bg-[radial-gradient(circle,rgba(255,255,255,0.16),rgba(255,255,255,0.06))] shadow-[0_24px_68px_rgba(13,21,39,0.3)]"
                   >
                     <motion.div
                       aria-hidden
                       className="absolute inset-3 rounded-full border border-white/10"
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+                      animate={{ rotate: 8 }}
+                      transition={{ duration: 1.2, ease: "easeOut" }}
                     />
-                    <Stars className="h-14 w-14 text-secondary" />
+                    <div className="relative h-16 w-16">
+                      <motion.div
+                        className="absolute inset-0 flex items-center justify-center"
+                        animate={{ opacity: [1, 0], rotate: [0, -12], y: [0, -6] }}
+                        transition={{ duration: 1.6, ease: "easeOut" }}
+                      >
+                        <LockKeyhole className="h-14 w-14 text-secondary" />
+                      </motion.div>
+                      <motion.div
+                        className="absolute inset-0 flex items-center justify-center"
+                        animate={{ opacity: [0, 1], rotate: [-12, 0], y: [-6, 0] }}
+                        transition={{ duration: 1.6, ease: "easeOut", delay: 0.25 }}
+                      >
+                        <LockOpen className="h-14 w-14 text-secondary" />
+                      </motion.div>
+                    </div>
                   </motion.div>
                   <div className="mt-8 inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/8 px-4 py-2 text-sm uppercase tracking-[0.24em] text-white/66">
                     <span className="h-2 w-2 rounded-full bg-secondary shadow-[0_0_18px_rgba(230,184,106,0.8)]" />
@@ -166,7 +182,11 @@ export function RevealExperience(props: RevealExperienceProps) {
                 </motion.div>
               ) : null}
 
-              <Button onClick={goNext} variant={panelButtonVariant} className="relative z-10 mt-10 min-w-44">
+              <Button
+                onClick={goNext}
+                variant={panelButtonVariant}
+                className={`relative z-10 mt-10 min-w-52 px-8 py-6 text-base font-semibold ${unlockPulse ? "glow-hover bg-secondary text-slate-900 shadow-[0_22px_52px_rgba(230,184,106,0.45)] ring-2 ring-secondary/60 hover:bg-secondary/90" : ""}`}
+              >
                 {stepLabel}
               </Button>
             </CardContent>
@@ -175,7 +195,7 @@ export function RevealExperience(props: RevealExperienceProps) {
 
         {screen === "content" ? (
           <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 sm:space-y-7">
-            <Card className="overflow-hidden border-white/60 bg-card/90 shadow-[0_24px_64px_rgba(66,46,31,0.1)]">
+            <Card className="micro-fade overflow-hidden border-white/60 bg-card/90 shadow-[0_24px_64px_rgba(66,46,31,0.1)]">
               <CardContent className="space-y-7 p-8 sm:p-10">
                 <div className="flex flex-wrap items-center gap-2.5">
                   {props.mood ? <Badge variant="secondary">{props.mood}</Badge> : null}
@@ -264,7 +284,7 @@ export function RevealExperience(props: RevealExperienceProps) {
               </CardContent>
             </Card>
             {(props.predictionText || props.realityText || props.reflectionForm) ? (
-              <Card className="border-white/60 bg-card/90">
+              <Card className="micro-fade border-white/60 bg-card/90">
                 <CardContent className="grid gap-5 p-8 sm:p-10 lg:grid-cols-2">
                   <div className="rounded-[30px] bg-secondary/55 p-6 sm:p-7">
                     <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Past prediction</p>
@@ -351,3 +371,13 @@ export function RevealExperience(props: RevealExperienceProps) {
     </>
   );
 }
+
+
+
+
+
+
+
+
+
+

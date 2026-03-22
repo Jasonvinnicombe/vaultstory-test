@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import { CalendarClock, FolderLock, PencilLine, Users } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -27,7 +27,7 @@ function formatDate(value: string | null) {
 
 export function VaultCard({ id, name, vaultType, subjectName, entryCount, nextUnlockDate, coverImagePreviewUrl }: VaultCardProps) {
   return (
-    <Card className="h-full border-white/60 bg-card/85 transition-transform hover:-translate-y-0.5 hover:shadow-glow">
+    <Card className="micro-fade glow-hover h-full border-white/60 bg-card/85">
       <CardContent className="space-y-5 p-6">
         <Link href={`/vaults/${id}`} className="group block rounded-[24px] outline-none transition focus-visible:ring-2 focus-visible:ring-ring/80">
           {coverImagePreviewUrl ? (
@@ -76,3 +76,4 @@ export function VaultCard({ id, name, vaultType, subjectName, entryCount, nextUn
     </Card>
   );
 }
+
