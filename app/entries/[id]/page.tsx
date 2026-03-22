@@ -19,7 +19,7 @@ import { createClient } from "@/lib/supabase/server";
 
 export default async function EntryPage({ params }: { params: Promise<{ id: string }> }) {
   const [{ id }, { profile, user, avatarPreviewUrl }] = await Promise.all([params, getProfile()]);
-  const supabase = await createClient();
+  const supabase = profile?.is_admin ? supabaseAdmin : await createClient();
 
   const { data: entry } = await supabase.from("vault_entries").select("*").eq("id", id).maybeSingle();
   if (!entry) notFound();
@@ -185,4 +185,5 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
     </AppShell>
   );
 }
+
 
