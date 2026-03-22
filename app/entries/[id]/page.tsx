@@ -67,7 +67,10 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
   const tags = (tagRows ?? []).map((tag) => tag.tag);
   const status = getEntryStatus(entry);
   const canCompleteMilestone =
-    entry.unlock_type === "manual_milestone" && !entry.milestone_achieved_at && !isDraftEntry(entry);
+    entry.unlock_type === "manual_milestone" &&
+    !entry.milestone_achieved_at &&
+    !isDraftEntry(entry) &&
+    !profile?.is_admin;
 
   return (
     <AppShell fullName={profile?.full_name ?? user.user_metadata.full_name ?? null} email={user.email ?? ""} isAdmin={profile?.is_admin ?? false} avatarUrl={avatarPreviewUrl}>
@@ -185,5 +188,7 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
     </AppShell>
   );
 }
+
+
 
 

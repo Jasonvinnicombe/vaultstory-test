@@ -25,6 +25,9 @@ export async function completeMilestoneAction(formData: FormData) {
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized.");
 
+  const { data: profile } = await supabase.from("profiles").select("is_admin").eq("id", user.id).maybeSingle();
+  if (profile?.is_admin) throw new Error("Admins cannot unlock customer milestones.");
+
   const { error } = await supabase.from("vault_entries").update({ milestone_achieved_at: new Date().toISOString() }).eq("id", entryId);
   if (error) throw new Error(error.message);
 
@@ -812,3 +815,4 @@ export async function deleteUserAction(formData: FormData) {
     redirectWithMessage(message, "adminError");
   }
 }
+
