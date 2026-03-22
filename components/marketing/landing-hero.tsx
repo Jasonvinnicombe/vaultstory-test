@@ -21,24 +21,6 @@ const fadeUp = {
   animate: { opacity: 1, y: 0 },
 };
 
-const storySteps = [
-  {
-    label: "A future birthday",
-    text: "A video for their 18th, recorded while their voice still sounds small in the next room.",
-    icon: Video,
-  },
-  {
-    label: "A family story",
-    text: "A grandparent's memory, saved before it becomes half-remembered by everybody else.",
-    icon: Vault,
-  },
-  {
-    label: "A message for hard days",
-    text: "Words of love, reassurance, and guidance that arrive right when they are needed most.",
-    icon: Sparkles,
-  },
-];
-
 const navItems = [
   { label: "Dashboard", icon: LayoutDashboard },
   { label: "Vaults", icon: Vault },
@@ -125,42 +107,6 @@ export function LandingHero() {
             <VaultTimelinePreview />
           </motion.div>
         </div>
-
-        <motion.div
-          initial="initial"
-          animate="animate"
-          transition={{ staggerChildren: 0.08, delayChildren: 0.08 }}
-          className="grid w-full gap-6 lg:grid-cols-3 xl:gap-8"
-        >
-          {storySteps.map((step) => {
-            const Icon = step.icon;
-
-            return (
-              <motion.div
-                key={step.label}
-                variants={fadeUp}
-                transition={{ duration: 0.55, ease: "easeOut" }}
-                className="h-full w-full min-w-0"
-              >
-                <Card className="glass-panel h-full w-full min-h-[320px] border-white/70 bg-[linear-gradient(180deg,rgba(255,252,247,0.98),rgba(243,236,227,0.84))] shadow-[0_18px_48px_rgba(30,42,68,0.08)]">
-                  <CardContent className="flex h-full flex-col justify-between gap-10 p-8 sm:p-9">
-                    <div className="space-y-6">
-                      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-secondary/18 text-secondary-foreground ring-1 ring-secondary/25">
-                        <Icon className="h-6 w-6 text-secondary-foreground" />
-                      </div>
-                      <h3 className="max-w-[16ch] text-balance font-display text-[2rem] leading-[1.04] text-foreground sm:text-[2.35rem]">
-                        {step.label}
-                      </h3>
-                    </div>
-                    <p className="max-w-[28ch] text-base leading-8 text-foreground/78 sm:max-w-none sm:text-lg">
-                      {step.text}
-                    </p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            );
-          })}
-        </motion.div>
       </div>
     </section>
   );
@@ -345,14 +291,4 @@ export function LandingProductPreview() {
     </Card>
   );
 }
-
-
-
-
-
-
-
-
-
-
 
