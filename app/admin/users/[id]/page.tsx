@@ -1,10 +1,11 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { AppShell } from "@/components/layout/app-shell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { StorageUsageInline } from "@/components/admin/storage-usage-inline";
 import { requireAdmin } from "@/lib/auth";
 import { getEffectiveStorageQuotaGb, getMembershipLabel } from "@/lib/billing";
 import { supabaseAdmin } from "@/lib/supabase/admin";
@@ -100,6 +101,9 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
                 <p className="text-sm uppercase tracking-[0.22em] text-muted-foreground">Storage</p>
                 <p className="mt-3 text-lg font-medium text-foreground">{formatStorageLabel(effectiveStorage)}</p>
                 <p className="mt-2 text-sm leading-7 text-muted-foreground">{targetUser.storage_quota_gb ? "Custom override is active for this user." : "Using the plan default storage allowance."}</p>
+                <p className="mt-2 text-sm leading-7 text-muted-foreground">
+                  Current storage usage: <StorageUsageInline userId={targetUser.id} />
+                </p>
               </div>
             </div>
           </CardContent>
@@ -117,7 +121,7 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
                   <div key={vault.id} className="flex flex-col gap-3 rounded-[24px] border border-border/70 bg-background/80 p-5 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                       <p className="text-base font-medium text-foreground">{vault.name}</p>
-                      <p className="mt-1 text-sm leading-7 text-muted-foreground">{vault.subject_name ?? "Private subject"} · Created {formatDate(vault.created_at)}</p>
+                      <p className="mt-1 text-sm leading-7 text-muted-foreground">{vault.subject_name ?? "Private subject"} � Created {formatDate(vault.created_at)}</p>
                     </div>
                     <Button asChild variant="outline"><Link href={`/vaults/${vault.id}`}>Open vault</Link></Button>
                   </div>

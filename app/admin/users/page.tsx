@@ -5,6 +5,7 @@ import { AppShell } from "@/components/layout/app-shell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { StorageUsageInline } from "@/components/admin/storage-usage-inline";
 import { requireAdmin } from "@/lib/auth";
 import { getEffectiveStorageQuotaGb, getMembershipLabel } from "@/lib/billing";
 import { supabaseAdmin } from "@/lib/supabase/admin";
@@ -255,6 +256,9 @@ export default async function AdminUsersPage({
                         <p className="mt-2 text-sm leading-7 text-muted-foreground">{entry.email}</p>
                         <p className="text-sm leading-7 text-muted-foreground">Joined {formatDate(entry.created_at)}. Current plan: <strong className="text-foreground">{getMembershipLabel(entry.membership_plan)}</strong>.</p>
                         <p className="text-sm leading-7 text-muted-foreground">Current storage allowance: <strong className="text-foreground">{formatStorageLabel(effectiveStorage)}</strong>{entry.storage_quota_gb ? " (custom override)" : ""}.</p>
+                        <p className="text-sm leading-7 text-muted-foreground">
+                          Current storage usage: <StorageUsageInline userId={entry.id} />
+                        </p>
                       </div>
                       <div className="flex flex-wrap gap-3 lg:justify-end">
                         <Button asChild variant="outline"><Link href={`/admin/users/${entry.id}`}>View details</Link></Button>
