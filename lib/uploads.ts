@@ -39,7 +39,7 @@ export function validateAsset(file: File, kind: "cover" | "photo" | "audio" | "v
       throw new Error("Images must be JPG, PNG, or WebP");
     }
     if (file.size > FILE_LIMITS.image) {
-      throw new Error("Images must be 10MB or smaller");
+      throw new Error("Image is too large. Maximum size is 10MB.");
     }
   }
 
@@ -48,7 +48,7 @@ export function validateAsset(file: File, kind: "cover" | "photo" | "audio" | "v
       throw new Error("Audio must be MP3, WAV, M4A, or WebM");
     }
     if (file.size > FILE_LIMITS.audio) {
-      throw new Error("Audio files must be 25MB or smaller");
+      throw new Error("Audio file is too large. Maximum size is 25MB.");
     }
   }
 
@@ -57,7 +57,7 @@ export function validateAsset(file: File, kind: "cover" | "photo" | "audio" | "v
       throw new Error("Video must be MP4, MOV, or WebM");
     }
     if (file.size > FILE_LIMITS.video) {
-      throw new Error("Video files must be 10GB or smaller");
+      throw new Error("Video file is too large. Maximum size is 10GB.");
     }
   }
 }
@@ -83,7 +83,12 @@ export async function uploadFileToBucket(params: {
   });
 
   if (error || !data) {
-    throw new Error(error?.message ?? "Upload failed.");
+    const rawMessage = error?.message ?? "Upload failed.";
+    const looksLikeSizeLimit = /maximum allowed size|too large|exceeds|size/i.test(rawMessage);
+    if (looksLikeSizeLimit) {
+      throw new Error("That file is larger than the upload limit. Try a smaller file or compress it.");
+    }
+    throw new Error(rawMessage);
   }
 
   return {

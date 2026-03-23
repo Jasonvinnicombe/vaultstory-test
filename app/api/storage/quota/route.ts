@@ -24,31 +24,47 @@ function extractObjectSizeBytes(metadata: unknown) {
 }
 
 async function getBucketUsageBytes(bucketId: string, userId: string) {
-  let usedBytes = 0;
-  let offset = 0;
+  async function listFolderBytes(prefix: string) {
+    let usedBytes = 0;
+    let offset = 0;
 
-  while (true) {
-    const { data, error } = await supabaseAdmin.storage.from(bucketId).list(userId, {
-      limit: STORAGE_PAGE_SIZE,
-      offset,
-      sortBy: { column: "name", order: "asc" },
-    });
+    while (true) {
+      const { data, error } = await supabaseAdmin.storage.from(bucketId).list(prefix, {
+        limit: STORAGE_PAGE_SIZE,
+        offset,
+        sortBy: { column: "name", order: "asc" },
+      });
 
-    if (error) {
-      throw new Error(error.message);
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      const files = (data ?? []) as StorageListFile[];
+
+      for (const file of files) {
+        const size = extractObjectSizeBytes(file.metadata);
+        if (size > 0) {
+          usedBytes += size;
+          continue;
+        }
+
+        if (file.id == null && file.name) {
+          const nestedPrefix = `${prefix}/${file.name}`;
+          usedBytes += await listFolderBytes(nestedPrefix);
+        }
+      }
+
+      if (files.length < STORAGE_PAGE_SIZE) {
+        break;
+      }
+
+      offset += STORAGE_PAGE_SIZE;
     }
 
-    const files = (data ?? []) as StorageListFile[];
-    usedBytes += files.reduce((total, file) => total + extractObjectSizeBytes(file.metadata), 0);
-
-    if (files.length < STORAGE_PAGE_SIZE) {
-      break;
-    }
-
-    offset += STORAGE_PAGE_SIZE;
+    return usedBytes;
   }
 
-  return usedBytes;
+  return listFolderBytes(userId);
 }
 
 export async function POST(request: Request) {
