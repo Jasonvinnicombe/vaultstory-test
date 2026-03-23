@@ -41,11 +41,6 @@ function extractObjectSizeBytes(file: StorageListFile) {
   return 0;
 }
 
-  const rawSize = (metadata as { size?: number | string }).size;
-  const size = typeof rawSize === "string" ? Number.parseInt(rawSize, 10) : rawSize;
-  return typeof size === "number" && Number.isFinite(size) && size > 0 ? size : 0;
-}
-
 async function getBucketUsageBytes(bucketId: string, userId: string) {
   async function listFolderBytes(prefix: string) {
     let usedBytes = 0;
@@ -142,4 +137,3 @@ export async function POST(request: Request) {
     return NextResponse.json({ allowed: false, message }, { status: 500 });
   }
 }
-
