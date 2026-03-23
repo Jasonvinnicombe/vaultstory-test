@@ -49,6 +49,7 @@ export const MEMBERSHIP_PLANS: MembershipPlan[] = [
     description: "The main paid tier for people who want richer storytelling, deeper media, and a stronger family archive.",
     features: [
       "Unlimited vaults",
+      "7-day free trial",
       "50GB storage",
       "Video and voice memories",
       "Milestone unlocks",
@@ -68,6 +69,7 @@ export const MEMBERSHIP_PLANS: MembershipPlan[] = [
     features: [
       "Up to 6 family members",
       "Shared family vault",
+      "7-day free trial",
       "100GB storage",
       "Grandparents can add stories",
       "Child milestone vaults",
@@ -80,6 +82,15 @@ export const MEMBERSHIP_PLANS: MembershipPlan[] = [
 ];
 
 export const PLAN_COMPARISON_ROWS: PlanComparisonRow[] = [
+  {
+    label: "Free trial",
+    values: {
+      free: "—",
+      premium: "7 days",
+      family: "7 days",
+      lifetime: "—",
+    },
+  },
   {
     label: "Vaults included",
     values: {
@@ -189,4 +200,5 @@ export const UPSELL_OFFERS: UpsellOffer[] = [
     description: "A simple expansion for growing family archives with more video, audio, and scanned history.",
   },
 ];
+
 

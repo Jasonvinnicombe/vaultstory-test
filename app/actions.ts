@@ -456,6 +456,7 @@ export async function createCheckoutSessionAction(formData: FormData) {
         membershipPlan: selectedPlan,
       },
       subscription_data: {
+        trial_period_days: 7,
         metadata: {
           supabaseUserId: user.id,
           membershipPlan: selectedPlan,
