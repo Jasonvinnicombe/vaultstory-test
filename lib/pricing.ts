@@ -1,4 +1,4 @@
-export type MembershipPlan = {
+ï»¿export type MembershipPlan = {
   id: "free" | "premium" | "family" | "lifetime";
   name: string;
   priceLabel: string;
@@ -85,10 +85,10 @@ export const PLAN_COMPARISON_ROWS: PlanComparisonRow[] = [
   {
     label: "Free trial",
     values: {
-      free: "—",
+      free: "â€”",
       premium: "7 days",
       family: "7 days",
-      lifetime: "—",
+      lifetime: "â€”",
     },
   },
   {
@@ -200,5 +200,6 @@ export const UPSELL_OFFERS: UpsellOffer[] = [
     description: "A simple expansion for growing family archives with more video, audio, and scanned history.",
   },
 ];
+
 
 
