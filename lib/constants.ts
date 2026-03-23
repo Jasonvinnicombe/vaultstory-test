@@ -49,7 +49,7 @@ export const ACCEPTED_VIDEO_TYPES = ["video/mp4", "video/quicktime", "video/webm
 export const FILE_LIMITS = {
   image: 10 * 1024 * 1024,
   audio: 25 * 1024 * 1024,
-  video: 10 * 1024 * 1024 * 1024,
+  video: 20 * 1024 * 1024 * 1024,
 };
 
 export const UPCOMING_UNLOCK_WINDOW_DAYS = 30;

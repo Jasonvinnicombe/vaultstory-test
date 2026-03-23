@@ -57,7 +57,7 @@ export function validateAsset(file: File, kind: "cover" | "photo" | "audio" | "v
       throw new Error("Video must be MP4, MOV, or WebM");
     }
     if (file.size > FILE_LIMITS.video) {
-      throw new Error("Video file is too large. Maximum size is 10GB.");
+      throw new Error("Video file is too large. Maximum size is 20GB.");
     }
   }
 }
