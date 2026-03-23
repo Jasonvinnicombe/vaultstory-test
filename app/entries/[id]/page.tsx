@@ -178,7 +178,7 @@ export default async function EntryPage({ params, searchParams }: { params: Prom
           <>
             {adminPreview ? (
               <Card className="border-white/60 bg-secondary/40">
-                <CardContent className="p-5 text-sm text-foreground">
+                <CardContent className="p-5 flex items-center text-left text-sm text-foreground">
                   Admin preview only. This does not unlock the entry for the customer.
                 </CardContent>
               </Card>
@@ -193,7 +193,7 @@ export default async function EntryPage({ params, searchParams }: { params: Prom
             realityText={entry.reality_text}
             assets={signedAssets}
             reflectionForm={
-              adminPreview ? undefined : entry.reality_text ? undefined : <ReflectionForm entryId={entry.id} vaultId={entry.vault_id} />
+              adminPreview ? undefined : entry.reality_text ? undefined : <ReflectionForm entryId={entry.id} vaultId={entry.vault_id} initialValue={entry.reality_text ?? ""} />
             }
           />
           </>
