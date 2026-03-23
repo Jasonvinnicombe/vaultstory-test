@@ -27,6 +27,7 @@ const footerGroups = [
     links: [
       { href: "/login", label: "Log in" },
       { href: "/signup", label: "Create account" },
+      { href: "/privacy", label: "Privacy policy" },
       { href: "/pricing", label: "Membership options" },
       { href: "/reviews", label: "Stories" },
       { href: "/support", label: "Contact support" },
@@ -76,6 +77,7 @@ export function SiteFooter() {
             <Link href="/pricing" className="transition-colors hover:text-foreground">Pricing</Link>
             <Link href="/reviews" className="transition-colors hover:text-foreground">Reviews</Link>
             <Link href="/faq" className="transition-colors hover:text-foreground">FAQ</Link>
+            <Link href="/privacy" className="transition-colors hover:text-foreground">Privacy</Link>
             <Link href="/support" className="transition-colors hover:text-foreground">Support</Link>
             <Link href="/login" className="transition-colors hover:text-foreground">Log in</Link>
             <Link href="/signup" className="transition-colors hover:text-foreground">Create account</Link>
@@ -85,4 +87,6 @@ export function SiteFooter() {
     </footer>
   );
 }
+
+
 

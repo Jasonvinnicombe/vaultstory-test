@@ -12,6 +12,7 @@ import { getEntryStatus } from "@/lib/entries";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { VaultCard } from "@/components/vaults/vault-card";
+import { StorageUsageCard } from "@/components/dashboard/storage-usage";
 
 export default async function DashboardPage({ searchParams }: { searchParams?: Promise<{ onboarding?: string; q?: string }> }) {
   const [resolvedSearchParams, { profile, user, avatarPreviewUrl }] = await Promise.all([
@@ -112,6 +113,8 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
           })}
         </section>
 
+        <StorageUsageCard />
+
         <section id="vaults" className="space-y-4">
           <Card className="overflow-hidden border-white/60 bg-card/86 shadow-[0_18px_48px_rgba(66,46,31,0.08)]">
             <CardContent className="grid gap-4 p-5 sm:p-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
@@ -168,3 +171,5 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
     </AppShell>
   );
 }
+
+
