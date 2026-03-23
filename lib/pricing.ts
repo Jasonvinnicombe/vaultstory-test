@@ -1,9 +1,8 @@
-ï»¿export type MembershipPlan = {
+export type MembershipPlan = {
   id: "free" | "premium" | "family" | "lifetime";
   name: string;
   priceLabel: string;
   cadence: string;
-  annualLabel?: string;
   description: string;
   features: string[];
   ctaLabel: string;
@@ -45,7 +44,6 @@ export const MEMBERSHIP_PLANS: MembershipPlan[] = [
     name: "Premium",
     priceLabel: "$7.99",
     cadence: "/month",
-    annualLabel: "or $69/year",
     description: "The main paid tier for people who want richer storytelling, deeper media, and a stronger family archive.",
     features: [
       "Unlimited vaults",
@@ -85,10 +83,10 @@ export const PLAN_COMPARISON_ROWS: PlanComparisonRow[] = [
   {
     label: "Free trial",
     values: {
-      free: "â€”",
+      free: "—",
       premium: "7 days",
       family: "7 days",
-      lifetime: "â€”",
+      lifetime: "—",
     },
   },
   {

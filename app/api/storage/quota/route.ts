@@ -10,13 +10,36 @@ const STORAGE_PAGE_SIZE = 100;
 type StorageListFile = {
   id?: string;
   name?: string;
+  size?: number | string;
   metadata?: unknown;
 };
 
-function extractObjectSizeBytes(metadata: unknown) {
-  if (!metadata || typeof metadata !== "object") {
-    return 0;
+function extractObjectSizeBytes(file: StorageListFile) {
+  const candidates: unknown[] = [];
+
+  if (file.size != null) {
+    candidates.push(file.size);
   }
+
+  if (file.metadata && typeof file.metadata === "object") {
+    const meta = file.metadata as Record<string, unknown>;
+    candidates.push(meta.size, meta.contentLength, meta["content-length"], meta.length, meta.fileSize);
+  }
+
+  for (const value of candidates) {
+    if (typeof value === "number" && Number.isFinite(value) && value > 0) {
+      return value;
+    }
+    if (typeof value === "string") {
+      const parsed = Number.parseInt(value, 10);
+      if (Number.isFinite(parsed) && parsed > 0) {
+        return parsed;
+      }
+    }
+  }
+
+  return 0;
+}
 
   const rawSize = (metadata as { size?: number | string }).size;
   const size = typeof rawSize === "string" ? Number.parseInt(rawSize, 10) : rawSize;
@@ -42,7 +65,7 @@ async function getBucketUsageBytes(bucketId: string, userId: string) {
       const files = (data ?? []) as StorageListFile[];
 
       for (const file of files) {
-        const size = extractObjectSizeBytes(file.metadata);
+        const size = extractObjectSizeBytes(file);
         if (size > 0) {
           usedBytes += size;
           continue;
@@ -119,3 +142,4 @@ export async function POST(request: Request) {
     return NextResponse.json({ allowed: false, message }, { status: 500 });
   }
 }
+
