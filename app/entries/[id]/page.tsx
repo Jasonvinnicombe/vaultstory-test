@@ -17,8 +17,8 @@ import { getEntryStatus, isDraftEntry } from "@/lib/entries";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
-export default async function EntryPage({ params }: { params: Promise<{ id: string }> }) {
-  const [{ id }, { profile, user, avatarPreviewUrl }] = await Promise.all([params, getProfile()]);
+export default async function EntryPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams?: Promise<{ preview?: string }> }) {
+  const [{ id }, resolvedSearchParams, { profile, user, avatarPreviewUrl }] = await Promise.all([params, searchParams ?? Promise.resolve({}), getProfile()]);
   const supabase = profile?.is_admin ? supabaseAdmin : await createClient();
 
   const { data: entry } = await supabase.from("vault_entries").select("*").eq("id", id).maybeSingle();
@@ -66,11 +66,14 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
 
   const tags = (tagRows ?? []).map((tag) => tag.tag);
   const status = getEntryStatus(entry);
+  const adminPreview = Boolean(profile?.is_admin && resolvedSearchParams.preview === "1" && status !== "draft");
   const canCompleteMilestone =
     entry.unlock_type === "manual_milestone" &&
     !entry.milestone_achieved_at &&
     !isDraftEntry(entry) &&
     !profile?.is_admin;
+
+  const shouldReveal = status === "unlocked" || adminPreview;
 
   return (
     <AppShell fullName={profile?.full_name ?? user.user_metadata.full_name ?? null} email={user.email ?? ""} isAdmin={profile?.is_admin ?? false} avatarUrl={avatarPreviewUrl}>
@@ -156,7 +159,7 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
               </div>
             </CardContent>
           </Card>
-        ) : status !== "unlocked" ? (
+        ) : !shouldReveal ? (
           <LockedEntryView
             title={entry.title}
             createdAt={entry.created_at}
@@ -168,9 +171,19 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
                 <MilestoneCompleteForm entryId={entry.id} vaultId={entry.vault_id} />
               ) : undefined
             }
+            adminPreviewHref={profile?.is_admin ? `/entries/${entry.id}?preview=1` : undefined}
+            adminPreviewLabel="Preview entry as admin"
           />
         ) : (
-          <RevealExperience
+          <>
+            {adminPreview ? (
+              <Card className="border-white/60 bg-secondary/40">
+                <CardContent className="p-5 text-sm text-foreground">
+                  Admin preview only. This does not unlock the entry for the customer.
+                </CardContent>
+              </Card>
+            ) : null}
+            <RevealExperience
             title={entry.title}
             createdAt={entry.created_at}
             contentText={entry.content_text}
@@ -180,9 +193,10 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
             realityText={entry.reality_text}
             assets={signedAssets}
             reflectionForm={
-              entry.reality_text ? undefined : <ReflectionForm entryId={entry.id} vaultId={entry.vault_id} />
+              adminPreview ? undefined : entry.reality_text ? undefined : <ReflectionForm entryId={entry.id} vaultId={entry.vault_id} />
             }
           />
+          </>
         )}
       </div>
     </AppShell>
