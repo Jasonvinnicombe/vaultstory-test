@@ -19,6 +19,9 @@ import { PricingPlans } from "@/components/marketing/pricing-plans";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { getCurrencyFromHeaders } from "@/lib/currency";
+import { getPlanPriceDisplay, getStripePriceId } from "@/lib/stripe-pricing";
+import { headers } from "next/headers";
 
 const coreHighlights = [
   {
@@ -143,7 +146,16 @@ const trustPoints = [
   },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const detectedCurrency = getCurrencyFromHeaders(await headers());
+  const premiumDisplay = await getPlanPriceDisplay("premium", detectedCurrency);
+  const familyDisplay = await getPlanPriceDisplay("family", detectedCurrency);
+  const priceOverrides = {
+    premium: premiumDisplay ?? undefined,
+    family: familyDisplay ?? undefined,
+  };
+  const familyCheckoutEnabled = Boolean(getStripePriceId("family", detectedCurrency));
+
   return (
     <div className="grain min-h-screen overflow-x-hidden">
       <SiteHeader />
@@ -327,6 +339,8 @@ export default function HomePage() {
           <PricingPlans
             title="Start simply, then grow into richer media, more family access, and a deeper archive."
             description="Start free with one meaningful vault, then upgrade when you want more media, milestone timing, and shared family access."
+            familyCheckoutEnabled={familyCheckoutEnabled}
+            priceOverrides={priceOverrides}
           />
         </section>
 
@@ -353,6 +367,3 @@ export default function HomePage() {
     </div>
   );
 }
-
-
-

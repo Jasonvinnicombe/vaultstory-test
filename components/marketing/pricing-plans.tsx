@@ -3,7 +3,7 @@ import { Check, Sparkles } from "lucide-react";
 import { PlanActionButton } from "@/components/billing/plan-action-button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { MEMBERSHIP_PLANS } from "@/lib/pricing";
+import { MEMBERSHIP_PLANS, type MembershipPlan } from "@/lib/pricing";
 
 export function PricingPlans(props: {
   title?: string;
@@ -12,6 +12,7 @@ export function PricingPlans(props: {
   currentPlan?: string | null;
   isAuthenticated?: boolean;
   familyCheckoutEnabled?: boolean;
+  priceOverrides?: Partial<Record<MembershipPlan["id"], { priceLabel: string; cadence: string }>>;
 }) {
   const title = props.title ?? "Choose the membership that fits how your family preserves memories.";
   const description = props.description ?? "Start free, then move up when you want richer media, milestone unlocks, and shared family access.";
@@ -27,6 +28,9 @@ export function PricingPlans(props: {
       <div className={props.compact ? "grid gap-4 lg:grid-cols-2" : "grid gap-4 md:grid-cols-3"}>
         {MEMBERSHIP_PLANS.map((plan) => {
           const isCurrent = props.currentPlan?.toLowerCase() === plan.name.toLowerCase();
+          const override = props.priceOverrides?.[plan.id];
+          const priceLabel = override?.priceLabel ?? plan.priceLabel;
+          const cadence = override?.cadence ?? plan.cadence;
 
           return (
             <Card
@@ -52,8 +56,8 @@ export function PricingPlans(props: {
                 </div>
 
                 <div className="mt-6 flex items-end gap-2">
-                  <span className={`font-display text-4xl ${plan.highlight ? "text-white" : "text-foreground"}`}>{plan.priceLabel}</span>
-                  <span className={plan.highlight ? "pb-1 text-white/62" : "pb-1 text-muted-foreground"}>{plan.cadence}</span>
+                  <span className={`font-display text-4xl ${plan.highlight ? "text-white" : "text-foreground"}`}>{priceLabel}</span>
+                  <span className={plan.highlight ? "pb-1 text-white/62" : "pb-1 text-muted-foreground"}>{cadence}</span>
                 </div>
                 {plan.annualLabel ? (
                   <p className={`mt-2 text-sm ${plan.highlight ? "text-white/88" : "text-muted-foreground"}`}>{plan.annualLabel}</p>

@@ -9,6 +9,7 @@ export type MembershipPlan = {
   ctaHref: string;
   highlight?: boolean;
   badge?: string;
+  annualLabel?: string;
 };
 
 export type UpsellOffer = {
@@ -83,10 +84,10 @@ export const PLAN_COMPARISON_ROWS: PlanComparisonRow[] = [
   {
     label: "Free trial",
     values: {
-      free: "â€”",
+      free: "—",
       premium: "7 days",
       family: "7 days",
-      lifetime: "â€”",
+      lifetime: "—",
     },
   },
   {
@@ -198,6 +199,8 @@ export const UPSELL_OFFERS: UpsellOffer[] = [
     description: "A simple expansion for growing family archives with more video, audio, and scanned history.",
   },
 ];
+
+
 
 
 

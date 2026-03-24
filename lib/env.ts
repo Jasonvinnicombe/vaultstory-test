@@ -25,7 +25,15 @@ const envSchema = z.object({
   STRIPE_SECRET_KEY: z.string().min(1).optional(),
   STRIPE_WEBHOOK_SECRET: z.string().min(1).optional(),
   STRIPE_PREMIUM_PRICE_ID: z.string().min(1).optional(),
+  STRIPE_PREMIUM_PRICE_ID_AUD: z.string().min(1).optional(),
+  STRIPE_PREMIUM_PRICE_ID_USD: z.string().min(1).optional(),
+  STRIPE_PREMIUM_PRICE_ID_GBP: z.string().min(1).optional(),
+  STRIPE_PREMIUM_PRICE_ID_EUR: z.string().min(1).optional(),
   STRIPE_FAMILY_PRICE_ID: z.string().min(1).optional(),
+  STRIPE_FAMILY_PRICE_ID_AUD: z.string().min(1).optional(),
+  STRIPE_FAMILY_PRICE_ID_USD: z.string().min(1).optional(),
+  STRIPE_FAMILY_PRICE_ID_GBP: z.string().min(1).optional(),
+  STRIPE_FAMILY_PRICE_ID_EUR: z.string().min(1).optional(),
 });
 
 type Env = z.infer<typeof envSchema>;
@@ -48,7 +56,15 @@ function loadEnv() {
     STRIPE_SECRET_KEY: normalizeEnvValue(process.env.STRIPE_SECRET_KEY),
     STRIPE_WEBHOOK_SECRET: normalizeEnvValue(process.env.STRIPE_WEBHOOK_SECRET),
     STRIPE_PREMIUM_PRICE_ID: normalizeEnvValue(process.env.STRIPE_PREMIUM_PRICE_ID),
+    STRIPE_PREMIUM_PRICE_ID_AUD: normalizeEnvValue(process.env.STRIPE_PREMIUM_PRICE_ID_AUD),
+    STRIPE_PREMIUM_PRICE_ID_USD: normalizeEnvValue(process.env.STRIPE_PREMIUM_PRICE_ID_USD),
+    STRIPE_PREMIUM_PRICE_ID_GBP: normalizeEnvValue(process.env.STRIPE_PREMIUM_PRICE_ID_GBP),
+    STRIPE_PREMIUM_PRICE_ID_EUR: normalizeEnvValue(process.env.STRIPE_PREMIUM_PRICE_ID_EUR),
     STRIPE_FAMILY_PRICE_ID: normalizeEnvValue(process.env.STRIPE_FAMILY_PRICE_ID),
+    STRIPE_FAMILY_PRICE_ID_AUD: normalizeEnvValue(process.env.STRIPE_FAMILY_PRICE_ID_AUD),
+    STRIPE_FAMILY_PRICE_ID_USD: normalizeEnvValue(process.env.STRIPE_FAMILY_PRICE_ID_USD),
+    STRIPE_FAMILY_PRICE_ID_GBP: normalizeEnvValue(process.env.STRIPE_FAMILY_PRICE_ID_GBP),
+    STRIPE_FAMILY_PRICE_ID_EUR: normalizeEnvValue(process.env.STRIPE_FAMILY_PRICE_ID_EUR),
   });
 
   return cachedEnv;

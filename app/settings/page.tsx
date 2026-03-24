@@ -6,7 +6,10 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { getMembershipLabel, verifyCheckoutSessionAndSync } from "@/lib/billing";
 import { getProfile } from "@/lib/auth";
+import { getCurrencyFromHeaders } from "@/lib/currency";
 import { env } from "@/lib/env";
+import { getPlanPriceDisplay, getStripePriceId } from "@/lib/stripe-pricing";
+import { headers } from "next/headers";
 
 type SettingsPageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
@@ -42,7 +45,14 @@ export default async function SettingsPage(props: SettingsPageProps) {
   const preferences = (profile?.notification_preferences as { emailReminders?: boolean; unlockDigest?: boolean } | null) ?? {};
   const currentPlan = getMembershipLabel(profile?.membership_plan ?? "free");
   const currentStatus = profile?.membership_status ?? "active";
-  const familyCheckoutEnabled = Boolean(env.STRIPE_SECRET_KEY && env.STRIPE_FAMILY_PRICE_ID);
+  const detectedCurrency = getCurrencyFromHeaders(await headers());
+  const familyCheckoutEnabled = Boolean(env.STRIPE_SECRET_KEY && getStripePriceId("family", detectedCurrency));
+  const premiumDisplay = await getPlanPriceDisplay("premium", detectedCurrency);
+  const familyDisplay = await getPlanPriceDisplay("family", detectedCurrency);
+  const priceOverrides = {
+    premium: premiumDisplay ?? undefined,
+    family: familyDisplay ?? undefined,
+  };
 
   return (
     <AppShell fullName={profile?.full_name ?? user.user_metadata.full_name ?? null} email={user.email ?? ""} isAdmin={profile?.is_admin ?? false} avatarUrl={avatarPreviewUrl}>
@@ -67,7 +77,15 @@ export default async function SettingsPage(props: SettingsPageProps) {
           }}
         />
         <MfaSettings />
-        <MembershipOptions currentPlan={currentPlan} currentStatus={currentStatus} billingError={resolvedBillingError} billingSuccess={resolvedBillingSuccess} billingPlan={billingPlan} familyCheckoutEnabled={familyCheckoutEnabled} />
+        <MembershipOptions
+          currentPlan={currentPlan}
+          currentStatus={currentStatus}
+          billingError={resolvedBillingError}
+          billingSuccess={resolvedBillingSuccess}
+          billingPlan={billingPlan}
+          familyCheckoutEnabled={familyCheckoutEnabled}
+          priceOverrides={priceOverrides}
+        />
       </div>
     </AppShell>
   );

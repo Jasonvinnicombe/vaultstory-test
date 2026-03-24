@@ -9,9 +9,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { getMembershipLabel } from "@/lib/billing";
 import { getUser } from "@/lib/auth";
+import { getCurrencyFromHeaders } from "@/lib/currency";
 import { env } from "@/lib/env";
 import { MEMBERSHIP_PLANS, PLAN_COMPARISON_ROWS } from "@/lib/pricing";
+import { getPlanPriceDisplay, getStripePriceId } from "@/lib/stripe-pricing";
 import { createClient } from "@/lib/supabase/server";
+import { headers } from "next/headers";
 
 const comparisonPoints = [
   {
@@ -68,7 +71,14 @@ export default async function PricingPage(props: PricingPageProps) {
     : { data: null };
   const currentPlan = getMembershipLabel(profile?.membership_plan ?? null);
   const billingCanceled = typeof searchParams.billingCanceled === "string" ? searchParams.billingCanceled : null;
-  const familyCheckoutEnabled = Boolean(env.STRIPE_SECRET_KEY && env.STRIPE_FAMILY_PRICE_ID);
+  const detectedCurrency = getCurrencyFromHeaders(await headers());
+  const familyCheckoutEnabled = Boolean(env.STRIPE_SECRET_KEY && getStripePriceId("family", detectedCurrency));
+  const premiumDisplay = await getPlanPriceDisplay("premium", detectedCurrency);
+  const familyDisplay = await getPlanPriceDisplay("family", detectedCurrency);
+  const priceOverrides = {
+    premium: premiumDisplay ?? undefined,
+    family: familyDisplay ?? undefined,
+  };
 
   return (
     <div className="grain min-h-screen overflow-x-hidden">
@@ -104,7 +114,14 @@ export default async function PricingPage(props: PricingPageProps) {
         ) : null}
 
         <section className="mx-auto w-full max-w-[1500px] px-5 pb-8 sm:px-6 sm:pb-12 lg:px-8">
-          <PricingPlans currentPlan={currentPlan} isAuthenticated={Boolean(user)} familyCheckoutEnabled={familyCheckoutEnabled} title="Membership plans" description={familyCheckoutEnabled ? "Premium and Family are both ready to run through Stripe. Choose the plan that fits how many people will care for the archive together." : "Premium is live through Stripe today. Family is fully modelled in-product and can be switched on as soon as its Stripe price id is configured."} />
+          <PricingPlans
+            currentPlan={currentPlan}
+            isAuthenticated={Boolean(user)}
+            familyCheckoutEnabled={familyCheckoutEnabled}
+            title="Membership plans"
+            description={familyCheckoutEnabled ? "Premium and Family are both ready to run through Stripe. Choose the plan that fits how many people will care for the archive together." : "Premium is live through Stripe today. Family is fully modelled in-product and can be switched on as soon as its Stripe price id is configured."}
+            priceOverrides={priceOverrides}
+          />
         </section>
 
         <section className="page-wrap pb-12">
