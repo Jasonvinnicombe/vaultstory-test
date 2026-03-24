@@ -23,7 +23,7 @@ import { getCurrencyFromHeaders } from "@/lib/currency";
 import { getPlanPriceDisplay, getStripePriceId } from "@/lib/stripe-pricing";
 import { headers } from "next/headers";
 
-const coreHighlights = [
+export const dynamic = "force-dynamic";`r`n`r`nconst coreHighlights = [
   {
     title: "Save private memories",
     body: "Keep letters, photos, voice notes, and video in one calm family archive.",
@@ -374,5 +374,6 @@ export default async function HomePage(props: HomePageProps) {
     </div>
   );
 }
+
 
 

@@ -16,7 +16,7 @@ import { getPlanPriceDisplay, getStripePriceId } from "@/lib/stripe-pricing";
 import { createClient } from "@/lib/supabase/server";
 import { headers } from "next/headers";
 
-const comparisonPoints = [
+export const dynamic = "force-dynamic";`r`n`r`nconst comparisonPoints = [
   {
     title: "Free is built to create attachment",
     body: "One vault, simple media, and timed delivery are enough to get families emotionally invested before they ever pay.",
@@ -211,3 +211,4 @@ export default async function PricingPage(props: PricingPageProps) {
     </div>
   );
 }
+
