@@ -1,9 +1,11 @@
 import { Check, Sparkles } from "lucide-react";
 
+import { CurrencySwitcher } from "@/components/marketing/currency-switcher";
 import { PlanActionButton } from "@/components/billing/plan-action-button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { MEMBERSHIP_PLANS, type MembershipPlan } from "@/lib/pricing";
+import type { CurrencyCode } from "@/lib/currency";
 
 export function PricingPlans(props: {
   title?: string;
@@ -14,6 +16,7 @@ export function PricingPlans(props: {
   familyCheckoutEnabled?: boolean;
   priceOverrides?: Partial<Record<MembershipPlan["id"], { priceLabel: string; cadence: string }>>;
   currencyNote?: string | null;
+  currencyCode?: CurrencyCode;
 }) {
   const title = props.title ?? "Choose the membership that fits how your family preserves memories.";
   const description = props.description ?? "Start free, then move up when you want richer media, milestone unlocks, and shared family access.";
@@ -27,6 +30,7 @@ export function PricingPlans(props: {
         {props.currencyNote ? (
           <p className="text-sm text-muted-foreground">{props.currencyNote}</p>
         ) : null}
+        {props.currencyCode ? <CurrencySwitcher currentCurrency={props.currencyCode} /> : null}
       </div>
 
       <div className={props.compact ? "grid gap-4 lg:grid-cols-2" : "grid gap-4 md:grid-cols-3"}>

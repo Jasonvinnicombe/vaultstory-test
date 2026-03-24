@@ -88,9 +88,10 @@ export default async function SettingsPage(props: SettingsPageProps) {
           billingPlan={billingPlan}
           familyCheckoutEnabled={familyCheckoutEnabled}
           priceOverrides={priceOverrides}
-          currencyNote={`Prices shown in ${detectedCurrency}.`}
+          currencyNote={`Prices shown in ${detectedCurrency}.`}`r`n          currencyCode={detectedCurrency}
         />
       </div>
     </AppShell>
   );
 }
+
