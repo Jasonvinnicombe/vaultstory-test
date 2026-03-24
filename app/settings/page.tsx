@@ -11,7 +11,9 @@ import { env } from "@/lib/env";
 import { getPlanPriceDisplay, getStripePriceId } from "@/lib/stripe-pricing";
 import { headers } from "next/headers";
 
-export const dynamic = "force-dynamic";`r`n`r`ntype SettingsPageProps = {
+export const dynamic = "force-dynamic";
+
+type SettingsPageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
@@ -92,4 +94,3 @@ export default async function SettingsPage(props: SettingsPageProps) {
     </AppShell>
   );
 }
-
