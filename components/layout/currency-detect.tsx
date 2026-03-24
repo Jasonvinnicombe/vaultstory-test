@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { getCurrencyCookieName } from "@/lib/currency";
 
@@ -67,17 +67,54 @@ function getCookieValue(name: string) {
   return match.split("=").slice(1).join("=");
 }
 
+function getQueryCurrency() {
+  if (typeof window === "undefined") return null;
+  const params = new URLSearchParams(window.location.search);
+  return normalizeCurrency(params.get("currency"));
+}
+
 export function CurrencyDetect() {
+  const [status, setStatus] = useState<{
+    cookie: string | null;
+    detected: string | null;
+    timezone: string | null;
+    language: string | null;
+  } | null>(null);
+
   useEffect(() => {
     const cookieName = getCurrencyCookieName();
     const existing = normalizeCurrency(getCookieValue(cookieName));
     const detected = detectCurrency() ?? "USD";
+    const override = getQueryCurrency();
+    const nextCurrency = override ?? detected;
 
-    if (existing === detected) return;
+    if (existing !== nextCurrency) {
+      document.cookie = `${cookieName}=${nextCurrency}; path=/; max-age=2592000; samesite=lax`;
+      window.location.replace(window.location.pathname);
+      return;
+    }
 
-    document.cookie = `${cookieName}=${detected}; path=/; max-age=2592000; samesite=lax`;
-    window.location.reload();
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone ?? null;
+    const language = navigator.languages?.[0] ?? navigator.language ?? null;
+    setStatus({
+      cookie: existing,
+      detected,
+      timezone: tz,
+      language,
+    });
   }, []);
 
-  return null;
+  if (typeof window === "undefined") return null;
+
+  if (!status) return null;
+
+  return (
+    <div className="fixed bottom-6 right-6 z-[60] rounded-2xl border border-white/20 bg-[rgba(30,42,68,0.92)] p-4 text-xs text-white shadow-[0_18px_48px_rgba(15,23,42,0.28)]">
+      <div className="font-semibold">Currency debug</div>
+      <div className="mt-1">cookie: {status.cookie ?? "none"}</div>
+      <div>detected: {status.detected ?? "none"}</div>
+      <div>tz: {status.timezone ?? "unknown"}</div>
+      <div>lang: {status.language ?? "unknown"}</div>
+    </div>
+  );
 }
