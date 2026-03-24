@@ -84,10 +84,10 @@ export const PLAN_COMPARISON_ROWS: PlanComparisonRow[] = [
   {
     label: "Free trial",
     values: {
-      free: "—",
+      free: "ï¿½",
       premium: "7 days",
       family: "7 days",
-      lifetime: "—",
+      lifetime: "ï¿½",
     },
   },
   {
