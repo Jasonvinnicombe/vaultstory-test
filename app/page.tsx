@@ -146,8 +146,14 @@ const trustPoints = [
   },
 ];
 
-export default async function HomePage() {
-  const detectedCurrency = getCurrencyFromHeaders(await headers());
+type HomePageProps = {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+};
+
+export default async function HomePage(props: HomePageProps) {
+  const searchParams = props.searchParams ? await props.searchParams : {};
+  const currencyParam = typeof searchParams.currency === "string" ? searchParams.currency : null;
+  const detectedCurrency = getCurrencyFromHeaders(await headers(), currencyParam);
   const premiumDisplay = await getPlanPriceDisplay("premium", detectedCurrency);
   const familyDisplay = await getPlanPriceDisplay("family", detectedCurrency);
   const priceOverrides = {
@@ -341,6 +347,7 @@ export default async function HomePage() {
             description="Start free with one meaningful vault, then upgrade when you want more media, milestone timing, and shared family access."
             familyCheckoutEnabled={familyCheckoutEnabled}
             priceOverrides={priceOverrides}
+            currencyNote={`Prices shown in ${detectedCurrency}.`}
           />
         </section>
 
@@ -367,3 +374,5 @@ export default async function HomePage() {
     </div>
   );
 }
+
+
