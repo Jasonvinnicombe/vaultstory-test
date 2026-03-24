@@ -71,9 +71,10 @@ export function CurrencyDetect() {
   useEffect(() => {
     const cookieName = getCurrencyCookieName();
     const existing = normalizeCurrency(getCookieValue(cookieName));
-    if (existing) return;
-
     const detected = detectCurrency() ?? "USD";
+
+    if (existing === detected) return;
+
     document.cookie = `${cookieName}=${detected}; path=/; max-age=2592000; samesite=lax`;
     window.location.reload();
   }, []);
