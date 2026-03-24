@@ -124,7 +124,8 @@ export default async function PricingPage(props: PricingPageProps) {
             title="Membership plans"
             description={familyCheckoutEnabled ? "Premium and Family are both ready to run through Stripe. Choose the plan that fits how many people will care for the archive together." : "Premium is live through Stripe today. Family is fully modelled in-product and can be switched on as soon as its Stripe price id is configured."}
             priceOverrides={priceOverrides}
-            currencyNote={`Prices shown in ${detectedCurrency}.`}`r`n            currencyCode={detectedCurrency}
+            currencyNote={`Prices shown in ${detectedCurrency}.`}
+            currencyCode={detectedCurrency}
           />
         </section>
 
