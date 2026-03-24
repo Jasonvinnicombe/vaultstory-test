@@ -44,6 +44,8 @@ const COUNTRY_HEADER_CANDIDATES = [
   "x-railway-country",
 ];
 
+const CURRENCY_COOKIE = "vs_currency";
+
 function normalizeCountry(value: string | null | undefined) {
   if (!value) return null;
   const trimmed = value.trim().toUpperCase();
@@ -73,6 +75,21 @@ function getCountryFromHeaders(headers: Headers) {
   return normalizeCountry(match?.[1]);
 }
 
+function getCurrencyFromCookie(headers: Headers) {
+  const cookieHeader = headers.get("cookie");
+  if (!cookieHeader) return null;
+
+  const match = cookieHeader
+    .split(";")
+    .map((part) => part.trim())
+    .find((part) => part.toLowerCase().startsWith(`${CURRENCY_COOKIE}=`));
+
+  if (!match) return null;
+
+  const value = match.split("=").slice(1).join("=");
+  return normalizeCurrency(value);
+}
+
 export function getCurrencyForCountry(country: string | null | undefined): CurrencyCode | null {
   const normalized = normalizeCountry(country);
   if (!normalized) return null;
@@ -92,6 +109,13 @@ export function getCurrencyFromHeaders(headers: Headers, override?: string | nul
   const forced = normalizeCurrency(override);
   if (forced) return forced;
 
+  const cookieCurrency = getCurrencyFromCookie(headers);
+  if (cookieCurrency) return cookieCurrency;
+
   const country = getCountryFromHeaders(headers);
   return getCurrencyForCountry(country) ?? "USD";
+}
+
+export function getCurrencyCookieName() {
+  return CURRENCY_COOKIE;
 }
