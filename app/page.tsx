@@ -349,7 +349,8 @@ export default async function HomePage(props: HomePageProps) {
             description="Start free with one meaningful vault, then upgrade when you want more media, milestone timing, and shared family access."
             familyCheckoutEnabled={familyCheckoutEnabled}
             priceOverrides={priceOverrides}
-            currencyNote={`Prices shown in ${detectedCurrency}.`}`r`n            currencyCode={detectedCurrency}
+            currencyNote={`Prices shown in ${detectedCurrency}.`}
+            currencyCode={detectedCurrency}
           />
         </section>
 
@@ -376,6 +377,7 @@ export default async function HomePage(props: HomePageProps) {
     </div>
   );
 }
+
 
 
 
