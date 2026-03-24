@@ -45,7 +45,8 @@ export default async function SettingsPage(props: SettingsPageProps) {
   const preferences = (profile?.notification_preferences as { emailReminders?: boolean; unlockDigest?: boolean } | null) ?? {};
   const currentPlan = getMembershipLabel(profile?.membership_plan ?? "free");
   const currentStatus = profile?.membership_status ?? "active";
-  const detectedCurrency = getCurrencyFromHeaders(await headers());
+  const currencyParam = typeof searchParams.currency === "string" ? searchParams.currency : null;
+  const detectedCurrency = getCurrencyFromHeaders(await headers(), currencyParam);
   const familyCheckoutEnabled = Boolean(env.STRIPE_SECRET_KEY && getStripePriceId("family", detectedCurrency));
   const premiumDisplay = await getPlanPriceDisplay("premium", detectedCurrency);
   const familyDisplay = await getPlanPriceDisplay("family", detectedCurrency);
@@ -85,6 +86,7 @@ export default async function SettingsPage(props: SettingsPageProps) {
           billingPlan={billingPlan}
           familyCheckoutEnabled={familyCheckoutEnabled}
           priceOverrides={priceOverrides}
+          currencyNote={`Prices shown in ${detectedCurrency}.`}
         />
       </div>
     </AppShell>

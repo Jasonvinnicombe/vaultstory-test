@@ -71,7 +71,8 @@ export default async function PricingPage(props: PricingPageProps) {
     : { data: null };
   const currentPlan = getMembershipLabel(profile?.membership_plan ?? null);
   const billingCanceled = typeof searchParams.billingCanceled === "string" ? searchParams.billingCanceled : null;
-  const detectedCurrency = getCurrencyFromHeaders(await headers());
+  const currencyParam = typeof searchParams.currency === "string" ? searchParams.currency : null;
+  const detectedCurrency = getCurrencyFromHeaders(await headers(), currencyParam);
   const familyCheckoutEnabled = Boolean(env.STRIPE_SECRET_KEY && getStripePriceId("family", detectedCurrency));
   const premiumDisplay = await getPlanPriceDisplay("premium", detectedCurrency);
   const familyDisplay = await getPlanPriceDisplay("family", detectedCurrency);
@@ -121,6 +122,7 @@ export default async function PricingPage(props: PricingPageProps) {
             title="Membership plans"
             description={familyCheckoutEnabled ? "Premium and Family are both ready to run through Stripe. Choose the plan that fits how many people will care for the archive together." : "Premium is live through Stripe today. Family is fully modelled in-product and can be switched on as soon as its Stripe price id is configured."}
             priceOverrides={priceOverrides}
+            currencyNote={`Prices shown in ${detectedCurrency}.`}
           />
         </section>
 

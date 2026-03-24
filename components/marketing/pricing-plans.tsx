@@ -13,6 +13,7 @@ export function PricingPlans(props: {
   isAuthenticated?: boolean;
   familyCheckoutEnabled?: boolean;
   priceOverrides?: Partial<Record<MembershipPlan["id"], { priceLabel: string; cadence: string }>>;
+  currencyNote?: string | null;
 }) {
   const title = props.title ?? "Choose the membership that fits how your family preserves memories.";
   const description = props.description ?? "Start free, then move up when you want richer media, milestone unlocks, and shared family access.";
@@ -23,6 +24,9 @@ export function PricingPlans(props: {
         <p className="text-sm uppercase tracking-[0.22em] text-muted-foreground">Membership options</p>
         <h2 className="text-balance font-display text-4xl sm:text-5xl">{title}</h2>
         <p className="text-base leading-8 text-muted-foreground sm:text-lg">{description}</p>
+        {props.currencyNote ? (
+          <p className="text-sm text-muted-foreground">{props.currencyNote}</p>
+        ) : null}
       </div>
 
       <div className={props.compact ? "grid gap-4 lg:grid-cols-2" : "grid gap-4 md:grid-cols-3"}>

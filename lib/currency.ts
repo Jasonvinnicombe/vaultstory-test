@@ -37,6 +37,11 @@ const COUNTRY_HEADER_CANDIDATES = [
   "x-country-code",
   "x-country",
   "x-vertex-country",
+  "x-forwarded-country",
+  "x-geoip-country",
+  "x-geoip-country-code",
+  "x-appengine-country",
+  "x-railway-country",
 ];
 
 function normalizeCountry(value: string | null | undefined) {
@@ -44,6 +49,15 @@ function normalizeCountry(value: string | null | undefined) {
   const trimmed = value.trim().toUpperCase();
   if (!trimmed || trimmed === "XX" || trimmed === "ZZ") return null;
   return trimmed;
+}
+
+function normalizeCurrency(value: string | null | undefined): CurrencyCode | null {
+  if (!value) return null;
+  const trimmed = value.trim().toUpperCase();
+  if (trimmed === "AUD" || trimmed === "USD" || trimmed === "GBP" || trimmed === "EUR") {
+    return trimmed;
+  }
+  return null;
 }
 
 function getCountryFromHeaders(headers: Headers) {
@@ -74,7 +88,10 @@ export function getCurrencyForCountry(country: string | null | undefined): Curre
   return null;
 }
 
-export function getCurrencyFromHeaders(headers: Headers): CurrencyCode {
+export function getCurrencyFromHeaders(headers: Headers, override?: string | null): CurrencyCode {
+  const forced = normalizeCurrency(override);
+  if (forced) return forced;
+
   const country = getCountryFromHeaders(headers);
   return getCurrencyForCountry(country) ?? "USD";
 }

@@ -14,6 +14,7 @@ export function MembershipOptions(props: {
   billingPlan?: string | null;
   familyCheckoutEnabled?: boolean;
   priceOverrides?: Record<string, { priceLabel: string; cadence: string } | null>;
+  currencyNote?: string | null;
 }) {
   const hasBillingSuccess = props.billingSuccess === "1";
   const planLabel = props.billingPlan === "family" ? "Family" : "Premium";
@@ -74,6 +75,7 @@ export function MembershipOptions(props: {
             title="Membership options"
             description="Start free, upgrade to Premium now, and use Family when you need shared vault care across a household."
             priceOverrides={props.priceOverrides ?? undefined}
+            currencyNote={props.currencyNote ?? null}
           />
         </div>
       </CardContent>
