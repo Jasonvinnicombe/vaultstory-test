@@ -14,12 +14,12 @@ const footerGroups = [
     ],
   },
   {
-    title: "Use cases",
+    title: "Vault uses",
     links: [
-      { href: "/#use-cases", label: "Messages for children" },
-      { href: "/#use-cases", label: "Family stories" },
-      { href: "/#use-cases", label: "Life milestones" },
-      { href: "/#use-cases", label: "Family archive" },
+      { href: "/vault-uses#ages", label: "Age milestones" },
+      { href: "/vault-uses#life", label: "Life milestones" },
+      { href: "/vault-uses#family-legacy", label: "Family legacy" },
+      { href: "/vault-uses#personal-journaling", label: "Personal journaling" },
     ],
   },
   {
@@ -87,6 +87,3 @@ export function SiteFooter() {
     </footer>
   );
 }
-
-
-

@@ -304,7 +304,7 @@ export default async function HomePage(props: HomePageProps) {
         <section id="features" className="page-wrap scroll-mt-28 border-t border-white/55 py-10 sm:py-14 lg:py-18">
           <div className="grid gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:items-start">
             <div className="section-stack max-w-3xl">
-              <p className="text-sm uppercase tracking-[0.22em] text-muted-foreground">Real-life examples</p>
+              <p className="text-sm uppercase tracking-[0.22em] text-muted-foreground">Vault uses</p>
               <h2 className="text-balance font-display text-4xl sm:text-5xl">
                 Built for the messages and milestones people want their family to feel, not just store.
               </h2>
@@ -312,7 +312,7 @@ export default async function HomePage(props: HomePageProps) {
 
             <Card className="overflow-hidden border-white/15 bg-[linear-gradient(180deg,rgba(30,42,68,0.98),rgba(49,63,95,0.94))] text-white shadow-[0_28px_72px_rgba(30,42,68,0.22)]">
               <CardContent className="p-6 sm:p-7">
-                <Badge className="bg-secondary/90 text-secondary-foreground">Examples people keep</Badge>
+                <Badge className="bg-secondary/90 text-secondary-foreground">Vault uses</Badge>
                 <div className="mt-5 space-y-4">
                   {useCases.map((item) => (
                     <div key={item.title} className="rounded-[24px] border border-white/12 bg-white/6 p-5">
@@ -375,6 +375,7 @@ export default async function HomePage(props: HomePageProps) {
     </div>
   );
 }
+
 
 
 

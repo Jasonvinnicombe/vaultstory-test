@@ -14,7 +14,7 @@ import {
 const marketingLinks = [
   { href: "/#how-it-works", label: "How it works" },
   { href: "/#features", label: "Features" },
-  { href: "/#use-cases", label: "Use cases" },
+  { href: "/vault-uses", label: "Vault uses" },
   { href: "/pricing", label: "Pricing" },
   { href: "/reviews", label: "Reviews" },
   { href: "/faq", label: "FAQ" },
@@ -100,4 +100,5 @@ export function SiteHeader() {
     </header>
   );
 }
+
 
