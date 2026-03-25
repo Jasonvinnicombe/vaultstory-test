@@ -88,7 +88,7 @@ export function LandingHero() {
             <motion.div variants={fadeUp} transition={{ duration: 0.55, ease: "easeOut" }} className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:gap-4">
               <Button asChild size="lg" className="w-full sm:w-auto">
                 <Link href="/signup">
-                  Start Your First Vault
+                  Start free trial
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
@@ -291,4 +291,5 @@ export function LandingProductPreview() {
     </Card>
   );
 }
+
 

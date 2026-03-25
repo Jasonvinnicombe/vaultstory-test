@@ -100,7 +100,7 @@ export default async function PricingPage(props: PricingPageProps) {
                   Free gets families recording. Premium becomes the main revenue layer. Family expands the household use case when more loved ones start contributing.
                 </p>
                 <div className="flex flex-wrap gap-3 pt-2">
-                  <Button asChild><Link href={user ? "/settings" : "/signup"}>{user ? "Manage membership" : "Start free"}</Link></Button>
+                  <Button asChild><Link href={user ? "/settings" : "/signup"}>{user ? "Manage membership" : "Start free trial"}</Link></Button>
                   <Button asChild variant="outline"><Link href="mailto:hello@vaultstory.app?subject=Pricing%20Questions">Talk to us about plans</Link></Button>
                 </div>
               </div>
@@ -202,7 +202,7 @@ export default async function PricingPage(props: PricingPageProps) {
                 <h2 className="mt-4 text-balance font-display text-4xl leading-tight sm:text-5xl">Start preserving your most important moments today.</h2>
               </div>
               <Button asChild size="lg" variant="secondary">
-                <Link href={user ? "/settings" : "/signup"}>{user ? "Manage membership" : "Create Your First Vault"}</Link>
+                <Link href={user ? "/settings" : "/signup"}>{user ? "Manage membership" : "Start free trial"}</Link>
               </Button>
             </CardContent>
           </Card>
@@ -212,6 +212,8 @@ export default async function PricingPage(props: PricingPageProps) {
     </div>
   );
 }
+
+
 
 
 

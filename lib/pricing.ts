@@ -37,7 +37,7 @@ export const MEMBERSHIP_PLANS: MembershipPlan[] = [
       "Basic unlock dates",
       "A calm way to start preserving what matters",
     ],
-    ctaLabel: "Start free",
+    ctaLabel: "Start free trial",
     ctaHref: "/signup",
   },
   {
@@ -54,7 +54,7 @@ export const MEMBERSHIP_PLANS: MembershipPlan[] = [
       "Milestone unlocks",
       "Timeline view",
     ],
-    ctaLabel: "Choose Premium",
+    ctaLabel: "Start free trial",
     ctaHref: "/signup?plan=premium",
     highlight: true,
     badge: "Best starting paid plan",
@@ -74,7 +74,7 @@ export const MEMBERSHIP_PLANS: MembershipPlan[] = [
       "Child milestone vaults",
       "Designed for the highest-value shared archive use case",
     ],
-    ctaLabel: "Choose Family plan",
+    ctaLabel: "Start free trial",
     ctaHref: "/signup?plan=family",
     badge: "High-value family tier",
   },
@@ -199,6 +199,8 @@ export const UPSELL_OFFERS: UpsellOffer[] = [
     description: "A simple expansion for growing family archives with more video, audio, and scanned history.",
   },
 ];
+
+
 
 
 

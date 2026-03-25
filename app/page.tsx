@@ -182,7 +182,7 @@ export default async function HomePage(props: HomePageProps) {
               </p>
               <div className="flex flex-col gap-3 pt-2 sm:flex-row">
                 <Button asChild>
-                  <Link href="/signup">Start free</Link>
+                  <Link href="/signup">Start free trial</Link>
                 </Button>
                 <Button asChild variant="outline">
                   <Link href="/#pricing">View pricing</Link>
@@ -364,7 +364,7 @@ export default async function HomePage(props: HomePageProps) {
               <Button asChild size="lg" variant="secondary">
                 <Link href="/signup">
                   <Sparkles className="h-4 w-4" />
-                  Create Your First Vault
+                  Start free trial
                 </Link>
               </Button>
             </CardContent>
@@ -375,6 +375,7 @@ export default async function HomePage(props: HomePageProps) {
     </div>
   );
 }
+
 
 
 

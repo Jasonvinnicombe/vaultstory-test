@@ -306,7 +306,7 @@ export default function FaqPage() {
                   This page covers the practical, emotional, and privacy questions that usually come up when someone is deciding whether Vault Story is the right place to preserve family memories for the future.
                 </p>
                 <div className="flex flex-wrap gap-3 pt-2">
-                  <Button asChild><Link href="/signup">Start your vault</Link></Button>
+                  <Button asChild><Link href="/signup">Start free trial</Link></Button>
                   <Button asChild variant="outline"><Link href="/pricing">View pricing</Link></Button>
                 </div>
               </div>
@@ -400,7 +400,7 @@ export default function FaqPage() {
                 </h2>
               </div>
               <Button asChild size="lg" variant="secondary">
-                <Link href="/signup">Create Your First Vault</Link>
+                <Link href="/signup">Start free trial</Link>
               </Button>
             </CardContent>
           </Card>
@@ -410,3 +410,4 @@ export default function FaqPage() {
     </div>
   );
 }
+

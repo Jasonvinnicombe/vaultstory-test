@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import {
   CalendarClock,
   Heart,
@@ -112,7 +112,7 @@ export default function ReviewsPage() {
                     This page is built around the kinds of reactions Vault Story is meant to create: a daughter hearing her mum at the right age, a family hearing grandad tell it himself, a letter from a harder season landing with new meaning years later.
                   </p>
                   <div className="flex flex-wrap gap-3 pt-2">
-                    <Button asChild><Link href="/signup">Start your vault</Link></Button>
+                    <Button asChild><Link href="/signup">Start free trial</Link></Button>
                     <Button asChild variant="outline"><Link href="/pricing">View pricing</Link></Button>
                   </div>
                 </div>
@@ -279,7 +279,7 @@ export default function ReviewsPage() {
                 </h2>
               </div>
               <Button asChild size="lg" variant="secondary">
-                <Link href="/signup">Create Your First Vault</Link>
+                <Link href="/signup">Start free trial</Link>
               </Button>
             </CardContent>
           </Card>
@@ -289,4 +289,5 @@ export default function ReviewsPage() {
     </div>
   );
 }
+
 

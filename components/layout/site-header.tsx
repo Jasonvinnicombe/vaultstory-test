@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import { LockKeyhole, Menu, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -86,7 +86,7 @@ export function SiteHeader() {
                 <Button asChild>
                   <Link href="/signup">
                     <Sparkles className="h-4 w-4" />
-                    Start your vault
+                    Start free trial
                   </Link>
                 </Button>
               </div>
@@ -94,9 +94,10 @@ export function SiteHeader() {
           </Dialog>
 
           <Button asChild variant="ghost" className="hidden sm:inline-flex"><Link href="/login">Log in</Link></Button>
-          <Button asChild size="sm" className="hidden sm:inline-flex sm:h-11 sm:px-5"><Link href="/signup"><Sparkles className="h-4 w-4" />Start your vault</Link></Button>
+          <Button asChild size="sm" className="hidden sm:inline-flex sm:h-11 sm:px-5"><Link href="/signup"><Sparkles className="h-4 w-4" />Start free trial</Link></Button>
         </div>
       </div>
     </header>
   );
 }
+
