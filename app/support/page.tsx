@@ -15,12 +15,6 @@ export const metadata: Metadata = {
 
 const supportEmail = "support@vaultstory.app";
 
-const quickTopics = [
-  "Invites not showing up after signup",
-  "Billing, Premium, or Family plan access",
-  "Trouble logging in or confirming email",
-  "Vault, entry, or media upload problems",
-] as const;
 
 export default function SupportPage() {
   return (
@@ -74,18 +68,6 @@ export default function SupportPage() {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-2xl">Common reasons people reach out</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {quickTopics.map((topic) => (
-                  <div key={topic} className="rounded-[22px] border border-border/70 bg-background/70 px-4 py-3 text-sm leading-7 text-foreground">
-                    {topic}
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
 
             <Card>
               <CardHeader className="space-y-3">
@@ -109,3 +91,4 @@ export default function SupportPage() {
     </>
   );
 }
+

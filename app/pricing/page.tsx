@@ -166,11 +166,7 @@ export default async function PricingPage(props: PricingPageProps) {
                 </table>
               </div>
 
-              <div className="mt-8 rounded-[28px] border border-secondary/20 bg-secondary/10 p-5 text-sm leading-7 text-muted-foreground">
-                {familyCheckoutEnabled
-                  ? "Premium and Family checkout both run through Stripe now, so the pricing table and in-product gates finally tell the same story."
-                  : "Premium checkout is live now. Family is already gated correctly in-product and can use the same Stripe flow as soon as its Family price id is configured."}
-              </div>
+
             </CardContent>
           </Card>
         </section>
@@ -212,6 +208,7 @@ export default async function PricingPage(props: PricingPageProps) {
     </div>
   );
 }
+
 
 
 
