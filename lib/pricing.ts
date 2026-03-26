@@ -84,10 +84,10 @@ export const PLAN_COMPARISON_ROWS: PlanComparisonRow[] = [
   {
     label: "Free trial",
     values: {
-      free: "�",
+      free: "Included",
       premium: "7 days",
       family: "7 days",
-      lifetime: "�",
+      lifetime: "Included",
     },
   },
   {
@@ -199,6 +199,8 @@ export const UPSELL_OFFERS: UpsellOffer[] = [
     description: "A simple expansion for growing family archives with more video, audio, and scanned history.",
   },
 ];
+
+
 
 
 
