@@ -64,7 +64,7 @@ const vaultUses = [
     id: "relationship",
     title: "Relationship time capsules",
     description: "Create messages for anniversaries, hard seasons, or new beginnings.",
-    image: "/images/milestones/ChatGPT Image Mar 26, 2026, 07_22_05 PM.png",
+    image: "/images/milestones/relationship-time-capsules.png",
     alt: "Two couples at different life stages sharing warm moments together.",
   },
   {
@@ -92,14 +92,14 @@ const vaultUses = [
     id: "letters-media",
     title: "Letters, voice, and video",
     description: "Save the tone, the voice, and the room along with the memory.",
-    image: "/images/milestones/Firefly_a picture showing Letters, voice, and video  911221.png",
+    image: "/images/milestones/letters-voice-video.png",
     alt: "Illustrated icons representing letters, voice recordings, and video memories.",
   },
   {
     id: "photo-story",
     title: "Photo stories",
     description: "Pair photos with context so the future gets the full story.",
-    image: "/images/milestones/ChatGPT Image Mar 26, 2026, 07_41_36 PM.png",
+    image: "/images/milestones/photo-stories.png",
     alt: "A photo story card pairing an image with a written memory about buying a first home.",
     imageFit: "contain",
     imageClassName: "bg-[#080716] p-4",
@@ -165,6 +165,7 @@ export default function VaultUsesPage() {
     </div>
   );
 }
+
 
 
 
