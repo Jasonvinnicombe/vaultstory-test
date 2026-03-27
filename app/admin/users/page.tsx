@@ -1,6 +1,6 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 
-import { deleteUserAction, inviteAdminAction, removeAdminInviteAction, updateUserAccessAction } from "@/app/actions";
+import { deleteUserAction, inviteAdminAction, removeAdminInviteAction } from "@/app/actions";
 import { AppShell } from "@/components/layout/app-shell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,9 +11,6 @@ import { getEffectiveStorageQuotaGb, getMembershipLabel } from "@/lib/billing";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
 const ROOT_ADMIN_EMAIL = "jasonvinnicombe2@gmail.com";
-
-const planOptions = ["free", "premium", "family", "lifetime"] as const;
-const statusOptions = ["active", "trialing", "inactive", "canceled", "past_due"] as const;
 
 function formatDate(value: string | null | undefined) {
   if (!value) return "Unknown";
@@ -236,7 +233,7 @@ export default async function AdminUsersPage({
         <section className="space-y-4">
           <div className="section-stack">
             <h2 className="font-display text-3xl text-foreground">All users</h2>
-            <p className="text-sm leading-7 text-muted-foreground">Change plan access, billing status, custom storage, and admin permissions for every account in the system.</p>
+            <p className="text-sm leading-7 text-muted-foreground">Open a user to review their details, edit access, adjust storage, or remove the account.</p>
           </div>
           <div className="space-y-4">
             {filteredUsers.length ? filteredUsers.map((entry) => {
@@ -269,67 +266,6 @@ export default async function AdminUsersPage({
                         </form>
                       </div>
                     </div>
-
-                    <form action={updateUserAccessAction} className="grid gap-4 2xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.8fr)_auto] 2xl:items-end">
-                      <input type="hidden" name="targetUserId" value={entry.id} />
-                      <input type="hidden" name="targetEmail" value={entry.email} />
-
-                      <label className="space-y-2 text-sm font-medium text-foreground">
-                        <span className="uppercase tracking-[0.22em] text-muted-foreground">Membership plan</span>
-                        <select
-                          name="membershipPlan"
-                          defaultValue={entry.membership_plan}
-                          className="h-14 w-full rounded-[22px] border border-border/70 bg-background px-5 text-base text-foreground outline-none transition focus:border-primary/30 focus:ring-4 focus:ring-secondary/25"
-                        >
-                          {planOptions.map((option) => (
-                            <option key={option} value={option}>{getMembershipLabel(option)}</option>
-                          ))}
-                        </select>
-                      </label>
-
-                      <label className="space-y-2 text-sm font-medium text-foreground">
-                        <span className="uppercase tracking-[0.22em] text-muted-foreground">Membership status</span>
-                        <select
-                          name="membershipStatus"
-                          defaultValue={entry.membership_status}
-                          className="h-14 w-full rounded-[22px] border border-border/70 bg-background px-5 text-base capitalize text-foreground outline-none transition focus:border-primary/30 focus:ring-4 focus:ring-secondary/25"
-                        >
-                          {statusOptions.map((option) => (
-                            <option key={option} value={option}>{option.replace("_", " ")}</option>
-                          ))}
-                        </select>
-                      </label>
-
-                      <label className="space-y-2 text-sm font-medium text-foreground">
-                        <span className="uppercase tracking-[0.22em] text-muted-foreground">Admin access</span>
-                        <select
-                          name="adminAccess"
-                          defaultValue={entry.is_admin ? "admin" : "standard"}
-                          disabled={isRootAdmin}
-                          className="h-14 w-full rounded-[22px] border border-border/70 bg-background px-5 text-base text-foreground outline-none transition focus:border-primary/30 focus:ring-4 focus:ring-secondary/25 disabled:cursor-not-allowed disabled:opacity-70"
-                        >
-                          <option value="standard">Standard user</option>
-                          <option value="admin">Admin</option>
-                        </select>
-                      </label>
-
-                      <label className="space-y-2 text-sm font-medium text-foreground">
-                        <span className="uppercase tracking-[0.22em] text-muted-foreground">Storage override (GB)</span>
-                        <input
-                          type="number"
-                          name="storageQuotaGb"
-                          min="1"
-                          step="1"
-                          defaultValue={entry.storage_quota_gb ?? ""}
-                          placeholder="Leave blank for plan default"
-                          className="h-14 w-full rounded-[22px] border border-border/70 bg-background px-5 text-base text-foreground outline-none transition focus:border-primary/30 focus:ring-4 focus:ring-secondary/25"
-                        />
-                      </label>
-
-                      <div className="flex gap-3 2xl:justify-end">
-                        <Button type="submit">Save access</Button>
-                      </div>
-                    </form>
                   </CardContent>
                 </Card>
               );
@@ -346,5 +282,3 @@ export default async function AdminUsersPage({
     </AppShell>
   );
 }
-
-

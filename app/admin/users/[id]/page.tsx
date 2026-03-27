@@ -1,14 +1,19 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { updateUserAccessAction } from "@/app/actions";
 import { AppShell } from "@/components/layout/app-shell";
+import { StorageUsageInline } from "@/components/admin/storage-usage-inline";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { StorageUsageInline } from "@/components/admin/storage-usage-inline";
 import { requireAdmin } from "@/lib/auth";
 import { getEffectiveStorageQuotaGb, getMembershipLabel } from "@/lib/billing";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+
+const ROOT_ADMIN_EMAIL = "jasonvinnicombe2@gmail.com";
+const planOptions = ["free", "premium", "family", "lifetime"] as const;
+const statusOptions = ["active", "trialing", "inactive", "canceled", "past_due"] as const;
 
 function formatDate(value: string | null | undefined) {
   if (!value) return "Unknown";
@@ -27,8 +32,18 @@ function formatStorageLabel(value: number) {
   return `${value}GB storage`;
 }
 
-export default async function AdminUserDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const [{ id }, { profile, user, avatarPreviewUrl }] = await Promise.all([params, requireAdmin()]);
+export default async function AdminUserDetailPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams?: Promise<{ adminSuccess?: string; adminError?: string }>;
+}) {
+  const [{ id }, resolvedSearchParams, { profile, user, avatarPreviewUrl }] = await Promise.all([
+    params,
+    searchParams ?? Promise.resolve({}),
+    requireAdmin(),
+  ]);
 
   const { data: targetUser } = await supabaseAdmin
     .from("profiles")
@@ -39,6 +54,12 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
   if (!targetUser) {
     notFound();
   }
+
+  const feedback = resolvedSearchParams.adminError
+    ? { type: "error" as const, message: resolvedSearchParams.adminError }
+    : resolvedSearchParams.adminSuccess
+      ? { type: "success" as const, message: resolvedSearchParams.adminSuccess }
+      : null;
 
   const [{ count: ownedVaultCount }, { count: memberVaultCount }, { count: entryCount }, { data: ownedVaults }] = await Promise.all([
     supabaseAdmin.from("vaults").select("id", { head: true, count: "exact" }).eq("owner_user_id", id),
@@ -52,6 +73,7 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
     targetUser.membership_status,
     targetUser.storage_quota_gb,
   );
+  const isRootAdmin = targetUser.email.toLowerCase() === ROOT_ADMIN_EMAIL;
 
   return (
     <AppShell
@@ -72,11 +94,18 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
                 <span className="inline-flex items-center gap-2 rounded-full bg-secondary/55 px-3 py-1.5">Status: {targetUser.membership_status.replace("_", " ")}</span>
                 <span className="inline-flex items-center gap-2 rounded-full bg-secondary/55 px-3 py-1.5">{formatStorageLabel(effectiveStorage)}</span>
                 {targetUser.is_admin ? <span className="inline-flex items-center gap-2 rounded-full bg-primary px-3 py-1.5 text-primary-foreground">Admin</span> : null}
+                {isRootAdmin ? <span className="inline-flex items-center gap-2 rounded-full bg-secondary/88 px-3 py-1.5 text-primary">Root admin</span> : null}
               </div>
             </div>
             <Button asChild variant="outline"><Link href="/admin/users">Back to users</Link></Button>
           </CardContent>
         </Card>
+
+        {feedback ? (
+          <Card className={feedback.type === "error" ? "border-red-200 bg-red-50/90" : "border-emerald-200 bg-emerald-50/90"}>
+            <CardContent className="p-5 text-sm leading-7 text-foreground">{feedback.message}</CardContent>
+          </Card>
+        ) : null}
 
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <Card className="glass-panel"><CardContent className="p-6"><p className="text-sm text-muted-foreground">Joined</p><p className="mt-2 font-display text-3xl">{formatDate(targetUser.created_at)}</p></CardContent></Card>
@@ -89,7 +118,7 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
           <CardContent className="space-y-4 p-8">
             <div className="section-stack">
               <h2 className="font-display text-3xl text-foreground">Access summary</h2>
-              <p className="text-sm leading-7 text-muted-foreground">This gives you a quick view of how the account is currently configured.</p>
+              <p className="text-sm leading-7 text-muted-foreground">Review how the account is configured, then update plan access, billing state, storage, or admin permissions here.</p>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
               <div className="rounded-[28px] border border-border/70 bg-background/80 p-5">
@@ -106,6 +135,68 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
                 </p>
               </div>
             </div>
+
+            <form action={updateUserAccessAction} className="grid gap-4 pt-2 2xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.8fr)_auto] 2xl:items-end">
+              <input type="hidden" name="targetUserId" value={targetUser.id} />
+              <input type="hidden" name="targetEmail" value={targetUser.email} />
+              <input type="hidden" name="redirectTo" value={`/admin/users/${targetUser.id}`} />
+
+              <label className="space-y-2 text-sm font-medium text-foreground">
+                <span className="uppercase tracking-[0.22em] text-muted-foreground">Membership plan</span>
+                <select
+                  name="membershipPlan"
+                  defaultValue={targetUser.membership_plan}
+                  className="h-14 w-full rounded-[22px] border border-border/70 bg-background px-5 text-base text-foreground outline-none transition focus:border-primary/30 focus:ring-4 focus:ring-secondary/25"
+                >
+                  {planOptions.map((option) => (
+                    <option key={option} value={option}>{getMembershipLabel(option)}</option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="space-y-2 text-sm font-medium text-foreground">
+                <span className="uppercase tracking-[0.22em] text-muted-foreground">Membership status</span>
+                <select
+                  name="membershipStatus"
+                  defaultValue={targetUser.membership_status}
+                  className="h-14 w-full rounded-[22px] border border-border/70 bg-background px-5 text-base capitalize text-foreground outline-none transition focus:border-primary/30 focus:ring-4 focus:ring-secondary/25"
+                >
+                  {statusOptions.map((option) => (
+                    <option key={option} value={option}>{option.replace("_", " ")}</option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="space-y-2 text-sm font-medium text-foreground">
+                <span className="uppercase tracking-[0.22em] text-muted-foreground">Admin access</span>
+                <select
+                  name="adminAccess"
+                  defaultValue={targetUser.is_admin ? "admin" : "standard"}
+                  disabled={isRootAdmin}
+                  className="h-14 w-full rounded-[22px] border border-border/70 bg-background px-5 text-base text-foreground outline-none transition focus:border-primary/30 focus:ring-4 focus:ring-secondary/25 disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                  <option value="standard">Standard user</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </label>
+
+              <label className="space-y-2 text-sm font-medium text-foreground">
+                <span className="uppercase tracking-[0.22em] text-muted-foreground">Storage override (GB)</span>
+                <input
+                  type="number"
+                  name="storageQuotaGb"
+                  min="1"
+                  step="1"
+                  defaultValue={targetUser.storage_quota_gb ?? ""}
+                  placeholder="Leave blank for plan default"
+                  className="h-14 w-full rounded-[22px] border border-border/70 bg-background px-5 text-base text-foreground outline-none transition focus:border-primary/30 focus:ring-4 focus:ring-secondary/25"
+                />
+              </label>
+
+              <div className="flex gap-3 2xl:justify-end">
+                <Button type="submit">Save access</Button>
+              </div>
+            </form>
           </CardContent>
         </Card>
 
@@ -121,7 +212,7 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
                   <div key={vault.id} className="flex flex-col gap-3 rounded-[24px] border border-border/70 bg-background/80 p-5 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                       <p className="text-base font-medium text-foreground">{vault.name}</p>
-                      <p className="mt-1 text-sm leading-7 text-muted-foreground">{vault.subject_name ?? "Private subject"} · Created {formatDate(vault.created_at)}</p>
+                      <p className="mt-1 text-sm leading-7 text-muted-foreground">{vault.subject_name ?? "Private subject"} � Created {formatDate(vault.created_at)}</p>
                     </div>
                     <Button asChild variant="outline"><Link href={`/vaults/${vault.id}`}>Open vault</Link></Button>
                   </div>
@@ -138,4 +229,3 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
     </AppShell>
   );
 }
-
