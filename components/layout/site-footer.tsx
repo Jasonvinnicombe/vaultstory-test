@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { BrandMark } from "@/components/layout/brand-mark";
+
 const footerGroups = [
   {
     title: "Product",
@@ -44,7 +46,7 @@ export function SiteFooter() {
       <div className="page-wrap space-y-8 sm:space-y-10">
         <div className="grid gap-8 lg:grid-cols-[1.1fr_1.9fr] lg:items-start lg:gap-14">
           <div className="section-stack max-w-xl space-y-3 sm:space-y-4">
-            <p className="text-sm font-semibold tracking-[0.18em] text-primary">VAULT STORY</p>
+            <BrandMark className="text-sm" />
             <h2 className="font-display text-2xl leading-tight text-foreground sm:text-4xl">
               A private place to preserve memories for the right future moment.
             </h2>

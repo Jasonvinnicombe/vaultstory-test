@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { LockKeyhole, Menu, Sparkles } from "lucide-react";
+import { Menu, Sparkles } from "lucide-react";
 
+import { BrandMark } from "@/components/layout/brand-mark";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -25,11 +26,8 @@ export function SiteHeader() {
   return (
     <header id="top" className="sticky top-0 z-40 border-b border-white/35 bg-background/75 backdrop-blur-xl">
       <div className="page-wrap flex items-center justify-between gap-3 py-4">
-        <Link href="/" className="flex min-w-0 items-center gap-3 text-sm font-semibold tracking-[0.16em] text-primary">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[0_12px_24px_rgba(61,41,28,0.18)]">
-            <LockKeyhole className="h-4 w-4" />
-          </span>
-          <span className="truncate">VAULT STORY</span>
+        <Link href="/" className="min-w-0">
+          <BrandMark />
         </Link>
 
         <nav className="hidden items-center gap-7 text-sm text-muted-foreground lg:flex">
@@ -100,5 +98,3 @@ export function SiteHeader() {
     </header>
   );
 }
-
-
