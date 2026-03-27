@@ -212,7 +212,7 @@ export default async function AdminUserDetailPage({
                   <div key={vault.id} className="flex flex-col gap-3 rounded-[24px] border border-border/70 bg-background/80 p-5 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                       <p className="text-base font-medium text-foreground">{vault.name}</p>
-                      <p className="mt-1 text-sm leading-7 text-muted-foreground">{vault.subject_name ?? "Private subject"} · Created {formatDate(vault.created_at)}</p>
+                      <p className="mt-1 text-sm leading-7 text-muted-foreground">{vault.subject_name ?? "Private subject"} - Created {formatDate(vault.created_at)}</p>
                     </div>
                     <Button asChild variant="outline"><Link href={`/vaults/${vault.id}`}>Open vault</Link></Button>
                   </div>
