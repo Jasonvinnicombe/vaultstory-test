@@ -22,8 +22,8 @@ function ModernBrandMark({ className }: { className?: string }) {
         <rect x="10" y="27" width="72" height="56" rx="12" />
         <path d="M20 38h7" />
         <circle cx="46" cy="55" r="18" />
-        <path d="M46 44c-4.5 0-8 3.5-8 8v4h16v-4c0-4.5-3.5-8-8-8Z" />
-        <path d="M42 44v-4c0-2.2 1.8-4 4-4s4 1.8 4 4v4" />
+        <path d="M46 46c-5 0-9 4-9 9v3h18v-3c0-5-4-9-9-9Z" />
+        <path d="M41.5 46v-3.5c0-2.5 2-4.5 4.5-4.5s4.5 2 4.5 4.5V46" />
       </svg>
       <span className="truncate text-[1.05rem] font-extrabold tracking-[0.08em] text-[#243457] sm:text-[1.15rem]">
         VAULT STORY
@@ -50,3 +50,4 @@ export function BrandMark({ variant = "modern", className }: BrandMarkProps) {
 
   return <ModernBrandMark className={className} />;
 }
+
