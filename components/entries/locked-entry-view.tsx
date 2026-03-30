@@ -28,11 +28,14 @@ export function LockedEntryView(props: { title: string; createdAt: string; unloc
         <div className="space-y-4"><p className="inline-flex items-center gap-2 text-sm text-white/88"><CalendarClock className="h-4 w-4" />Countdown to reveal</p><CountdownTimer unlockAt={props.unlockAt} /></div>
 
         {props.canCompleteMilestone ? <div className="rounded-[30px] border border-white/16 bg-white/10 p-6"><p className="text-sm leading-7 text-white/92">This entry opens with a manual milestone. Mark it complete when the moment truly arrives.</p><div className="mt-4">{props.milestoneForm}</div></div> : null}
-        {!props.canCompleteMilestone && !props.unlockAt ? (props.adminPreviewHref ? <Button asChild variant="secondary"><Link href={props.adminPreviewHref}>{props.adminPreviewLabel ?? "Preview entry"}</Link></Button> : <Button variant="secondary" disabled>Waiting for milestone completion</Button>) : null}
+        {props.adminPreviewHref ? (
+          <Button asChild variant="secondary">
+            <Link href={props.adminPreviewHref}>{props.adminPreviewLabel ?? "Preview entry"}</Link>
+          </Button>
+        ) : null}
+        {!props.canCompleteMilestone && !props.unlockAt && !props.adminPreviewHref ? <Button variant="secondary" disabled>Waiting for milestone completion</Button> : null}
       </CardContent>
     </Card>
   );
 }
-
-
 
