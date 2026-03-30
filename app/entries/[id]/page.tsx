@@ -178,9 +178,9 @@ export default async function EntryPage({ params, searchParams }: { params: Prom
           <>
             {adminPreview ? (
               <Card className="border-white/60 bg-secondary/40">
-                <CardContent className="p-5 flex items-center text-left text-sm text-foreground">
+                <div className="flex h-12 items-center px-5 text-left text-sm text-foreground">
                   Admin preview only. This does not unlock the entry for the customer.
-                </CardContent>
+                </div>
               </Card>
             ) : null}
             <RevealExperience
@@ -202,6 +202,11 @@ export default async function EntryPage({ params, searchParams }: { params: Prom
     </AppShell>
   );
 }
+
+
+
+
+
 
 
 

@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "test:unlock-notifications": "node scripts/test-unlock-notifications.cjs"
   },
   "dependencies": {
     "@hookform/resolvers": "3.10.0",
@@ -40,4 +41,3 @@
     "typescript": "5.9.3"
   }
 }
-

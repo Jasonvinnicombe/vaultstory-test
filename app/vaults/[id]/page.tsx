@@ -94,7 +94,7 @@ export default async function VaultPage({ params, searchParams }: { params: Prom
             <p className="text-sm leading-7 text-muted-foreground">A visual sequence of memories, promises, and moments waiting for their time.</p>
           </div>
           <div className="space-y-5">
-            {filteredEntries.length ? filteredEntries.map((entry) => <EntryCard key={entry.id} entry={entry} timeline />) : <EmptyState icon={CalendarClock} title={emptyState.title} body={emptyState.body} action={filter === "all" ? <Button asChild><Link href={`/vaults/${vault.id}/entries/new`}>Create first entry</Link></Button> : undefined} />}
+            {filteredEntries.length ? filteredEntries.map((entry) => <EntryCard key={entry.id} entry={entry} timeline contextLabel={vault.subject_name ? `For ${vault.subject_name}` : null} />) : <EmptyState icon={CalendarClock} title={emptyState.title} body={emptyState.body} action={filter === "all" ? <Button asChild><Link href={`/vaults/${vault.id}/entries/new`}>Create first entry</Link></Button> : undefined} />}
           </div>
         </section>
 
@@ -104,6 +104,7 @@ export default async function VaultPage({ params, searchParams }: { params: Prom
     </AppShell>
   );
 }
+
 
 
 

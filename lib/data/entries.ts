@@ -9,12 +9,11 @@ export const getDashboardEntries = cache(async (userId: string) => {
     .from("vault_entries")
     .select("*, entry_assets(*)")
     .eq("user_id", userId)
-    .eq("is_deleted", false)
     .order("created_at", { ascending: false });
 
   if (error) throw error;
 
-  const entries = (data ?? []) as VaultEntry[];
+  const entries = ((data ?? []) as VaultEntry[]).filter((entry) => entry.is_deleted !== true);
 
   const total = entries.length;
   const unlocked = entries.filter((entry) => isUnlocked(entry));
@@ -44,11 +43,10 @@ export const getEntryById = cache(async (id: string, userId: string) => {
     .select("*, entry_assets(*)")
     .eq("id", id)
     .eq("user_id", userId)
-    .eq("is_deleted", false)
     .maybeSingle();
 
   if (error) throw error;
 
-  return data as VaultEntry | null;
+  const entry = data as VaultEntry | null;
+  return entry?.is_deleted === true ? null : entry;
 });
-

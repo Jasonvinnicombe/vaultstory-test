@@ -16,7 +16,7 @@ type EntryRow = {
   unlock_at: string | null;
   milestone_label: string | null;
   milestone_achieved_at: string | null;
-  is_deleted: boolean | null;
+  is_deleted?: boolean | null;
 };
 
 type VaultRow = {
@@ -38,6 +38,10 @@ type ProfileRow = {
   full_name: string | null;
   timezone: string | null;
   notification_preferences: Json | null;
+};
+
+type UnlockNotificationRunOptions = {
+  dryRun?: boolean;
 };
 
 function isAuthorized(request: NextRequest) {
@@ -72,10 +76,14 @@ function formatUnlockedAt(unlockedAt: string, timezone?: string | null) {
   }).format(new Date(unlockedAt));
 }
 
-async function runUnlockNotifications() {
+function isMissingNotificationLogTable(message: string) {
+  return /entry_unlock_notifications/i.test(message) && /(schema cache|could not find the table)/i.test(message);
+}
+
+async function runUnlockNotifications({ dryRun = false }: UnlockNotificationRunOptions = {}) {
   const { data: entries, error: entriesError } = await supabaseAdmin
     .from("vault_entries")
-    .select("id,vault_id,title,created_at,unlock_type,unlock_at,milestone_label,milestone_achieved_at,is_deleted");
+    .select("id,vault_id,title,created_at,unlock_type,unlock_at,milestone_label,milestone_achieved_at");
 
   if (entriesError) {
     throw new Error(entriesError.message);
@@ -85,12 +93,16 @@ async function runUnlockNotifications() {
 
   if (unlockedEntries.length === 0) {
     return {
+      dryRun,
       processedEntries: 0,
       emailsSent: 0,
+      plannedEmails: 0,
       skippedAlreadySent: 0,
       skippedPreferences: 0,
       skippedMissingProfile: 0,
       skippedEmailNotConfigured: 0,
+      notificationLogAvailable: true,
+      previewRecipients: [] as Array<Record<string, string>>,
       failures: [] as string[],
     };
   }
@@ -129,35 +141,47 @@ async function runUnlockNotifications() {
     recipientIds.add(member.user_id);
   }
 
-  const [{ data: profiles, error: profilesError }, { data: sentLogs, error: sentLogsError }] = await Promise.all([
-    supabaseAdmin
-      .from("profiles")
-      .select("id,email,full_name,timezone,notification_preferences")
-      .in("id", [...recipientIds]),
-    supabaseAdmin
-      .from("entry_unlock_notifications")
-      .select("entry_id,recipient_user_id")
-      .in("entry_id", entryIds),
-  ]);
+  const { data: profiles, error: profilesError } = await supabaseAdmin
+    .from("profiles")
+    .select("id,email,full_name,timezone,notification_preferences")
+    .in("id", [...recipientIds]);
 
   if (profilesError) {
     throw new Error(profilesError.message);
   }
 
+  let notificationLogAvailable = true;
+  let sentKeys = new Set<string>();
+
+  const { data: sentLogs, error: sentLogsError } = await supabaseAdmin
+    .from("entry_unlock_notifications")
+    .select("entry_id,recipient_user_id")
+    .in("entry_id", entryIds);
+
   if (sentLogsError) {
-    throw new Error(sentLogsError.message);
+    if (isMissingNotificationLogTable(sentLogsError.message)) {
+      notificationLogAvailable = false;
+      if (!dryRun) {
+        throw new Error("Missing entry_unlock_notifications table. Apply supabase migration 20260315_future_memory_vault_unlock_notifications.sql before sending unlock emails.");
+      }
+    } else {
+      throw new Error(sentLogsError.message);
+    }
+  } else {
+    sentKeys = new Set((sentLogs ?? []).map((row) => `${row.entry_id}:${row.recipient_user_id}`));
   }
 
-  const sentKeys = new Set((sentLogs ?? []).map((row) => `${row.entry_id}:${row.recipient_user_id}`));
   const profileById = new Map((profiles ?? []).map((profile: ProfileRow) => [profile.id, profile]));
 
   let emailsSent = 0;
+  let plannedEmails = 0;
   let skippedAlreadySent = 0;
   let skippedPreferences = 0;
   let skippedMissingProfile = 0;
   let skippedEmailNotConfigured = 0;
   const failures: string[] = [];
   const rowsToInsert: Array<{ entry_id: string; recipient_user_id: string; recipient_email: string }> = [];
+  const previewRecipients: Array<Record<string, string>> = [];
 
   for (const entry of unlockedEntries) {
     const vault = vaultById.get(entry.vault_id);
@@ -167,6 +191,7 @@ async function runUnlockNotifications() {
 
     const recipientSet = recipientsByVault.get(entry.vault_id) ?? new Set<string>();
     const unlockedAt = entry.milestone_achieved_at || entry.unlock_at || entry.created_at;
+    const formattedUnlockedAt = formatUnlockedAt(unlockedAt, null);
     const coverImageUrl = vault.cover_image_url
       ? (await supabaseAdmin.storage.from("vault-covers").createSignedUrl(vault.cover_image_url, 60 * 60 * 24 * 7)).data?.signedUrl ?? null
       : null;
@@ -186,6 +211,22 @@ async function runUnlockNotifications() {
 
       if (!notificationsEnabled(profile.notification_preferences)) {
         skippedPreferences += 1;
+        continue;
+      }
+
+      if (dryRun) {
+        plannedEmails += 1;
+        if (previewRecipients.length < 20) {
+          previewRecipients.push({
+            entryId: entry.id,
+            entryTitle: entry.title,
+            vaultId: vault.id,
+            vaultName: vault.name,
+            recipientUserId,
+            recipientEmail: profile.email,
+            unlockedAt: formatUnlockedAt(unlockedAt, profile.timezone),
+          });
+        }
         continue;
       }
 
@@ -220,7 +261,7 @@ async function runUnlockNotifications() {
     }
   }
 
-  if (rowsToInsert.length > 0) {
+  if (!dryRun && rowsToInsert.length > 0) {
     const { error: insertError } = await supabaseAdmin.from("entry_unlock_notifications").insert(rowsToInsert);
     if (insertError) {
       throw new Error(insertError.message);
@@ -228,12 +269,16 @@ async function runUnlockNotifications() {
   }
 
   return {
+    dryRun,
     processedEntries: unlockedEntries.length,
     emailsSent,
+    plannedEmails,
     skippedAlreadySent,
     skippedPreferences,
     skippedMissingProfile,
     skippedEmailNotConfigured,
+    notificationLogAvailable,
+    previewRecipients,
     failures,
   };
 }
@@ -243,12 +288,14 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const dryRun = ["1", "true", "yes"].includes((request.nextUrl.searchParams.get("dryRun") ?? "").toLowerCase());
+
   try {
-    const result = await runUnlockNotifications();
+    const result = await runUnlockNotifications({ dryRun });
     return NextResponse.json(result);
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unable to process unlock notifications." },
+      { error: error instanceof Error ? error.message : "Unable to process unlock notifications.", dryRun },
       { status: 500 },
     );
   }

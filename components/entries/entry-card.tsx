@@ -8,9 +8,13 @@ import { formatDateTime } from "@/lib/date";
 import { getEntryStatus } from "@/lib/entries";
 import type { Database } from "@/types/database";
 
-type EntryCardProps = { entry: Database["public"]["Tables"]["vault_entries"]["Row"]; timeline?: boolean };
+type EntryCardProps = {
+  entry: Database["public"]["Tables"]["vault_entries"]["Row"];
+  timeline?: boolean;
+  contextLabel?: string | null;
+};
 
-export function EntryCard({ entry, timeline = false }: EntryCardProps) {
+export function EntryCard({ entry, timeline = false, contextLabel }: EntryCardProps) {
   const status = getEntryStatus(entry);
   const unlockLabel = status === "draft"
     ? "Draft - keep editing until you're ready to seal it"
@@ -32,6 +36,7 @@ export function EntryCard({ entry, timeline = false }: EntryCardProps) {
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="space-y-2">
                 <h3 className="font-medium text-foreground sm:text-[1.02rem]">{entry.title}</h3>
+                {contextLabel ? <p className="text-sm leading-6 text-muted-foreground">{contextLabel}</p> : null}
                 <p className="flex items-center gap-2 text-sm leading-7 text-muted-foreground"><CalendarClock className="h-4 w-4" />{unlockLabel}</p>
               </div>
               <div className="flex flex-wrap items-center gap-2">

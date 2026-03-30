@@ -1,6 +1,18 @@
 import Link from "next/link";
-import { CalendarClock, FolderLock, LockKeyhole, Mailbox, Search, Sparkles, Vault } from "lucide-react";
+import {
+  ArrowRight,
+  CalendarClock,
+  FolderLock,
+  LockKeyhole,
+  Mailbox,
+  Mic,
+  Plus,
+  Search,
+  Sparkles,
+  Vault,
+} from "lucide-react";
 
+import { CountdownTimer } from "@/components/entries/countdown-timer";
 import { AppShell } from "@/components/layout/app-shell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -8,11 +20,45 @@ import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { getProfile } from "@/lib/auth";
+import { formatDateTime } from "@/lib/date";
 import { getEntryStatus } from "@/lib/entries";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { VaultCard } from "@/components/vaults/vault-card";
 import { StorageUsageCard } from "@/components/dashboard/storage-usage";
+
+function formatDate(value: string | null) {
+  if (!value) return "Waiting for a milestone";
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(new Date(value));
+}
+
+function getHeroCopy(firstName: string | null, totalEntries: number, upcomingCount: number) {
+  if (!totalEntries) {
+    return {
+      eyebrow: `Welcome${firstName ? `, ${firstName}` : ""}`,
+      title: "Start the story that your future will thank you for.",
+      body: "Create your first vault, add a memory, and let the dashboard become the place where future moments quietly gather meaning.",
+    };
+  }
+
+  if (upcomingCount > 0) {
+    return {
+      eyebrow: `Welcome back${firstName ? `, ${firstName}` : ""}`,
+      title: "Something meaningful is already on its way.",
+      body: "Your archive is alive now. Keep adding memories so the next unlock feels even more personal when it arrives.",
+    };
+  }
+
+  return {
+    eyebrow: `Welcome back${firstName ? `, ${firstName}` : ""}`,
+    title: "Your story is growing with every memory you keep.",
+    body: "This is where your private timeline starts to feel real: the memories you have saved, the moments still sealed, and the ones inching closer.",
+  };
+}
 
 export default async function DashboardPage({ searchParams }: { searchParams?: Promise<{ onboarding?: string; q?: string }> }) {
   const [resolvedSearchParams, { profile, user, avatarPreviewUrl }] = await Promise.all([
@@ -26,17 +72,20 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
     supabase.from("vault_entries").select("*").order("created_at", { ascending: false }),
   ]);
 
-  const allEntries = entries ?? [];
-  const lockedEntries = allEntries.filter((entry) => getEntryStatus(entry) !== "unlocked");
+  const allEntries = (entries ?? []).filter((entry) => entry.is_deleted !== true);
+
   const unlockedEntries = allEntries.filter((entry) => getEntryStatus(entry) === "unlocked");
   const upcomingEntries = allEntries.filter((entry) => getEntryStatus(entry) === "soon");
+  const nextUnlockEntry =
+    [...allEntries]
+      .filter((entry) => getEntryStatus(entry) !== "unlocked" && entry.unlock_at)
+      .sort((a, b) => new Date(a.unlock_at ?? "").getTime() - new Date(b.unlock_at ?? "").getTime())[0] ?? null;
 
   const stats = [
-    { label: "Vault count", value: String(vaults?.length ?? 0), icon: FolderLock },
-    { label: "Entry count", value: String(allEntries.length), icon: Mailbox },
-    { label: "Locked entries", value: String(lockedEntries.length), icon: LockKeyhole },
-    { label: "Unlocked entries", value: String(unlockedEntries.length), icon: Sparkles },
-    { label: "Upcoming unlocks", value: String(upcomingEntries.length), icon: CalendarClock },
+    { label: "Memories saved", value: String(allEntries.length), icon: Mailbox },
+    { label: "Vaults", value: String(vaults?.length ?? 0), icon: FolderLock },
+    { label: "Unlocking soon", value: String(upcomingEntries.length), icon: CalendarClock },
+    { label: "Already revealed", value: String(unlockedEntries.length), icon: Sparkles },
   ];
 
   const vaultCards = await Promise.all(
@@ -67,28 +116,183 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
     }),
   );
 
+  const vaultById = new Map((vaults ?? []).map((vault) => [vault.id, vault]));
   const firstVault = vaults?.[0] ?? null;
   const query = resolvedSearchParams.q?.trim().toLowerCase() ?? "";
+  const firstName = profile?.full_name?.split(" ")[0] ?? user.user_metadata.full_name?.split(" ")[0] ?? null;
+  const heroCopy = getHeroCopy(firstName, allEntries.length, upcomingEntries.length);
+
   const filteredVaultCards = vaultCards.filter((vault) => {
     if (!query) return true;
     const haystack = `${vault.name} ${vault.vaultType} ${vault.subjectName ?? ""}`.toLowerCase();
     return haystack.includes(query);
   });
 
+  const timelineEntries = [...allEntries]
+    .sort((a, b) => {
+      const aStatus = getEntryStatus(a);
+      const bStatus = getEntryStatus(b);
+      const priority = { soon: 0, unlocked: 1, locked: 2, draft: 3 } as const;
+      const priorityDelta = priority[aStatus] - priority[bStatus];
+      if (priorityDelta !== 0) return priorityDelta;
+
+      const aTime = a.unlock_at ? new Date(a.unlock_at).getTime() : new Date(a.created_at).getTime();
+      const bTime = b.unlock_at ? new Date(b.unlock_at).getTime() : new Date(b.created_at).getTime();
+      return aTime - bTime;
+    })
+    .slice(0, 6)
+    .map((entry) => {
+      const status = getEntryStatus(entry);
+      const vault = vaultById.get(entry.vault_id);
+
+      return {
+        id: entry.id,
+        title: entry.title,
+        vaultName: vault?.name ?? "Vault",
+        subjectName: vault?.subject_name ?? null,
+        href: `/entries/${entry.id}`,
+        status,
+        statusLabel:
+          status === "soon"
+            ? "Unlocking soon"
+            : status === "unlocked"
+              ? "Ready to revisit"
+              : status === "draft"
+                ? "Still being shaped"
+                : "Locked for later",
+        detail:
+          status === "draft"
+            ? `Recorded ${formatDateTime(entry.created_at)}`
+            : entry.unlock_at
+              ? `Unlocks ${formatDateTime(entry.unlock_at)}`
+              : entry.milestone_label ?? "Waiting for milestone completion",
+      };
+    });
+
+  const quickActions = [
+    {
+      title: "Write a memory",
+      description: "Create a new letter, photo story, or future note.",
+      href: firstVault ? `/vaults/${firstVault.id}/entries/new` : "/vaults/new",
+      icon: Plus,
+    },
+    {
+      title: "Record a voice note",
+      description: "Capture the feeling of the moment while it is fresh.",
+      href: firstVault ? `/vaults/${firstVault.id}/entries/new` : "/vaults/new",
+      icon: Mic,
+    },
+    {
+      title: "Create another vault",
+      description: "Start a private space for someone new.",
+      href: "/vaults/new",
+      icon: Vault,
+    },
+  ];
+
   return (
     <AppShell fullName={profile?.full_name ?? user.user_metadata.full_name ?? null} email={user.email ?? ""} isAdmin={profile?.is_admin ?? false} avatarUrl={avatarPreviewUrl}>
       <div className="space-y-7 sm:space-y-8">
-        <Card className="overflow-hidden border-white/60 bg-card/84 shadow-[0_24px_64px_rgba(66,46,31,0.1)]">
-          <CardContent className="relative flex flex-col gap-6 p-7 sm:p-8 lg:flex-row lg:items-end lg:justify-between lg:p-10">
-            <div className="hero-orb absolute right-[-5rem] top-[-3rem] hidden h-52 w-52 rounded-full opacity-60 lg:block" />
-            <div className="relative max-w-3xl section-stack">
-              <Badge className="w-fit bg-secondary/88">Dashboard</Badge>
-              <h1 className="text-balance font-display text-4xl leading-tight text-foreground sm:text-5xl">Your private family archive at a glance.</h1>
-              <p className="text-sm leading-7 text-muted-foreground sm:text-base">Track how many vaults you have, how many entries are still locked, and which future moments are quietly approaching next.</p>
+        <section className="grid items-start gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(340px,0.9fr)]">
+          <div className="space-y-5">
+            <Card className="overflow-hidden border-white/60 bg-[radial-gradient(circle_at_20%_18%,rgba(255,255,255,0.72),rgba(255,255,255,0.16)_24%,transparent_44%),radial-gradient(circle_at_88%_14%,rgba(230,184,106,0.18),transparent_22%),linear-gradient(135deg,rgba(255,251,246,0.96),rgba(246,238,228,0.9)_52%,rgba(238,231,221,0.86))] shadow-[0_28px_82px_rgba(66,46,31,0.12)]">
+              <CardContent className="relative flex flex-col gap-6 p-7 sm:p-8 lg:p-10">
+                <div className="hero-orb absolute right-[-4rem] top-[-3rem] hidden h-48 w-48 rounded-full opacity-60 lg:block" />
+                <div className="relative section-stack max-w-3xl">
+                  <Badge className="w-fit bg-secondary/88">Dashboard</Badge>
+                  <p className="text-sm uppercase tracking-[0.22em] text-muted-foreground">{heroCopy.eyebrow}</p>
+                  <h1 className="text-balance font-display text-4xl leading-tight text-foreground sm:text-5xl">{heroCopy.title}</h1>
+                  <p className="max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">{heroCopy.body}</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="space-y-5 rounded-[34px] border border-white/60 bg-white/30 p-5 shadow-[0_18px_48px_rgba(66,46,31,0.06)] backdrop-blur-sm sm:p-6">
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                {stats.map((stat) => {
+                  const Icon = stat.icon;
+                  return (
+                    <div key={stat.label} className="flex h-full min-h-[196px] flex-col rounded-[28px] border border-white/65 bg-white/58 p-5 shadow-[0_18px_38px_rgba(66,46,31,0.06)] backdrop-blur-sm">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[0_12px_30px_rgba(30,42,68,0.16)]">
+                        <Icon className="h-5 w-5" />
+                      </div>
+                      <div className="mt-4 min-h-[56px]">
+                        <p className="text-[11px] uppercase leading-[1.35] tracking-[0.12em] text-muted-foreground sm:text-xs sm:tracking-[0.18em]">{stat.label}</p>
+                      </div>
+                      <p className="mt-auto font-display text-3xl leading-none text-foreground">{stat.value}</p>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="relative flex flex-wrap gap-3">
+                <Button asChild>
+                  <Link href={firstVault ? `/vaults/${firstVault.id}/entries/new` : "/vaults/new"}>
+                    Create memory
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </Button>
+                <Button asChild variant="outline">
+                  <Link href="/vaults/new">Create vault</Link>
+                </Button>
+              </div>
             </div>
-            <Button asChild><Link href="/vaults/new">Create vault</Link></Button>
-          </CardContent>
-        </Card>
+          </div>
+
+          <Card className="overflow-hidden border-white/12 bg-[radial-gradient(circle_at_18%_18%,rgba(113,157,255,0.22),transparent_28%),radial-gradient(circle_at_82%_18%,rgba(230,184,106,0.16),transparent_24%),linear-gradient(180deg,rgba(16,28,52,0.98),rgba(28,44,82,0.96)_58%,rgba(42,63,110,0.92))] text-white shadow-[0_30px_86px_rgba(30,42,68,0.26)]">
+            <CardContent className="space-y-6 p-7 sm:p-8">
+              <div className="section-stack">
+                <p className="text-sm uppercase tracking-[0.22em] text-white/68">Featured unlock</p>
+                <h2 className="font-display text-3xl text-white">{nextUnlockEntry ? "Your next memory is already waiting." : "The next unlock starts with the next memory you save."}</h2>
+                <p className="text-sm leading-7 text-white/76">{nextUnlockEntry ? "This is the closest future moment in your archive right now. Keep the anticipation alive by adding another memory today." : "Once you seal something to a date or milestone, this area becomes the emotional heartbeat of the dashboard."}</p>
+              </div>
+
+              {nextUnlockEntry ? (
+                <>
+                  <div className="rounded-[30px] border border-white/14 bg-white/10 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="space-y-3">
+                        <Badge className="bg-secondary text-slate-900">Next unlock</Badge>
+                        <div>
+                          <h3 className="font-display text-3xl text-white">{nextUnlockEntry.title}</h3>
+                          <p className="mt-2 text-sm leading-7 text-white/74">Inside {vaultById.get(nextUnlockEntry.vault_id)?.name ?? "your vault"}{vaultById.get(nextUnlockEntry.vault_id)?.subject_name ? ` for ${vaultById.get(nextUnlockEntry.vault_id)?.subject_name}` : ""}.</p>
+                        </div>
+                      </div>
+                      <div className="flex h-14 w-14 items-center justify-center rounded-full border border-white/16 bg-white/10 text-secondary">
+                        <LockKeyhole className="h-6 w-6" />
+                      </div>
+                    </div>
+                    <div className="mt-5 rounded-[28px] border border-white/12 bg-black/20 p-4 text-sm text-white/78 backdrop-blur-sm">
+                      <p className="text-xs uppercase tracking-[0.2em] text-white/54">Unlock date</p>
+                      <p className="mt-2 text-base text-white">{formatDateTime(nextUnlockEntry.unlock_at)}</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <p className="inline-flex items-center gap-2 text-sm text-white/84"><CalendarClock className="h-4 w-4" />Countdown to reveal</p>
+                    <CountdownTimer unlockAt={nextUnlockEntry.unlock_at} variant="inline" />
+                  </div>
+
+                  <Button asChild variant="secondary" className="w-full sm:w-auto">
+                    <Link href={`/entries/${nextUnlockEntry.id}`}>Open entry</Link>
+                  </Button>
+                </>
+              ) : (
+                <div className="rounded-[30px] border border-dashed border-white/18 bg-white/8 p-6">
+                  <p className="text-sm leading-7 text-white/78">No dated unlocks are scheduled yet. Create a vault or add an entry with an exact day so the dashboard can start counting down to something meaningful.</p>
+                  <div className="mt-4 flex flex-wrap gap-3">
+                    <Button asChild variant="secondary">
+                      <Link href={firstVault ? `/vaults/${firstVault.id}/entries/new` : "/vaults/new"}>Create memory</Link>
+                    </Button>
+                    <Button asChild variant="outline" className="border-white/20 bg-transparent text-white hover:bg-white/10 hover:text-white">
+                      <Link href="/vaults/new">Create vault</Link>
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </section>
 
         {(!vaults?.length || !allEntries.length || resolvedSearchParams.onboarding === "done") ? (
           <Card className="overflow-hidden bg-primary text-primary-foreground shadow-[0_22px_56px_rgba(48,32,23,0.18)]">
@@ -106,14 +310,98 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
           </Card>
         ) : null}
 
-        <section className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-5">
-          {stats.map((stat) => {
-            const Icon = stat.icon;
-            return <Card key={stat.label} className="glass-panel"><CardContent className="flex h-full flex-col items-center justify-center p-6 text-center"><div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-secondary/90 text-primary"><Icon className="h-5 w-5" /></div><p className="text-sm text-muted-foreground">{stat.label}</p><p className="mt-2 font-display text-3xl">{stat.value}</p></CardContent></Card>;
+        <section className="grid gap-4 lg:grid-cols-3">
+          {quickActions.map((action) => {
+            const Icon = action.icon;
+            return (
+              <Link key={action.title} href={action.href} className="group">
+                <Card className="glass-panel h-full border-white/60 transition duration-200 group-hover:-translate-y-1 group-hover:shadow-[0_22px_54px_rgba(66,46,31,0.1)]">
+                  <div className="flex h-full flex-col px-6 py-8 sm:px-7 sm:py-8">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary/90 text-primary shadow-[0_12px_26px_rgba(30,42,68,0.08)]">
+                      <Icon className="h-5 w-5" />
+                    </div>
+                    <div className="mt-6 space-y-2">
+                      <h2 className="font-display text-2xl text-foreground">{action.title}</h2>
+                      <p className="text-sm leading-7 text-muted-foreground">{action.description}</p>
+                    </div>
+                    <p className="mt-auto inline-flex items-center gap-2 pt-6 text-sm font-medium text-foreground">Open <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" /></p>
+                  </div>
+                </Card>
+              </Link>
+            );
           })}
         </section>
 
-        <StorageUsageCard />
+        <section className="grid gap-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
+          <div className="space-y-4">
+            <div className="section-stack">
+              <Badge className="w-fit bg-secondary/88">Story timeline</Badge>
+              <h2 className="font-display text-3xl sm:text-4xl">What is moving through your archive right now</h2>
+              <p className="text-sm leading-7 text-muted-foreground">A mixed feed of memories that are approaching, newly unlocked, or still waiting for their moment.</p>
+            </div>
+
+            {timelineEntries.length ? (
+              <div className="grid gap-4">
+                {timelineEntries.map((entry) => {
+                  const statusClasses =
+                    entry.status === "soon"
+                      ? "border-secondary/70 bg-secondary/12 text-primary"
+                      : entry.status === "unlocked"
+                        ? "border-emerald-300/60 bg-emerald-50 text-emerald-900"
+                        : entry.status === "draft"
+                          ? "border-slate-300/70 bg-slate-100 text-slate-700"
+                          : "border-primary/15 bg-primary/6 text-primary";
+
+                  return (
+                    <Link key={entry.id} href={entry.href} className="group">
+                      <Card className="glass-panel overflow-hidden border-white/60 transition duration-200 group-hover:-translate-y-0.5 group-hover:shadow-[0_24px_62px_rgba(66,46,31,0.11)]">
+                        <div className="flex min-h-[188px] flex-col gap-6 px-8 py-8 sm:flex-row sm:justify-between sm:gap-8 sm:px-9 sm:py-8">
+                          <div className="flex flex-1 items-center">
+                            <div className="max-w-3xl space-y-4">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-medium uppercase tracking-[0.16em] ${statusClasses}`}>{entry.statusLabel}</span>
+                                <span className="text-xs uppercase tracking-[0.18em] text-muted-foreground">{entry.vaultName}</span>
+                              </div>
+                              <div className="space-y-2">
+                                <h3 className="font-display text-2xl text-foreground">{entry.title}</h3>
+                                <p className="mt-2 text-sm leading-7 text-muted-foreground">{entry.subjectName ? `For ${entry.subjectName}. ` : ""}{entry.detail}</p>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center justify-start gap-2 text-sm font-medium text-foreground sm:justify-end">
+                            View memory
+                            <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
+                          </div>
+                        </div>
+                      </Card>
+                    </Link>
+                  );
+                })}
+              </div>
+            ) : (
+              <EmptyState icon={Sparkles} title="Your timeline is ready for its first memory" body="Once you create a vault and save an entry, this area becomes the living stream of future unlocks and already-open moments." action={<Button asChild><Link href="/vaults/new">Create your first vault</Link></Button>} />
+            )}
+          </div>
+
+          <div className="space-y-4">
+            <StorageUsageCard />
+            <Card className="overflow-hidden border-white/60 bg-card/86 shadow-[0_18px_48px_rgba(66,46,31,0.08)]">
+              <CardContent className="space-y-4 p-6 sm:p-7">
+                <div className="section-stack">
+                  <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Gentle prompt</p>
+                  <h3 className="font-display text-2xl text-foreground">Capture something today before it becomes hard to remember clearly.</h3>
+                  <p className="text-sm leading-7 text-muted-foreground">The strongest dashboards do not just summarize the archive. They gently pull you back into preserving one more meaningful detail.</p>
+                </div>
+                <Button asChild variant="outline" className="w-full justify-between sm:w-auto">
+                  <Link href={firstVault ? `/vaults/${firstVault.id}/entries/new` : "/vaults/new"}>
+                    Add a memory now
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
 
         <section id="vaults" className="space-y-4">
           <Card className="overflow-hidden border-white/60 bg-card/86 shadow-[0_18px_48px_rgba(66,46,31,0.08)]">
@@ -144,7 +432,7 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="section-stack">
               <h2 className="font-display text-3xl sm:text-4xl">Your vaults</h2>
-              <p className="text-sm leading-7 text-muted-foreground">Each card shows the person it holds, how full it is, and the next moment waiting to arrive.</p>
+              <p className="text-sm leading-7 text-muted-foreground">Each vault still gives you the practical overview, but the dashboard now keeps the emotional momentum up top.</p>
             </div>
             {query ? <p className="text-sm leading-7 text-muted-foreground">Showing <strong className="text-foreground">{filteredVaultCards.length}</strong> vault{filteredVaultCards.length === 1 ? "" : "s"} for "{resolvedSearchParams.q}".</p> : null}
           </div>
@@ -159,17 +447,49 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
         </section>
 
         <section id="upcoming" className="space-y-4">
-          <div className="section-stack"><h2 className="font-display text-3xl sm:text-4xl">Upcoming unlocks</h2><p className="text-sm leading-7 text-muted-foreground">Entries unlocking within the next 30 days.</p></div>
-          <div className="grid gap-4">{upcomingEntries.length ? upcomingEntries.slice(0, 5).map((entry) => <Card key={entry.id} className="glass-panel"><CardContent className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between"><div><p className="font-medium text-foreground">{entry.title}</p><p className="mt-1 text-sm leading-7 text-muted-foreground">Unlocks on {new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(new Date(entry.unlock_at ?? ""))}</p></div><Button asChild variant="ghost"><Link href={`/vaults/${entry.vault_id}`}>Open vault</Link></Button></CardContent></Card>) : <EmptyState icon={CalendarClock} title="No upcoming unlocks" body="No entries are approaching their reveal yet. Once you lock memories to dates or milestones, this is where anticipation starts to build." />}</div>
-        </section>
-
-        <section className="space-y-4">
-          <div className="section-stack"><h2 className="font-display text-3xl sm:text-4xl">Unlocked memories</h2><p className="text-sm leading-7 text-muted-foreground">Moments that have made it through time and are ready to revisit.</p></div>
-          {unlockedEntries.length ? <div className="grid gap-4">{unlockedEntries.slice(0, 3).map((entry) => <Card key={entry.id} className="glass-panel"><CardContent className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between"><div><p className="font-medium text-foreground">{entry.title}</p><p className="mt-1 text-sm leading-7 text-muted-foreground">Now unlocked inside its vault.</p></div><Button asChild variant="ghost"><Link href={`/entries/${entry.id}`}>Reveal</Link></Button></CardContent></Card>)}</div> : <EmptyState icon={Sparkles} title="No unlocked memories" body="The best part of the product is still ahead: the first time a message from your past version returns with perfect timing." />}
+          <div className="section-stack">
+            <h2 className="font-display text-3xl sm:text-4xl">Unlocking soon</h2>
+            <p className="text-sm leading-7 text-muted-foreground">A focused view of the memories that are within the upcoming unlock window.</p>
+          </div>
+          <div className="grid gap-4">
+            {upcomingEntries.length ? upcomingEntries.slice(0, 4).map((entry) => (
+              <Card key={entry.id} className="glass-panel overflow-hidden border-white/60">
+                <div className="flex min-h-[188px] flex-col gap-5 px-6 py-8 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+                  <div className="flex flex-1 items-center">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">{vaultById.get(entry.vault_id)?.name ?? "Vault"}</p>
+                      <p className="mt-2 font-display text-2xl text-foreground">{entry.title}</p>
+                      <p className="mt-2 text-sm leading-7 text-muted-foreground">Unlocks on {formatDate(entry.unlock_at)}.</p>
+                    </div>
+                  </div>
+                  <Button asChild variant="ghost"><Link href={`/entries/${entry.id}`}>Open entry</Link></Button>
+                </div>
+              </Card>
+            )) : <EmptyState icon={CalendarClock} title="No upcoming unlocks" body="No entries are approaching their reveal yet. Once you lock memories to dates or milestones, this is where anticipation starts to build." />}
+          </div>
         </section>
       </div>
     </AppShell>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
