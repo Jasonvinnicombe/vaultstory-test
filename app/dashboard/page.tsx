@@ -270,14 +270,10 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
 
                   <div className="space-y-3">
                     <p className="inline-flex items-center gap-2 text-sm text-white/84"><CalendarClock className="h-4 w-4" />Countdown to reveal</p>
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                      <div className="flex-1">
-                        <CountdownTimer unlockAt={nextUnlockEntry.unlock_at} variant="inline" />
-                      </div>
-                      <Button asChild variant="secondary" className="w-full sm:w-auto sm:shrink-0">
-                        <Link href={`/entries/${nextUnlockEntry.id}`}>Open entry</Link>
-                      </Button>
-                    </div>
+                    <CountdownTimer unlockAt={nextUnlockEntry.unlock_at} variant="inline" />
+                    <Button asChild variant="secondary" className="w-full sm:w-auto">
+                      <Link href={`/entries/${nextUnlockEntry.id}`}>Open entry</Link>
+                    </Button>
                   </div>
                 </>
               ) : (
@@ -475,6 +471,7 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
     </AppShell>
   );
 }
+
 
 
 

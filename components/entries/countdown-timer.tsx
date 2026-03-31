@@ -26,30 +26,20 @@ export function CountdownTimer({ unlockAt, variant = "default" }: { unlockAt: st
   }
 
   if (variant === "inline") {
-    const inlineItems = countdown
+    const inlineLabel = countdown
       ? [
-          { label: "d", value: String(countdown.days).padStart(2, "0") },
-          { label: "h", value: String(countdown.hours).padStart(2, "0") },
-          { label: "m", value: String(countdown.minutes).padStart(2, "0") },
-          { label: "s", value: String(countdown.seconds).padStart(2, "0") },
-        ]
-      : [
-          { label: "d", value: "--" },
-          { label: "h", value: "--" },
-          { label: "m", value: "--" },
-          { label: "s", value: "--" },
-        ];
+          countdown.days > 0 ? `${countdown.days}d` : null,
+          `${countdown.hours}h`,
+          `${countdown.minutes}m`,
+          `${countdown.seconds}s`,
+        ].filter(Boolean).join(" ")
+      : "--h --m --s";
 
     return (
-      <div className="rounded-[28px] border border-white/12 bg-black/20 px-5 py-4 text-white backdrop-blur-sm">
+      <div className="rounded-[24px] border border-white/12 bg-black/20 px-4 py-3 text-white backdrop-blur-sm">
         <div className="flex flex-wrap items-center gap-3">
-          <span className="text-xs uppercase tracking-[0.22em] text-white/54">Opens in</span>
-          {inlineItems.map((item) => (
-            <div key={item.label} className="inline-flex items-baseline gap-1 rounded-full border border-white/10 bg-white/6 px-3 py-2">
-              <span className="font-display text-2xl leading-none text-white">{item.value}</span>
-              <span className="text-[10px] uppercase tracking-[0.2em] text-white/58">{item.label}</span>
-            </div>
-          ))}
+          <span className="text-[11px] uppercase tracking-[0.2em] text-white/54">Opens in</span>
+          <span className="font-display text-2xl leading-none text-white sm:text-3xl">{inlineLabel}</span>
         </div>
       </div>
     );
@@ -80,4 +70,5 @@ export function CountdownTimer({ unlockAt, variant = "default" }: { unlockAt: st
     </div>
   );
 }
+
 
