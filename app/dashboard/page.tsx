@@ -194,7 +194,7 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
     <AppShell fullName={profile?.full_name ?? user.user_metadata.full_name ?? null} email={user.email ?? ""} isAdmin={profile?.is_admin ?? false} avatarUrl={avatarPreviewUrl}>
       <div className="space-y-7 sm:space-y-8">
         <section className="grid items-start gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(340px,0.9fr)]">
-          <div className="space-y-5">
+          <div className="space-y-3">
             <Card className="overflow-hidden border-white/60 bg-[radial-gradient(circle_at_20%_18%,rgba(255,255,255,0.72),rgba(255,255,255,0.16)_24%,transparent_44%),radial-gradient(circle_at_88%_14%,rgba(230,184,106,0.18),transparent_22%),linear-gradient(135deg,rgba(255,251,246,0.96),rgba(246,238,228,0.9)_52%,rgba(238,231,221,0.86))] shadow-[0_28px_82px_rgba(66,46,31,0.12)]">
               <CardContent className="relative flex flex-col gap-6 p-7 sm:p-8 lg:p-10">
                 <div className="hero-orb absolute right-[-4rem] top-[-3rem] hidden h-48 w-48 rounded-full opacity-60 lg:block" />
@@ -207,7 +207,7 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
               </CardContent>
             </Card>
 
-            <div className="space-y-5 rounded-[34px] border border-white/60 bg-white/30 p-5 shadow-[0_18px_48px_rgba(66,46,31,0.06)] backdrop-blur-sm sm:p-6">
+            <div className="space-y-3 rounded-[34px] border border-white/60 bg-white/30 p-5 shadow-[0_18px_48px_rgba(66,46,31,0.06)] backdrop-blur-sm sm:p-6">
               <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 {stats.map((stat) => {
                   const Icon = stat.icon;
@@ -225,7 +225,7 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
                 })}
               </div>
 
-              <div className="relative flex flex-wrap gap-3">
+              <div className="relative flex flex-wrap gap-2">
                 <Button asChild>
                   <Link href={firstVault ? `/vaults/${firstVault.id}/entries/new` : "/vaults/new"}>
                     Create memory
@@ -279,7 +279,7 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
               ) : (
                 <div className="rounded-[30px] border border-dashed border-white/18 bg-white/8 p-6">
                   <p className="text-sm leading-7 text-white/78">No dated unlocks are scheduled yet. Create a vault or add an entry with an exact day so the dashboard can start counting down to something meaningful.</p>
-                  <div className="mt-4 flex flex-wrap gap-3">
+                  <div className="mt-4 flex flex-wrap gap-2">
                     <Button asChild variant="secondary">
                       <Link href={firstVault ? `/vaults/${firstVault.id}/entries/new` : "/vaults/new"}>Create memory</Link>
                     </Button>
@@ -301,7 +301,7 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
                 <h2 className="text-balance font-display text-3xl sm:text-4xl">Build your first family time capsule in two thoughtful steps.</h2>
                 <p className="text-sm leading-7 text-primary-foreground/82">Create your first vault, then add the first memory entry so the future has something meaningful waiting for it.</p>
               </div>
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-2">
                 <Button asChild variant="secondary"><Link href="/vaults/new?onboarding=1">1. Create first vault</Link></Button>
                 <Button asChild variant="outline" className="border-white/25 bg-transparent text-white hover:bg-white/10"><Link href={firstVault ? `/vaults/${firstVault.id}/entries/new?onboarding=1` : "/vaults/new?onboarding=1"}>2. Create first memory</Link></Button>
               </div>
@@ -361,31 +361,31 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
 
                   return (
                     <Link key={entry.id} href={entry.href} className="group">
-                      <Card className="glass-panel relative overflow-hidden border-white/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(255,248,241,0.96))] transition duration-200 group-hover:-translate-y-0.5 group-hover:shadow-[0_28px_72px_rgba(66,46,31,0.12)]">
-                        <div className={`pointer-events-none absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b ${accentClasses}`} />
-                        <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.92),transparent_72%)] opacity-80" />
-                        <div className="relative flex min-h-[188px] flex-col gap-6 px-7 py-7 sm:px-8 lg:grid lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center lg:gap-10">
-                          <div className="space-y-5">
-                            <div className="flex flex-wrap items-center gap-3">
-                              <span className={`inline-flex rounded-full border px-4 py-1.5 text-[11px] font-medium uppercase tracking-[0.18em] ${statusClasses}`}>{entry.statusLabel}</span>
-                              <span className="inline-flex rounded-full border border-black/5 bg-white/75 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-muted-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.5)]">{entry.vaultName}</span>
+                      <Card className="glass-panel relative overflow-hidden border-white/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(255,248,241,0.96))] transition duration-200 group-hover:-translate-y-0.5 group-hover:shadow-[0_20px_44px_rgba(66,46,31,0.08)]">
+                        <div className={`pointer-events-none absolute inset-y-0 left-0 w-1 bg-gradient-to-b ${accentClasses}`} />
+                        <div className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.7),transparent_72%)] opacity-55" />
+                        <div className="relative flex min-h-[152px] flex-col gap-4 px-6 py-5 sm:px-7 lg:grid lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center lg:gap-6">
+                          <div className="space-y-3">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className={`inline-flex rounded-full border px-3 py-1 text-[10px] font-medium uppercase tracking-[0.18em] ${statusClasses}`}>{entry.statusLabel}</span>
+                              <span className="inline-flex rounded-full border border-black/5 bg-white/75 px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-muted-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.5)]">{entry.vaultName}</span>
                               {entry.subjectName ? (
-                                <span className="inline-flex rounded-full border border-black/5 bg-black/[0.03] px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                                <span className="inline-flex rounded-full border border-black/5 bg-black/[0.03] px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
                                   For {entry.subjectName}
                                 </span>
                               ) : null}
                             </div>
                             <div className="space-y-3">
-                              <h3 className="max-w-3xl font-display text-[1.9rem] leading-tight text-foreground sm:text-[2.1rem]">{entry.title}</h3>
-                              <p className="max-w-3xl text-base leading-8 text-muted-foreground">{entry.detail}</p>
+                              <h3 className="max-w-3xl font-display text-[1.5rem] leading-tight text-foreground sm:text-[1.7rem]">{entry.title}</h3>
+                              <p className="max-w-3xl text-sm leading-6 text-muted-foreground">{entry.detail}</p>
                             </div>
                           </div>
-                          <div className="flex flex-col gap-3 lg:items-end">
-                            <div className="inline-flex items-center gap-2 rounded-full border border-black/5 bg-white/72 px-4 py-2 text-sm text-muted-foreground shadow-[0_10px_30px_rgba(66,46,31,0.06)]">
+                          <div className="flex flex-col gap-2 lg:items-end">
+                            <div className="inline-flex items-center gap-2 rounded-full border border-black/5 bg-white/72 px-3 py-1.5 text-xs text-muted-foreground shadow-[0_8px_20px_rgba(66,46,31,0.04)]">
                               <CalendarClock className="h-4 w-4 text-primary/75" />
                               <span>{entry.status === "soon" ? "Approaching unlock" : entry.status === "unlocked" ? "Ready now" : entry.status === "draft" ? "In progress" : "Locked safely"}</span>
                             </div>
-                            <span className="inline-flex items-center justify-center gap-2 rounded-full border border-primary/10 bg-primary px-5 py-3 text-sm font-medium text-primary-foreground shadow-[0_16px_34px_rgba(30,42,68,0.16)] transition group-hover:translate-x-1 group-hover:bg-primary/92">
+                            <span className="inline-flex items-center justify-center gap-2 rounded-full border border-primary/10 bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-[0_10px_22px_rgba(30,42,68,0.12)] transition group-hover:translate-x-1 group-hover:bg-primary/92">
                               View memory
                               <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
                             </span>
@@ -424,7 +424,7 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
         <section id="vaults" className="space-y-4">
           <Card className="overflow-hidden border-white/60 bg-card/86 shadow-[0_18px_48px_rgba(66,46,31,0.08)]">
             <CardContent className="grid gap-4 p-5 sm:p-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
-              <form className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-end">
+              <form className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-end">
                 <label className="space-y-2 text-sm font-medium text-foreground">
                   <span className="uppercase tracking-[0.22em] text-muted-foreground">Search vaults</span>
                   <div className="relative">
@@ -471,38 +471,38 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
           </div>
           <div className="grid gap-4">
             {upcomingEntries.length ? upcomingEntries.slice(0, 4).map((entry) => (
-              <Card key={entry.id} className="glass-panel group relative overflow-hidden border-white/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(255,248,241,0.96))] shadow-[0_20px_54px_rgba(66,46,31,0.08)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_28px_72px_rgba(66,46,31,0.12)]">
-                <div className="pointer-events-none absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b from-secondary via-secondary/20 to-transparent" />
-                <div className="pointer-events-none absolute right-[-3rem] top-[-3rem] h-28 w-28 rounded-full bg-secondary/10 blur-2xl" />
-                <div className="relative flex min-h-[188px] flex-col gap-6 px-7 py-7 sm:px-8 lg:grid lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center lg:gap-10">
-                  <div className="space-y-5">
-                    <div className="flex flex-wrap items-center gap-3">
-                      <span className="inline-flex rounded-full border border-secondary/60 bg-secondary/14 px-4 py-1.5 text-[11px] font-medium uppercase tracking-[0.18em] text-primary">Unlocking soon</span>
-                      <span className="inline-flex rounded-full border border-black/5 bg-white/75 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">{vaultById.get(entry.vault_id)?.name ?? "Vault"}</span>
+              <Card key={entry.id} className="glass-panel group relative overflow-hidden border-white/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(255,248,241,0.96))] shadow-[0_14px_32px_rgba(66,46,31,0.06)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_20px_44px_rgba(66,46,31,0.08)]">
+                <div className="pointer-events-none absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-secondary via-secondary/20 to-transparent" />
+                <div className="pointer-events-none absolute right-[-2rem] top-[-2rem] h-20 w-20 rounded-full bg-secondary/8 blur-2xl" />
+                <div className="relative flex min-h-[152px] flex-col gap-4 px-6 py-5 sm:px-7 lg:grid lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center lg:gap-6">
+                  <div className="space-y-3">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="inline-flex rounded-full border border-secondary/60 bg-secondary/14 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.18em] text-primary">Unlocking soon</span>
+                      <span className="inline-flex rounded-full border border-black/5 bg-white/75 px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-muted-foreground">{vaultById.get(entry.vault_id)?.name ?? "Vault"}</span>
                       {vaultById.get(entry.vault_id)?.subject_name ? (
-                        <span className="inline-flex rounded-full border border-black/5 bg-black/[0.03] px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                        <span className="inline-flex rounded-full border border-black/5 bg-black/[0.03] px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
                           For {vaultById.get(entry.vault_id)?.subject_name}
                         </span>
                       ) : null}
                     </div>
                     <div className="space-y-3">
-                      <p className="max-w-3xl font-display text-[1.9rem] leading-tight text-foreground sm:text-[2.1rem]">{entry.title}</p>
-                      <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-                        <span className="inline-flex items-center gap-2 rounded-full border border-black/5 bg-white/70 px-4 py-2 shadow-[0_10px_30px_rgba(66,46,31,0.06)]">
+                      <p className="max-w-3xl font-display text-[1.5rem] leading-tight text-foreground sm:text-[1.7rem]">{entry.title}</p>
+                      <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                        <span className="inline-flex items-center gap-2 rounded-full border border-black/5 bg-white/70 px-3 py-1.5 shadow-[0_8px_20px_rgba(66,46,31,0.04)]">
                           <CalendarClock className="h-4 w-4 text-primary/75" />
                           Unlocks {formatDate(entry.unlock_at)}
                         </span>
                       </div>
                     </div>
                   </div>
-                  <div className="flex flex-col gap-3 lg:items-end">
-                    <Button asChild variant="outline" className="rounded-full border-primary/12 bg-primary/6 px-5 text-foreground shadow-[0_12px_28px_rgba(66,46,31,0.06)] hover:bg-primary hover:text-primary-foreground">
+                  <div className="flex flex-col gap-2 lg:items-end">
+                    <Button asChild variant="outline" className="rounded-full border-primary/12 bg-primary/6 px-4 text-foreground shadow-[0_8px_20px_rgba(66,46,31,0.04)] hover:bg-primary hover:text-primary-foreground">
                       <Link href={`/entries/${entry.id}`}>
                         View memory
                         <ArrowRight className="h-4 w-4" />
                       </Link>
                     </Button>
-                    <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                    <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
                       {entry.unlock_at ? formatDateTime(entry.unlock_at) : "Waiting for a milestone"}
                     </p>
                   </div>
@@ -515,6 +515,7 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
     </AppShell>
   );
 }
+
 
 
 
