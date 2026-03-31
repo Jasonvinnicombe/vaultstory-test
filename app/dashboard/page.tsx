@@ -344,32 +344,51 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
                 {timelineEntries.map((entry) => {
                   const statusClasses =
                     entry.status === "soon"
-                      ? "border-secondary/70 bg-secondary/12 text-primary"
+                      ? "border-secondary/60 bg-secondary/14 text-primary"
                       : entry.status === "unlocked"
-                        ? "border-emerald-300/60 bg-emerald-50 text-emerald-900"
+                        ? "border-emerald-300/60 bg-emerald-50/90 text-emerald-900"
                         : entry.status === "draft"
                           ? "border-slate-300/70 bg-slate-100 text-slate-700"
                           : "border-primary/15 bg-primary/6 text-primary";
+                  const accentClasses =
+                    entry.status === "soon"
+                      ? "from-secondary/70 via-secondary/20 to-transparent"
+                      : entry.status === "unlocked"
+                        ? "from-emerald-300/65 via-emerald-100/25 to-transparent"
+                        : entry.status === "draft"
+                          ? "from-slate-300/70 via-slate-100/25 to-transparent"
+                          : "from-primary/25 via-primary/10 to-transparent";
 
                   return (
                     <Link key={entry.id} href={entry.href} className="group">
-                      <Card className="glass-panel overflow-hidden border-white/60 transition duration-200 group-hover:-translate-y-0.5 group-hover:shadow-[0_24px_62px_rgba(66,46,31,0.11)]">
-                        <div className="flex min-h-[188px] flex-col gap-6 px-8 py-8 sm:flex-row sm:justify-between sm:gap-8 sm:px-9 sm:py-8">
-                          <div className="flex flex-1 items-center">
-                            <div className="max-w-3xl space-y-4">
-                              <div className="flex flex-wrap items-center gap-2">
-                                <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-medium uppercase tracking-[0.16em] ${statusClasses}`}>{entry.statusLabel}</span>
-                                <span className="text-xs uppercase tracking-[0.18em] text-muted-foreground">{entry.vaultName}</span>
-                              </div>
-                              <div className="space-y-2">
-                                <h3 className="font-display text-2xl text-foreground">{entry.title}</h3>
-                                <p className="mt-2 text-sm leading-7 text-muted-foreground">{entry.subjectName ? `For ${entry.subjectName}. ` : ""}{entry.detail}</p>
-                              </div>
+                      <Card className="glass-panel relative overflow-hidden border-white/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(255,248,241,0.96))] transition duration-200 group-hover:-translate-y-0.5 group-hover:shadow-[0_28px_72px_rgba(66,46,31,0.12)]">
+                        <div className={`pointer-events-none absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b ${accentClasses}`} />
+                        <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.92),transparent_72%)] opacity-80" />
+                        <div className="relative flex min-h-[188px] flex-col gap-6 px-7 py-7 sm:px-8 lg:grid lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center lg:gap-10">
+                          <div className="space-y-5">
+                            <div className="flex flex-wrap items-center gap-3">
+                              <span className={`inline-flex rounded-full border px-4 py-1.5 text-[11px] font-medium uppercase tracking-[0.18em] ${statusClasses}`}>{entry.statusLabel}</span>
+                              <span className="inline-flex rounded-full border border-black/5 bg-white/75 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-muted-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.5)]">{entry.vaultName}</span>
+                              {entry.subjectName ? (
+                                <span className="inline-flex rounded-full border border-black/5 bg-black/[0.03] px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                                  For {entry.subjectName}
+                                </span>
+                              ) : null}
+                            </div>
+                            <div className="space-y-3">
+                              <h3 className="max-w-3xl font-display text-[1.9rem] leading-tight text-foreground sm:text-[2.1rem]">{entry.title}</h3>
+                              <p className="max-w-3xl text-base leading-8 text-muted-foreground">{entry.detail}</p>
                             </div>
                           </div>
-                          <div className="flex items-center justify-start gap-2 text-sm font-medium text-foreground sm:justify-end">
-                            View memory
-                            <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
+                          <div className="flex flex-col gap-3 lg:items-end">
+                            <div className="inline-flex items-center gap-2 rounded-full border border-black/5 bg-white/72 px-4 py-2 text-sm text-muted-foreground shadow-[0_10px_30px_rgba(66,46,31,0.06)]">
+                              <CalendarClock className="h-4 w-4 text-primary/75" />
+                              <span>{entry.status === "soon" ? "Approaching unlock" : entry.status === "unlocked" ? "Ready now" : entry.status === "draft" ? "In progress" : "Locked safely"}</span>
+                            </div>
+                            <span className="inline-flex items-center justify-center gap-2 rounded-full border border-primary/10 bg-primary px-5 py-3 text-sm font-medium text-primary-foreground shadow-[0_16px_34px_rgba(30,42,68,0.16)] transition group-hover:translate-x-1 group-hover:bg-primary/92">
+                              View memory
+                              <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
+                            </span>
                           </div>
                         </div>
                       </Card>
@@ -452,16 +471,41 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
           </div>
           <div className="grid gap-4">
             {upcomingEntries.length ? upcomingEntries.slice(0, 4).map((entry) => (
-              <Card key={entry.id} className="glass-panel overflow-hidden border-white/60">
-                <div className="flex min-h-[188px] flex-col gap-5 px-6 py-8 sm:flex-row sm:items-center sm:justify-between sm:px-8">
-                  <div className="flex flex-1 items-center">
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">{vaultById.get(entry.vault_id)?.name ?? "Vault"}</p>
-                      <p className="mt-2 font-display text-2xl text-foreground">{entry.title}</p>
-                      <p className="mt-2 text-sm leading-7 text-muted-foreground">Unlocks on {formatDate(entry.unlock_at)}.</p>
+              <Card key={entry.id} className="glass-panel group relative overflow-hidden border-white/60 bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(255,248,241,0.96))] shadow-[0_20px_54px_rgba(66,46,31,0.08)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_28px_72px_rgba(66,46,31,0.12)]">
+                <div className="pointer-events-none absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b from-secondary via-secondary/20 to-transparent" />
+                <div className="pointer-events-none absolute right-[-3rem] top-[-3rem] h-28 w-28 rounded-full bg-secondary/10 blur-2xl" />
+                <div className="relative flex min-h-[188px] flex-col gap-6 px-7 py-7 sm:px-8 lg:grid lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center lg:gap-10">
+                  <div className="space-y-5">
+                    <div className="flex flex-wrap items-center gap-3">
+                      <span className="inline-flex rounded-full border border-secondary/60 bg-secondary/14 px-4 py-1.5 text-[11px] font-medium uppercase tracking-[0.18em] text-primary">Unlocking soon</span>
+                      <span className="inline-flex rounded-full border border-black/5 bg-white/75 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">{vaultById.get(entry.vault_id)?.name ?? "Vault"}</span>
+                      {vaultById.get(entry.vault_id)?.subject_name ? (
+                        <span className="inline-flex rounded-full border border-black/5 bg-black/[0.03] px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                          For {vaultById.get(entry.vault_id)?.subject_name}
+                        </span>
+                      ) : null}
+                    </div>
+                    <div className="space-y-3">
+                      <p className="max-w-3xl font-display text-[1.9rem] leading-tight text-foreground sm:text-[2.1rem]">{entry.title}</p>
+                      <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+                        <span className="inline-flex items-center gap-2 rounded-full border border-black/5 bg-white/70 px-4 py-2 shadow-[0_10px_30px_rgba(66,46,31,0.06)]">
+                          <CalendarClock className="h-4 w-4 text-primary/75" />
+                          Unlocks {formatDate(entry.unlock_at)}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                  <Button asChild variant="ghost"><Link href={`/entries/${entry.id}`}>Open entry</Link></Button>
+                  <div className="flex flex-col gap-3 lg:items-end">
+                    <Button asChild variant="outline" className="rounded-full border-primary/12 bg-primary/6 px-5 text-foreground shadow-[0_12px_28px_rgba(66,46,31,0.06)] hover:bg-primary hover:text-primary-foreground">
+                      <Link href={`/entries/${entry.id}`}>
+                        View memory
+                        <ArrowRight className="h-4 w-4" />
+                      </Link>
+                    </Button>
+                    <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                      {entry.unlock_at ? formatDateTime(entry.unlock_at) : "Waiting for a milestone"}
+                    </p>
+                  </div>
                 </div>
               </Card>
             )) : <EmptyState icon={CalendarClock} title="No upcoming unlocks" body="No entries are approaching their reveal yet. Once you lock memories to dates or milestones, this is where anticipation starts to build." />}
@@ -471,6 +515,9 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
     </AppShell>
   );
 }
+
+
+
 
 
 
