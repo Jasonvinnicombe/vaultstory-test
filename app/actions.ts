@@ -816,8 +816,55 @@ export async function deleteUserAction(formData: FormData) {
     redirectWithMessage(message, "adminError");
   }
 }
+export async function triggerUnlockNotificationsAction(formData: FormData) {
+  const { revalidatePath } = await import("next/cache");
+  const { redirect } = await import("next/navigation");
+  const { getAppUrl } = await import("@/lib/app-url");
 
+  const mode = String(formData.get("mode") ?? "dry-run").trim().toLowerCase();
+  const dryRun = mode !== "send";
 
+  const redirectWithMessage = (message: string, type: "unlockError" | "unlockSuccess") => {
+    redirect(`/admin/users?${type}=${encodeURIComponent(message)}`);
+  };
 
+  try {
+    await requireCurrentAdmin();
 
+    const secret = process.env.UNLOCK_NOTIFICATIONS_CRON_SECRET?.trim();
+    if (!secret) {
+      redirectWithMessage("Add UNLOCK_NOTIFICATIONS_CRON_SECRET before running unlock notifications.", "unlockError");
+    }
+
+    const url = new URL("/api/notifications/unlocks", getAppUrl());
+    url.searchParams.set("secret", secret!);
+    if (dryRun) {
+      url.searchParams.set("dryRun", "1");
+    }
+
+    const response = await fetch(url, { method: "GET", cache: "no-store" });
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result?.error || "Unable to run unlock notifications.");
+    }
+
+    revalidatePath("/admin/users");
+
+    if (dryRun) {
+      redirectWithMessage(`Unlock email preview found ${result.plannedEmails ?? 0} pending email${result.plannedEmails === 1 ? "" : "s"}.`, "unlockSuccess");
+    }
+
+    redirectWithMessage(`Unlock email send completed. Sent ${result.emailsSent ?? 0} email${result.emailsSent === 1 ? "" : "s"}.`, "unlockSuccess");
+  } catch (error) {
+    const { isRedirectError } = await import("next/dist/client/components/redirect-error");
+
+    if (isRedirectError(error)) {
+      throw error;
+    }
+
+    const message = error instanceof Error ? error.message : "Unable to run unlock notifications.";
+    redirectWithMessage(message, "unlockError");
+  }
+}
 

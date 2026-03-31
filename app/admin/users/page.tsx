@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { deleteUserAction, inviteAdminAction, removeAdminInviteAction } from "@/app/actions";
+import { deleteUserAction, inviteAdminAction, removeAdminInviteAction, triggerUnlockNotificationsAction } from "@/app/actions";
 import { AppShell } from "@/components/layout/app-shell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { StorageUsageInline } from "@/components/admin/storage-usage-inline";
 import { requireAdmin } from "@/lib/auth";
 import { getEffectiveStorageQuotaGb, getMembershipLabel } from "@/lib/billing";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { getUnlockNotificationSummary } from "@/lib/unlock-notification-summary";
 
 const ROOT_ADMIN_EMAIL = "jasonvinnicombe2@gmail.com";
 
@@ -32,7 +33,7 @@ function formatStorageLabel(value: number) {
 export default async function AdminUsersPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ adminSuccess?: string; adminError?: string; q?: string }>;
+  searchParams?: Promise<{ adminSuccess?: string; adminError?: string; unlockSuccess?: string; unlockError?: string; q?: string }>;
 }) {
   const [{ profile, user, avatarPreviewUrl }, resolvedSearchParams] = await Promise.all([
     requireAdmin(),
@@ -43,6 +44,7 @@ export default async function AdminUsersPage({
     { data: profileRows, error: usersError },
     { data: pendingInvites, error: pendingInvitesError },
     { data: authUsersPage, error: authUsersError },
+    unlockSummary,
   ] = await Promise.all([
     supabaseAdmin
       .from("profiles")
@@ -54,6 +56,7 @@ export default async function AdminUsersPage({
       .eq("status", "pending")
       .order("created_at", { ascending: false }),
     supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 }),
+    getUnlockNotificationSummary().catch(() => ({ unlockedEntries: 0, pendingEmails: 0, sentEmails: 0, previewRecipients: [] })),
   ]);
 
   const profileMap = new Map((profileRows ?? []).map((entry) => [entry.id, entry]));
@@ -92,9 +95,13 @@ export default async function AdminUsersPage({
 
   const feedback = resolvedSearchParams.adminError
     ? { type: "error" as const, message: resolvedSearchParams.adminError }
-    : resolvedSearchParams.adminSuccess
-      ? { type: "success" as const, message: resolvedSearchParams.adminSuccess }
-      : null;
+    : resolvedSearchParams.unlockError
+      ? { type: "error" as const, message: resolvedSearchParams.unlockError }
+      : resolvedSearchParams.adminSuccess
+        ? { type: "success" as const, message: resolvedSearchParams.adminSuccess }
+        : resolvedSearchParams.unlockSuccess
+          ? { type: "success" as const, message: resolvedSearchParams.unlockSuccess }
+          : null;
 
   const dataWarning =
     usersError || pendingInvitesError || authUsersError
@@ -152,6 +159,59 @@ export default async function AdminUsersPage({
             <CardContent className="p-5 text-sm leading-7 text-foreground">{dataWarning}</CardContent>
           </Card>
         ) : null}
+
+        <Card className="border-white/60 bg-card/88 shadow-[0_20px_64px_rgba(66,46,31,0.08)]">
+          <CardContent className="space-y-6 p-8">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+              <div className="section-stack">
+                <h2 className="font-display text-3xl text-foreground">Unlock email monitor</h2>
+                <p className="text-sm leading-7 text-muted-foreground">See pending unlock notifications before customers miss them, and manually preview or send the batch if the scheduler falls behind.</p>
+              </div>
+              <div className="flex flex-wrap gap-3 lg:justify-end">
+                <form action={triggerUnlockNotificationsAction}>
+                  <input type="hidden" name="mode" value="dry-run" />
+                  <Button type="submit" variant="outline">Preview unlock batch</Button>
+                </form>
+                <form action={triggerUnlockNotificationsAction}>
+                  <input type="hidden" name="mode" value="send" />
+                  <Button type="submit">Send pending unlock emails</Button>
+                </form>
+              </div>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div className="rounded-[24px] border border-border/70 bg-background/75 p-5">
+                <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Unlocked entries</p>
+                <p className="mt-3 font-display text-3xl text-foreground">{unlockSummary.unlockedEntries}</p>
+              </div>
+              <div className="rounded-[24px] border border-border/70 bg-background/75 p-5">
+                <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Pending emails</p>
+                <p className="mt-3 font-display text-3xl text-foreground">{unlockSummary.pendingEmails}</p>
+              </div>
+              <div className="rounded-[24px] border border-border/70 bg-background/75 p-5">
+                <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Already logged</p>
+                <p className="mt-3 font-display text-3xl text-foreground">{unlockSummary.sentEmails}</p>
+              </div>
+            </div>
+            <div className="space-y-3">
+              <p className="text-sm font-medium text-foreground">Next recipients</p>
+              {unlockSummary.previewRecipients.length ? (
+                unlockSummary.previewRecipients.map((recipient) => (
+                  <div key={`${recipient.entryId}:${recipient.recipientEmail}`} className="flex flex-col gap-2 rounded-[22px] border border-border/70 bg-background/80 p-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-foreground">{recipient.entryTitle}</p>
+                      <p className="text-sm leading-7 text-muted-foreground">{recipient.vaultName}</p>
+                    </div>
+                    <p className="text-sm leading-7 text-muted-foreground">{recipient.recipientEmail}</p>
+                  </div>
+                ))
+              ) : (
+                <div className="rounded-[22px] border border-dashed border-border/70 bg-background/65 p-5 text-sm leading-7 text-muted-foreground">
+                  No pending unlock emails right now.
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
         <Card className="border-white/60 bg-card/88 shadow-[0_20px_64px_rgba(66,46,31,0.08)]">
           <CardContent className="space-y-6 p-8">
@@ -271,9 +331,7 @@ export default async function AdminUsersPage({
               );
             }) : (
               <Card className="border-white/60 bg-card/88 shadow-[0_20px_64px_rgba(66,46,31,0.08)]">
-                <CardContent className="p-6 text-sm leading-7 text-muted-foreground">
-                  No users match that search yet.
-                </CardContent>
+                <CardContent className="p-6 text-sm leading-7 text-muted-foreground">No users match that search yet.</CardContent>
               </Card>
             )}
           </div>
