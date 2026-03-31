@@ -1,3 +1,4 @@
+import { getAppUrl } from "@/lib/app-url";
 import { env } from "@/lib/env";
 
 type InviteEmailInput = {
@@ -45,7 +46,7 @@ function formatRole(role: string) {
 }
 
 function buildInviteLink(mode: "login" | "signup", email: string) {
-  const url = new URL(mode === "login" ? "/login" : "/signup", env.NEXT_PUBLIC_APP_URL);
+  const url = new URL(mode === "login" ? "/login" : "/signup", getAppUrl());
   url.searchParams.set("email", email);
   url.searchParams.set("invite", "vault");
   url.searchParams.set("next", "/dashboard");
@@ -53,7 +54,7 @@ function buildInviteLink(mode: "login" | "signup", email: string) {
 }
 
 function buildAdminInviteLink(mode: "login" | "signup", email: string) {
-  const url = new URL(mode === "login" ? "/login" : "/signup", env.NEXT_PUBLIC_APP_URL);
+  const url = new URL(mode === "login" ? "/login" : "/signup", getAppUrl());
   url.searchParams.set("email", email);
   url.searchParams.set("invite", "admin");
   url.searchParams.set("next", "/admin/users");
@@ -61,7 +62,7 @@ function buildAdminInviteLink(mode: "login" | "signup", email: string) {
 }
 
 function buildEntryLink(entryId: string, email: string) {
-  const url = new URL(`/entries/${entryId}`, env.NEXT_PUBLIC_APP_URL);
+  const url = new URL(`/entries/${entryId}`, getAppUrl());
   url.searchParams.set("email", email);
   return url.toString();
 }
@@ -242,6 +243,7 @@ export async function sendSupportRequestEmail(input: SupportEmailInput): Promise
 }
 export async function sendUnlockReadyEmail(input: UnlockReadyEmailInput): Promise<EmailResult> {
   const entryUrl = buildEntryLink(input.entryId, input.to);
+  console.info("[unlock-email] sending entry link", { entryId: input.entryId, host: new URL(entryUrl).origin, recipient: input.to });
   const recipientLabel = input.recipientName?.trim() || input.to;
   const subjectLine = input.subjectName?.trim()
     ? `${input.subjectName}'s memory is ready to open`
@@ -301,3 +303,6 @@ export async function sendUnlockReadyEmail(input: UnlockReadyEmailInput): Promis
     text,
   });
 }
+
+
+

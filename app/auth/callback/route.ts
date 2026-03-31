@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { normalizeEnvValue } from "@/lib/supabase/config";
+import { getAppUrl } from "@/lib/app-url";
 import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request: NextRequest) {
@@ -8,7 +8,13 @@ export async function GET(request: NextRequest) {
   const code = requestUrl.searchParams.get("code");
   const nextPath = requestUrl.searchParams.get("next") || "/dashboard";
   const safeNextPath = nextPath.startsWith("/") ? nextPath : "/dashboard";
-  const appUrl = normalizeEnvValue(process.env.NEXT_PUBLIC_APP_URL) || requestUrl.origin;
+  let appUrl = requestUrl.origin;
+
+  try {
+    appUrl = getAppUrl();
+  } catch {
+    appUrl = requestUrl.origin;
+  }
 
   if (!code) {
     return NextResponse.redirect(
