@@ -23,17 +23,29 @@ function formatDate(value: string | null | undefined) {
 }
 
 function formatStorageLabel(value: number) {
+
   if (!Number.isFinite(value)) {
     return "Unlimited storage";
   }
 
   return `${value}GB storage`;
 }
+function formatDateTime(value: string | null | undefined) {
+  if (!value) return "Never";
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(new Date(value));
+}
+
 
 export default async function AdminUsersPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ adminSuccess?: string; adminError?: string; unlockSuccess?: string; unlockError?: string; q?: string }>;
+  searchParams?: Promise<{ adminSuccess?: string; adminError?: string; unlockSuccess?: string; unlockError?: string; q?: string; sort?: string }>;
 }) {
   const [{ profile, user, avatarPreviewUrl }, resolvedSearchParams] = await Promise.all([
     requireAdmin(),
@@ -78,6 +90,7 @@ export default async function AdminUsersPage({
       membership_status: profileEntry?.membership_status ?? "active",
       storage_quota_gb: profileEntry?.storage_quota_gb ?? null,
       created_at: profileEntry?.created_at ?? authUser.created_at ?? null,
+      last_sign_in_at: authUser.last_sign_in_at ?? null,
     };
   });
 
@@ -85,9 +98,27 @@ export default async function AdminUsersPage({
     ...entry,
     membership_plan: entry.membership_plan ?? "free",
     membership_status: entry.membership_status ?? "active",
+    last_sign_in_at: null,
   }));
 
+  const sort = resolvedSearchParams.sort?.trim().toLowerCase() ?? "newest";
   const users = [...mergedUsers, ...orphanedProfiles].sort((a, b) => {
+    if (sort === "oldest") {
+      const aTime = a.created_at ? new Date(a.created_at).getTime() : 0;
+      const bTime = b.created_at ? new Date(b.created_at).getTime() : 0;
+      return aTime - bTime;
+    }
+
+    if (sort === "name") {
+      return (a.full_name ?? a.email).localeCompare(b.full_name ?? b.email, undefined, { sensitivity: "base" });
+    }
+
+    if (sort === "last-login") {
+      const aTime = a.last_sign_in_at ? new Date(a.last_sign_in_at).getTime() : 0;
+      const bTime = b.last_sign_in_at ? new Date(b.last_sign_in_at).getTime() : 0;
+      return bTime - aTime;
+    }
+
     const aTime = a.created_at ? new Date(a.created_at).getTime() : 0;
     const bTime = b.created_at ? new Date(b.created_at).getTime() : 0;
     return bTime - aTime;
@@ -219,7 +250,7 @@ export default async function AdminUsersPage({
               <h2 className="font-display text-3xl text-foreground">Search users</h2>
               <p className="text-sm leading-7 text-muted-foreground">Find people by name or email before changing access.</p>
             </div>
-            <form className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto_auto] lg:items-end">
+            <form className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_240px_auto_auto] lg:items-end">
               <label className="space-y-2 text-sm font-medium text-foreground">
                 <span className="uppercase tracking-[0.22em] text-muted-foreground">Search</span>
                 <input
@@ -230,8 +261,21 @@ export default async function AdminUsersPage({
                   className="h-14 w-full rounded-[22px] border border-border/70 bg-background px-5 text-base text-foreground outline-none transition focus:border-primary/30 focus:ring-4 focus:ring-secondary/25"
                 />
               </label>
-              <Button type="submit" className="h-14 px-7">Search</Button>
-              {query ? <Button asChild type="button" variant="outline" className="h-14 px-7"><a href="/admin/users">Clear</a></Button> : null}
+              <label className="space-y-2 text-sm font-medium text-foreground">
+                <span className="uppercase tracking-[0.22em] text-muted-foreground">Sort</span>
+                <select
+                  name="sort"
+                  defaultValue={sort}
+                  className="h-14 w-full rounded-[22px] border border-border/70 bg-background px-5 text-base text-foreground outline-none transition focus:border-primary/30 focus:ring-4 focus:ring-secondary/25"
+                >
+                  <option value="newest">Newest joined</option>
+                  <option value="oldest">Oldest joined</option>
+                  <option value="last-login">Last login</option>
+                  <option value="name">Name A-Z</option>
+                </select>
+              </label>
+              <Button type="submit" className="h-14 px-7">Apply</Button>
+              {(query || sort !== "newest") ? <Button asChild type="button" variant="outline" className="h-14 px-7"><a href="/admin/users">Clear</a></Button> : null}
             </form>
             <p className="text-sm leading-7 text-muted-foreground">
               Showing <strong className="text-foreground">{filteredUsers.length}</strong> user{filteredUsers.length === 1 ? "" : "s"} and <strong className="text-foreground">{filteredPendingInvites.length}</strong> pending admin invite{filteredPendingInvites.length === 1 ? "" : "s"}.
@@ -312,6 +356,7 @@ export default async function AdminUsersPage({
                         </div>
                         <p className="mt-2 text-sm leading-7 text-muted-foreground">{entry.email}</p>
                         <p className="text-sm leading-7 text-muted-foreground">Joined {formatDate(entry.created_at)}. Current plan: <strong className="text-foreground">{getMembershipLabel(entry.membership_plan)}</strong>.</p>
+                        <p className="text-sm leading-7 text-muted-foreground">Last login: <strong className="text-foreground">{formatDateTime(entry.last_sign_in_at)}</strong>.</p>
                         <p className="text-sm leading-7 text-muted-foreground">Current storage allowance: <strong className="text-foreground">{formatStorageLabel(effectiveStorage)}</strong>{entry.storage_quota_gb ? " (custom override)" : ""}.</p>
                         <p className="text-sm leading-7 text-muted-foreground">
                           Current storage usage: <StorageUsageInline userId={entry.id} />
@@ -340,3 +385,11 @@ export default async function AdminUsersPage({
     </AppShell>
   );
 }
+
+
+
+
+
+
+
+
