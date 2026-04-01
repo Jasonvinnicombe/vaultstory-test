@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { CalendarClock, LockKeyhole, LockOpen, Sparkles, X } from "lucide-react";
+import { CalendarClock, Download, LockKeyhole, LockOpen, Sparkles, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
@@ -427,3 +427,4 @@ export function RevealExperience(props: RevealExperienceProps) {
     </>
   );
 }
+
