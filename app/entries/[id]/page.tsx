@@ -14,6 +14,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { getProfile } from "@/lib/auth";
 import { formatDateTime } from "@/lib/date";
 import { getEntryStatus, isDraftEntry } from "@/lib/entries";
+import { getStorageObjectUrl } from "@/lib/storage";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -44,17 +45,15 @@ export default async function EntryPage({ params, searchParams }: { params: Prom
         }
 
         try {
-          const { data, error } = await supabaseAdmin.storage
-            .from("entry-assets")
-            .createSignedUrl(asset.file_url, 60 * 10);
+          const fileUrl = await getStorageObjectUrl(asset.file_url, { bucket: "entry-assets", expiresIn: 60 * 10 });
 
-          if (error || !data?.signedUrl) {
+          if (!fileUrl) {
             return null;
           }
 
           return {
             id: asset.id,
-            fileUrl: data.signedUrl,
+            fileUrl,
             fileType: asset.file_type,
           };
         } catch {
@@ -202,6 +201,10 @@ export default async function EntryPage({ params, searchParams }: { params: Prom
     </AppShell>
   );
 }
+
+
+
+
 
 
 

@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { sendUnlockReadyEmail } from "@/lib/email";
 import { getEntryStatus } from "@/lib/entries";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { getStorageObjectUrl } from "@/lib/storage";
 import type { Json } from "@/types/database";
 
 export const dynamic = "force-dynamic";
@@ -193,7 +194,7 @@ async function runUnlockNotifications({ dryRun = false }: UnlockNotificationRunO
     const unlockedAt = entry.milestone_achieved_at || entry.unlock_at || entry.created_at;
     const formattedUnlockedAt = formatUnlockedAt(unlockedAt, null);
     const coverImageUrl = vault.cover_image_url
-      ? (await supabaseAdmin.storage.from("vault-covers").createSignedUrl(vault.cover_image_url, 60 * 60 * 24 * 7)).data?.signedUrl ?? null
+      ? await getStorageObjectUrl(vault.cover_image_url, { bucket: "vault-covers", expiresIn: 60 * 60 * 24 * 7 })
       : null;
 
     for (const recipientUserId of recipientSet) {
@@ -304,3 +305,6 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   return GET(request);
 }
+
+
+

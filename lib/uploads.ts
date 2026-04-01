@@ -77,6 +77,44 @@ export async function uploadFileToBucket(params: {
 }) {
   await assertStorageQuota(params.file.size);
 
+  const strategyResponse = await fetch("/api/storage/upload-url", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      bucket: params.bucket,
+      path: params.path,
+      contentType: params.file.type || undefined,
+    }),
+  });
+
+  const strategyPayload = await strategyResponse.json().catch(() => null) as
+    | { strategy?: "r2" | "supabase"; uploadUrl?: string; objectKey?: string; message?: string }
+    | null;
+
+  if (!strategyResponse.ok) {
+    throw new Error(strategyPayload?.message ?? "Unable to prepare upload.");
+  }
+
+  if (strategyPayload?.strategy === "r2") {
+    const uploadResponse = await fetch(strategyPayload.uploadUrl!, {
+      method: "PUT",
+      headers: {
+        "Content-Type": params.file.type || "application/octet-stream",
+      },
+      body: params.file,
+    });
+
+    if (!uploadResponse.ok) {
+      throw new Error("Upload to cloud storage failed. Check the R2 bucket CORS policy and try again.");
+    }
+
+    return {
+      path: strategyPayload.objectKey!,
+    };
+  }
+
   const { data, error } = await params.supabase.storage.from(params.bucket).upload(params.path, params.file, {
     cacheControl: "3600",
     upsert: false,

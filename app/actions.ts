@@ -326,8 +326,10 @@ export async function deleteVaultAction(formData: FormData) {
 
     const entryIds = (entryRows ?? []).map((entry) => entry.id);
 
+    const { deleteStorageObject } = await import("@/lib/storage");
+
     if (vault.cover_image_url) {
-      await supabaseAdmin.storage.from("vault-covers").remove([vault.cover_image_url]);
+      await deleteStorageObject(vault.cover_image_url, { bucket: "vault-covers" });
     }
 
     if (entryIds.length > 0) {
@@ -345,7 +347,7 @@ export async function deleteVaultAction(formData: FormData) {
         .filter((path): path is string => Boolean(path));
 
       if (assetPaths.length > 0) {
-        await supabaseAdmin.storage.from("entry-assets").remove(assetPaths);
+        await Promise.all(assetPaths.map((assetPath) => deleteStorageObject(assetPath, { bucket: "entry-assets" })));
       }
     }
 
@@ -867,4 +869,7 @@ export async function triggerUnlockNotificationsAction(formData: FormData) {
     redirectWithMessage(message, "unlockError");
   }
 }
+
+
+
 

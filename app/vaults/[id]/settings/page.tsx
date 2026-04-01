@@ -12,6 +12,7 @@ import { canInviteAnotherFamilyMember, canUseFamilyInvites, getFamilyInviteUpgra
 import { getProfile } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { getStorageObjectUrl } from "@/lib/storage";
 
 export default async function VaultSettingsPage({
   params,
@@ -50,7 +51,7 @@ export default async function VaultSettingsPage({
   if (vault.owner_user_id !== user.id) notFound();
 
   const coverImagePreviewUrl = vault.cover_image_url
-    ? (await supabaseAdmin.storage.from("vault-covers").createSignedUrl(vault.cover_image_url, 60 * 10)).data?.signedUrl ?? null
+    ? await getStorageObjectUrl(vault.cover_image_url, { bucket: "vault-covers", expiresIn: 60 * 10 })
     : null;
 
   const memberRows = await Promise.all(
@@ -127,3 +128,6 @@ export default async function VaultSettingsPage({
     </AppShell>
   );
 }
+
+
+

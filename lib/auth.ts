@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { hasSupabaseEnv } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
+import { getStorageObjectUrl } from "@/lib/storage";
 
 const ROOT_ADMIN_EMAIL = "jasonvinnicombe2@gmail.com";
 
@@ -110,7 +111,7 @@ export async function getProfile() {
   const profile = await syncAdminInvite(data);
 
   const avatarPreviewUrl = profile?.avatar_url
-    ? (await supabaseAdmin.storage.from("avatars").createSignedUrl(profile.avatar_url, 60 * 10)).data?.signedUrl ?? null
+    ? await getStorageObjectUrl(profile.avatar_url, { bucket: "avatars", expiresIn: 60 * 10 })
     : null;
 
   return { user, profile, avatarPreviewUrl };
@@ -125,3 +126,6 @@ export async function requireAdmin() {
 
   return result;
 }
+
+
+

@@ -1,91 +1,12 @@
 import { NextResponse } from "next/server";
 
 import { getEffectiveStorageQuotaGb, getMembershipLabel } from "@/lib/billing";
+import { getTotalStorageUsageBytes } from "@/lib/storage";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
-const STORAGE_BUCKETS = ["avatars", "vault-covers", "entry-assets"];
-const STORAGE_PAGE_SIZE = 100;
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const usageCache = new Map<string, { timestamp: number; payload: { allowed: boolean; quotaGb: number; usedBytes: number; label: string } }>();
-
-type StorageListFile = {
-  id?: string;
-  name?: string;
-  size?: number | string;
-  metadata?: unknown;
-};
-
-function extractObjectSizeBytes(file: StorageListFile) {
-  const candidates: unknown[] = [];
-
-  if (file.size != null) {
-    candidates.push(file.size);
-  }
-
-  if (file.metadata && typeof file.metadata === "object") {
-    const meta = file.metadata as Record<string, unknown>;
-    candidates.push(meta.size, meta.contentLength, meta["content-length"], meta.length, meta.fileSize);
-  }
-
-  for (const value of candidates) {
-    if (typeof value === "number" && Number.isFinite(value) && value > 0) {
-      return value;
-    }
-    if (typeof value === "string") {
-      const parsed = Number.parseInt(value, 10);
-      if (Number.isFinite(parsed) && parsed > 0) {
-        return parsed;
-      }
-    }
-  }
-
-  return 0;
-}
-
-async function getBucketUsageBytes(bucketId: string, userId: string) {
-  async function listFolderBytes(prefix: string) {
-    let usedBytes = 0;
-    let offset = 0;
-
-    while (true) {
-      const { data, error } = await supabaseAdmin.storage.from(bucketId).list(prefix, {
-        limit: STORAGE_PAGE_SIZE,
-        offset,
-        sortBy: { column: "name", order: "asc" },
-      });
-
-      if (error) {
-        throw new Error(error.message);
-      }
-
-      const files = (data ?? []) as StorageListFile[];
-
-      for (const file of files) {
-        const size = extractObjectSizeBytes(file);
-        if (size > 0) {
-          usedBytes += size;
-          continue;
-        }
-
-        if (file.id == null && file.name) {
-          const nestedPrefix = `${prefix}/${file.name}`;
-          usedBytes += await listFolderBytes(nestedPrefix);
-        }
-      }
-
-      if (files.length < STORAGE_PAGE_SIZE) {
-        break;
-      }
-
-      offset += STORAGE_PAGE_SIZE;
-    }
-
-    return usedBytes;
-  }
-
-  return listFolderBytes(userId);
-}
 
 export async function GET(request: Request) {
   try {
@@ -133,8 +54,7 @@ export async function GET(request: Request) {
     }
 
     const quotaGb = getEffectiveStorageQuotaGb(profile?.membership_plan, profile?.membership_status, profile?.storage_quota_gb);
-    const usedBytesByBucket = await Promise.all(STORAGE_BUCKETS.map((bucketId) => getBucketUsageBytes(bucketId, targetUserId)));
-    const usedBytes = usedBytesByBucket.reduce((total, bytes) => total + bytes, 0);
+    const usedBytes = await getTotalStorageUsageBytes(targetUserId);
 
     const payload = {
       allowed: true,

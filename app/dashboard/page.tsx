@@ -24,6 +24,7 @@ import { formatDateTime } from "@/lib/date";
 import { getEntryStatus } from "@/lib/entries";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { getStorageObjectUrl } from "@/lib/storage";
 import { VaultCard } from "@/components/vaults/vault-card";
 import { StorageUsageCard } from "@/components/dashboard/storage-usage";
 
@@ -100,8 +101,7 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
           )[0] ?? null;
 
       const coverImagePreviewUrl = vault.cover_image_url
-        ? (await supabaseAdmin.storage.from("vault-covers").createSignedUrl(vault.cover_image_url, 60 * 10)).data
-            ?.signedUrl ?? null
+        ? await getStorageObjectUrl(vault.cover_image_url, { bucket: "vault-covers", expiresIn: 60 * 10 })
         : null;
 
       return {
@@ -515,6 +515,10 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
     </AppShell>
   );
 }
+
+
+
+
 
 
 
