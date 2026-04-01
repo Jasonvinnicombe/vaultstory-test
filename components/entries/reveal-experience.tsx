@@ -10,7 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { formatDateTime } from "@/lib/date";
 import { getRecordedAgoLabel } from "@/lib/entries";
 
-type Asset = { id: string; fileUrl: string; fileType: string };
+type Asset = { id: string; fileUrl: string; fileType: string; downloadUrl: string };
 
 type RevealExperienceProps = {
   title: string;
@@ -286,7 +286,7 @@ export function RevealExperience(props: RevealExperienceProps) {
                     <div className="flex items-center justify-between gap-3 px-3 pb-2 pt-3 text-sm text-muted-foreground">
                       <p>Video {index + 1}</p>
                       <a
-                        href={asset.fileUrl}
+                        href={asset.downloadUrl}
                         download={"vault-story-video-" + (index + 1)}
                         className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-background/80 px-3 py-1.5 font-medium text-foreground transition hover:border-primary/40 hover:text-primary"
                       >
@@ -312,7 +312,7 @@ export function RevealExperience(props: RevealExperienceProps) {
                     <div className="mb-3 flex items-center justify-between gap-3 text-sm text-muted-foreground">
                       <span>Audio {index + 1}</span>
                       <a
-                        href={asset.fileUrl}
+                        href={asset.downloadUrl}
                         download={"vault-story-audio-" + (index + 1)}
                         className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-background/80 px-3 py-1.5 font-medium text-foreground transition hover:border-primary/40 hover:text-primary"
                       >
@@ -430,7 +430,7 @@ export function RevealExperience(props: RevealExperienceProps) {
 
                   <div className="space-y-3">
                     <a
-                      href={selectedPhoto.fileUrl}
+                      href={selectedPhoto.downloadUrl}
                       download={"vault-story-photo-" + (selectedPhotoIndex! + 1)}
                       className="flex w-full items-center justify-center gap-2 rounded-full bg-secondary px-4 py-3 text-sm font-semibold text-slate-900 transition hover:bg-secondary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/70"
                     >
@@ -457,6 +457,7 @@ export function RevealExperience(props: RevealExperienceProps) {
     </>
   );
 }
+
 
 
 

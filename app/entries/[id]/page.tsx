@@ -33,6 +33,11 @@ export default async function EntryPage({ params, searchParams }: { params: Prom
 
   if (!vault) notFound();
 
+  const tags = (tagRows ?? []).map((tag) => tag.tag);
+  const status = getEntryStatus(entry);
+  const adminPreview = Boolean(profile?.is_admin && resolvedSearchParams.preview === "1" && status !== "draft");
+  const downloadQuery = adminPreview ? "?preview=1" : "";
+
   const signedAssets = (
     await Promise.all(
       (assetRows ?? []).map(async (asset) => {
@@ -41,6 +46,7 @@ export default async function EntryPage({ params, searchParams }: { params: Prom
             id: asset.id,
             fileUrl: asset.file_url,
             fileType: asset.file_type,
+            downloadUrl: `/api/entry-assets/${asset.id}/download${downloadQuery}`,
           };
         }
 
@@ -55,17 +61,15 @@ export default async function EntryPage({ params, searchParams }: { params: Prom
             id: asset.id,
             fileUrl,
             fileType: asset.file_type,
+            downloadUrl: `/api/entry-assets/${asset.id}/download${downloadQuery}`,
           };
         } catch {
           return null;
         }
       }),
     )
-  ).filter((asset): asset is { id: string; fileUrl: string; fileType: string } => Boolean(asset));
+  ).filter((asset): asset is { id: string; fileUrl: string; fileType: string; downloadUrl: string } => Boolean(asset));
 
-  const tags = (tagRows ?? []).map((tag) => tag.tag);
-  const status = getEntryStatus(entry);
-  const adminPreview = Boolean(profile?.is_admin && resolvedSearchParams.preview === "1" && status !== "draft");
   const canCompleteMilestone =
     entry.unlock_type === "manual_milestone" &&
     !entry.milestone_achieved_at &&
@@ -183,34 +187,21 @@ export default async function EntryPage({ params, searchParams }: { params: Prom
               </Card>
             ) : null}
             <RevealExperience
-            title={entry.title}
-            createdAt={entry.created_at}
-            contentText={entry.content_text}
-            mood={entry.mood}
-            tags={tags}
-            predictionText={entry.prediction_text}
-            realityText={entry.reality_text}
-            assets={signedAssets}
-            reflectionForm={
-              adminPreview ? undefined : entry.reality_text ? undefined : <ReflectionForm entryId={entry.id} vaultId={entry.vault_id} initialValue={entry.reality_text ?? ""} />
-            }
-          />
+              title={entry.title}
+              createdAt={entry.created_at}
+              contentText={entry.content_text}
+              mood={entry.mood}
+              tags={tags}
+              predictionText={entry.prediction_text}
+              realityText={entry.reality_text}
+              assets={signedAssets}
+              reflectionForm={
+                adminPreview ? undefined : entry.reality_text ? undefined : <ReflectionForm entryId={entry.id} vaultId={entry.vault_id} initialValue={entry.reality_text ?? ""} />
+              }
+            />
           </>
         )}
       </div>
     </AppShell>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
