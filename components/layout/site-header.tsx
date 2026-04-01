@@ -84,7 +84,7 @@ export function SiteHeader() {
                 <Button asChild>
                   <Link href="/signup">
                     <Sparkles className="h-4 w-4" />
-                    Start free trial
+                    Create account
                   </Link>
                 </Button>
               </div>
@@ -92,9 +92,10 @@ export function SiteHeader() {
           </Dialog>
 
           <Button asChild variant="ghost" className="hidden sm:inline-flex"><Link href="/login">Log in</Link></Button>
-          <Button asChild size="sm" className="hidden sm:inline-flex sm:h-11 sm:px-5"><Link href="/signup"><Sparkles className="h-4 w-4" />Start free trial</Link></Button>
+          <Button asChild size="sm" className="hidden sm:inline-flex sm:h-11 sm:px-5"><Link href="/signup"><Sparkles className="h-4 w-4" />Create account</Link></Button>
         </div>
       </div>
     </header>
   );
 }
+
