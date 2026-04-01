@@ -39,7 +39,7 @@ export function validateAsset(file: File, kind: "cover" | "photo" | "audio" | "v
       throw new Error("Images must be JPG, PNG, or WebP");
     }
     if (file.size > FILE_LIMITS.image) {
-      throw new Error("Image is too large. Maximum size is 10MB.");
+      throw new Error("Image is too large. Maximum size is 5GB.");
     }
   }
 
@@ -48,7 +48,7 @@ export function validateAsset(file: File, kind: "cover" | "photo" | "audio" | "v
       throw new Error("Audio must be MP3, WAV, M4A, or WebM");
     }
     if (file.size > FILE_LIMITS.audio) {
-      throw new Error("Audio file is too large. Maximum size is 25MB.");
+      throw new Error("Audio file is too large. Maximum size is 5GB.");
     }
   }
 
@@ -133,3 +133,4 @@ export async function uploadFileToBucket(params: {
     path: data.path,
   };
 }
+
