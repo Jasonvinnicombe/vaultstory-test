@@ -283,7 +283,17 @@ export function RevealExperience(props: RevealExperienceProps) {
                 {videoAssets.map((asset, index) => (
                   <div key={asset.id} className="overflow-hidden rounded-[30px] border border-white/65 bg-background/76 p-2 shadow-[0_18px_42px_rgba(66,46,31,0.08)]">
                     <video controls className="w-full rounded-[24px]" src={asset.fileUrl} />
-                    <p className="px-3 pb-2 pt-3 text-sm text-muted-foreground">Video {index + 1}</p>
+                    <div className="flex items-center justify-between gap-3 px-3 pb-2 pt-3 text-sm text-muted-foreground">
+                      <p>Video {index + 1}</p>
+                      <a
+                        href={asset.fileUrl}
+                        download={"vault-story-video-" + (index + 1)}
+                        className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-background/80 px-3 py-1.5 font-medium text-foreground transition hover:border-primary/40 hover:text-primary"
+                      >
+                        <Download className="h-4 w-4" />
+                        Download
+                      </a>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -299,7 +309,17 @@ export function RevealExperience(props: RevealExperienceProps) {
               <div className="grid gap-4">
                 {audioAssets.map((asset, index) => (
                   <div key={asset.id} className="rounded-[28px] border border-white/65 bg-background/76 p-5 shadow-[0_12px_32px_rgba(66,46,31,0.06)]">
-                    <div className="mb-3 text-sm text-muted-foreground">Audio {index + 1}</div>
+                    <div className="mb-3 flex items-center justify-between gap-3 text-sm text-muted-foreground">
+                      <span>Audio {index + 1}</span>
+                      <a
+                        href={asset.fileUrl}
+                        download={"vault-story-audio-" + (index + 1)}
+                        className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-background/80 px-3 py-1.5 font-medium text-foreground transition hover:border-primary/40 hover:text-primary"
+                      >
+                        <Download className="h-4 w-4" />
+                        Download
+                      </a>
+                    </div>
                     <audio controls className="w-full" src={asset.fileUrl} />
                   </div>
                 ))}
@@ -408,16 +428,26 @@ export function RevealExperience(props: RevealExperienceProps) {
                     </p>
                   </div>
 
-                  {photos.length > 1 ? (
-                    <div className="space-y-3">
-                      <Button type="button" variant="secondary" className="w-full" onClick={showPreviousPhoto}>
-                        Previous photo
-                      </Button>
-                      <Button type="button" variant="outline" className="w-full border-white/20 bg-transparent text-white hover:bg-white/10 hover:text-white" onClick={showNextPhoto}>
-                        Next photo
-                      </Button>
-                    </div>
-                  ) : null}
+                  <div className="space-y-3">
+                    <a
+                      href={selectedPhoto.fileUrl}
+                      download={"vault-story-photo-" + (selectedPhotoIndex! + 1)}
+                      className="flex w-full items-center justify-center gap-2 rounded-full bg-secondary px-4 py-3 text-sm font-semibold text-slate-900 transition hover:bg-secondary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/70"
+                    >
+                      <Download className="h-4 w-4" />
+                      Download photo
+                    </a>
+                    {photos.length > 1 ? (
+                      <>
+                        <Button type="button" variant="secondary" className="w-full" onClick={showPreviousPhoto}>
+                          Previous photo
+                        </Button>
+                        <Button type="button" variant="outline" className="w-full border-white/20 bg-transparent text-white hover:bg-white/10 hover:text-white" onClick={showNextPhoto}>
+                          Next photo
+                        </Button>
+                      </>
+                    ) : null}
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -427,4 +457,6 @@ export function RevealExperience(props: RevealExperienceProps) {
     </>
   );
 }
+
+
 
