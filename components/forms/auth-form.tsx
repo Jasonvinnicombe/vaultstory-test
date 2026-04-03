@@ -299,7 +299,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
         <div className="flex items-start justify-between gap-4">
           <div className="relative h-16 w-[11.5rem] shrink-0 sm:h-[4.5rem] sm:w-[13rem]">
             <Image
-              src="/Vaultstory.png"
+              src="/vaultstory-logo-horizontal.png"
               alt="Vault Story"
               fill
               priority
