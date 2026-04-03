@@ -13,6 +13,15 @@ import { getUnlockNotificationSummary } from "@/lib/unlock-notification-summary"
 
 const ROOT_ADMIN_EMAIL = "jasonvinnicombe2@gmail.com";
 
+type AdminUsersSearchParams = {
+  adminSuccess?: string;
+  adminError?: string;
+  unlockSuccess?: string;
+  unlockError?: string;
+  q?: string;
+  sort?: string;
+};
+
 function formatDate(value: string | null | undefined) {
   if (!value) return "Unknown";
   return new Intl.DateTimeFormat("en-US", {
@@ -45,12 +54,14 @@ function formatDateTime(value: string | null | undefined) {
 export default async function AdminUsersPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ adminSuccess?: string; adminError?: string; unlockSuccess?: string; unlockError?: string; q?: string; sort?: string }>;
+  searchParams?: Promise<AdminUsersSearchParams>;
 }) {
-  const [{ profile, user, avatarPreviewUrl }, resolvedSearchParams] = await Promise.all([
+  const [{ profile, user, avatarPreviewUrl }, rawSearchParams] = await Promise.all([
     requireAdmin(),
     searchParams ?? Promise.resolve({}),
   ]);
+
+  const resolvedSearchParams = rawSearchParams as AdminUsersSearchParams;
 
   const [
     { data: profileRows, error: usersError },
@@ -385,6 +396,11 @@ export default async function AdminUsersPage({
     </AppShell>
   );
 }
+
+
+
+
+
 
 
 

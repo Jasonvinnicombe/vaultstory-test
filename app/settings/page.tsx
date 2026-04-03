@@ -52,9 +52,9 @@ export default async function SettingsPage(props: SettingsPageProps) {
   const familyCheckoutEnabled = Boolean(env.STRIPE_SECRET_KEY && getStripePriceId("family", detectedCurrency));
   const premiumDisplay = await getPlanPriceDisplay("premium", detectedCurrency);
   const familyDisplay = await getPlanPriceDisplay("family", detectedCurrency);
-  const priceOverrides = {
-    premium: premiumDisplay ?? undefined,
-    family: familyDisplay ?? undefined,
+  const priceOverrides: Record<string, { priceLabel: string; cadence: string } | null> = {
+    premium: premiumDisplay ?? null,
+    family: familyDisplay ?? null,
   };
 
   return (
@@ -94,6 +94,11 @@ export default async function SettingsPage(props: SettingsPageProps) {
     </AppShell>
   );
 }
+
+
+
+
+
 
 
 

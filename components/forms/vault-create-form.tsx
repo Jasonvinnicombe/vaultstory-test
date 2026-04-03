@@ -20,8 +20,12 @@ import { VAULT_TYPES } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/client";
 import { uploadFileToBucket, validateAsset } from "@/lib/uploads";
 import { createVaultSchema } from "@/lib/validations/vaults";
+import type { Database } from "@/types/database";
 
 type VaultValues = z.infer<typeof createVaultSchema>;
+type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
+type VaultInsert = Database["public"]["Tables"]["vaults"]["Insert"];
+type VaultMemberInsert = Database["public"]["Tables"]["vault_members"]["Insert"];
 
 type VaultCreateFormProps = {
   currentPlan: string;
@@ -74,7 +78,7 @@ export function VaultCreateForm({ currentPlan, currentVaultCount }: VaultCreateF
       }
 
       const [{ data: latestProfile }, { count: latestVaultCount, error: vaultCountError }] = await Promise.all([
-        supabase.from("profiles").select("membership_plan,membership_status").eq("id", user.id).maybeSingle(),
+        supabase.from("profiles").select("membership_plan,membership_status").eq("id", user.id).maybeSingle<Pick<ProfileRow, "membership_plan" | "membership_status">>(),
         supabase.from("vaults").select("id", { head: true, count: "exact" }).eq("owner_user_id", user.id),
       ]);
 
@@ -99,29 +103,33 @@ export function VaultCreateForm({ currentPlan, currentVaultCount }: VaultCreateF
         coverImageUrl = uploaded.path;
       }
 
+      const vaultPayload: VaultInsert = {
+        owner_user_id: user.id,
+        name: values.vaultName,
+        vault_type: values.vaultType,
+        subject_name: values.subjectName,
+        subject_birthdate: values.subjectBirthdate || null,
+        description: values.description || null,
+        cover_image_url: coverImageUrl,
+      };
+
       const { data: vault, error } = await supabase
         .from("vaults")
-        .insert({
-          owner_user_id: user.id,
-          name: values.vaultName,
-          vault_type: values.vaultType,
-          subject_name: values.subjectName,
-          subject_birthdate: values.subjectBirthdate || null,
-          description: values.description || null,
-          cover_image_url: coverImageUrl,
-        })
+        .insert(vaultPayload as never)
         .select("id")
-        .single();
+        .single() as unknown as { data: { id: string }; error: { message: string } | null };
 
       if (error) {
         throw new Error(error.message);
       }
 
-      await supabase.from("vault_members").insert({
+      const membershipPayload: VaultMemberInsert = {
         vault_id: vault.id,
         user_id: user.id,
         role: "owner",
-      });
+      };
+
+      await supabase.from("vault_members").insert(membershipPayload as never);
 
       toast.success("Vault created.");
       const nextHref = searchParams.get("onboarding") === "1" ? `/vaults/${vault.id}/entries/new?onboarding=1` : `/vaults/${vault.id}`;

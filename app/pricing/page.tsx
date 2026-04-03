@@ -15,6 +15,7 @@ import { MEMBERSHIP_PLANS, PLAN_COMPARISON_ROWS } from "@/lib/pricing";
 import { getPlanPriceDisplay, getStripePriceId } from "@/lib/stripe-pricing";
 import { createClient } from "@/lib/supabase/server";
 import { headers } from "next/headers";
+import type { Database } from "@/types/database";
 
 export const dynamic = "force-dynamic";
 
@@ -60,6 +61,8 @@ function renderComparisonValue(value: string) {
   return <span>{value}</span>;
 }
 
+type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
+
 type PricingPageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
@@ -69,7 +72,7 @@ export default async function PricingPage(props: PricingPageProps) {
   const searchParams = props.searchParams ? await props.searchParams : {};
   const supabase = user ? await createClient() : null;
   const { data: profile } = user && supabase
-    ? await supabase.from("profiles").select("membership_plan").eq("id", user.id).maybeSingle()
+    ? await supabase.from("profiles").select("membership_plan").eq("id", user.id).maybeSingle<Pick<ProfileRow, "membership_plan">>()
     : { data: null };
   const currentPlan = getMembershipLabel(profile?.membership_plan ?? null);
   const billingCanceled = typeof searchParams.billingCanceled === "string" ? searchParams.billingCanceled : null;
@@ -209,6 +212,8 @@ export default async function PricingPage(props: PricingPageProps) {
     </div>
   );
 }
+
+
 
 
 

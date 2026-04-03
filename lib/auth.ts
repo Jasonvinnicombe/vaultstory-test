@@ -4,10 +4,15 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { hasSupabaseEnv } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 import { getStorageObjectUrl } from "@/lib/storage";
+import type { Database } from "@/types/database";
 
 const ROOT_ADMIN_EMAIL = "jasonvinnicombe2@gmail.com";
 
-async function syncAdminInvite(profile: { id: string; email: string; is_admin: boolean } | null) {
+type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
+type AdminInviteRow = Database["public"]["Tables"]["admin_invites"]["Row"];
+type VaultInviteRow = Database["public"]["Tables"]["vault_invites"]["Row"];
+
+async function syncAdminInvite(profile: ProfileRow | null) {
   if (!profile?.email || profile.is_admin) {
     return profile;
   }
@@ -20,7 +25,7 @@ async function syncAdminInvite(profile: { id: string; email: string; is_admin: b
     .select("id")
     .eq("email", normalizedEmail)
     .eq("status", "pending")
-    .maybeSingle();
+    .maybeSingle<Pick<AdminInviteRow, "id">>();
 
   if (!shouldBeAdmin && !pendingInvite?.id) {
     return profile;
@@ -45,7 +50,7 @@ async function syncAdminInvite(profile: { id: string; email: string; is_admin: b
   return { ...profile, is_admin: true };
 }
 
-async function syncVaultInvites(profile: { id: string; email: string } | null) {
+async function syncVaultInvites(profile: ProfileRow | null) {
   if (!profile?.email) {
     return;
   }
@@ -55,7 +60,10 @@ async function syncVaultInvites(profile: { id: string; email: string } | null) {
     .from("vault_invites")
     .select("id,vault_id,role")
     .eq("email", normalizedEmail)
-    .eq("status", "pending");
+    .eq("status", "pending") as {
+      data: Pick<VaultInviteRow, "id" | "vault_id" | "role">[] | null;
+      error: { message: string } | null;
+    };
 
   if (pendingInvitesError || !pendingInvites?.length) {
     return;
@@ -106,7 +114,7 @@ export async function requireUser() {
 export async function getProfile() {
   const user = await requireUser();
   const supabase = await createClient();
-  const { data } = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle();
+  const { data } = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle<ProfileRow>();
   await syncVaultInvites(data);
   const profile = await syncAdminInvite(data);
 
@@ -126,6 +134,3 @@ export async function requireAdmin() {
 
   return result;
 }
-
-
-

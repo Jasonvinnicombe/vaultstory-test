@@ -1,11 +1,14 @@
 import { createClient } from "@supabase/supabase-js";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { normalizeEnvValue } from "@/lib/supabase/config";
 import type { Database } from "@/types/database";
 
-let supabaseAdminClient: ReturnType<typeof createClient<Database>> | null = null;
+type TypedSupabaseClient = SupabaseClient<Database>;
 
-function getSupabaseAdminClient() {
+let supabaseAdminClient: TypedSupabaseClient | null = null;
+
+function getSupabaseAdminClient(): TypedSupabaseClient {
   if (supabaseAdminClient) {
     return supabaseAdminClient;
   }
@@ -27,10 +30,10 @@ function getSupabaseAdminClient() {
   return supabaseAdminClient;
 }
 
-export const supabaseAdmin = new Proxy({} as ReturnType<typeof createClient<Database>>, {
+export const supabaseAdmin = new Proxy({} as TypedSupabaseClient, {
   get(_target, prop) {
     const client = getSupabaseAdminClient();
-    const value = client[prop as keyof typeof client];
+    const value = client[prop as keyof TypedSupabaseClient];
     return typeof value === "function" ? value.bind(client) : value;
   },
 });

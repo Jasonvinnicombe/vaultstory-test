@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -18,8 +18,10 @@ import { VAULT_TYPES } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/client";
 import { uploadFileToBucket, validateAsset } from "@/lib/uploads";
 import { createVaultSchema } from "@/lib/validations/vaults";
+import type { Database } from "@/types/database";
 
 type VaultValues = z.infer<typeof createVaultSchema>;
+type VaultUpdate = Database["public"]["Tables"]["vaults"]["Update"];
 
 export function VaultSettingsForm(props: {
   vaultId: string;
@@ -85,7 +87,7 @@ export function VaultSettingsForm(props: {
           subject_birthdate: values.subjectBirthdate || null,
           description: values.description || null,
           cover_image_url: coverImageUrl,
-        })
+        } as VaultUpdate as never)
         .eq("id", props.vaultId);
 
       if (error) throw new Error(error.message);
@@ -187,3 +189,7 @@ export function VaultSettingsForm(props: {
     </Card>
   );
 }
+
+
+
+

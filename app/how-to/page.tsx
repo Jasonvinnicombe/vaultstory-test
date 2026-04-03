@@ -101,7 +101,7 @@ export default async function HowToPage() {
   const [{ profile, user, avatarPreviewUrl }, supabase] = await Promise.all([getProfile(), createClient()]);
   const { data: vaults } = await supabase.from("vaults").select("id, name").order("created_at", { ascending: false }).limit(3);
 
-  const firstVault = vaults?.[0] ?? null;
+  const firstVault = (vaults?.[0] ?? null) as { id: string; name: string } | null;
   const createEntryHref = firstVault ? `/vaults/${firstVault.id}/entries/new` : "/vaults/new";
 
   return (

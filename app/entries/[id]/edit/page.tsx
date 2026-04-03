@@ -11,22 +11,31 @@ import { getMembershipLabel } from "@/lib/billing";
 import { getProfile } from "@/lib/auth";
 import { getEntryStatus } from "@/lib/entries";
 import { createClient } from "@/lib/supabase/server";
+import type { Database } from "@/types/database";
+
+type EditEntrySearchParams = { step?: string };
+
+type EntryRow = Database["public"]["Tables"]["vault_entries"]["Row"];
+type VaultRow = Database["public"]["Tables"]["vaults"]["Row"];
+type EntryTagRow = Database["public"]["Tables"]["entry_tags"]["Row"];
+type EntryAssetRow = Database["public"]["Tables"]["entry_assets"]["Row"];
 
 export default async function EditDraftEntryPage({
   params,
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams?: Promise<{ step?: string }>;
+  searchParams?: Promise<EditEntrySearchParams>;
 }) {
-  const [{ id }, resolvedSearchParams, { profile, user, avatarPreviewUrl }] = await Promise.all([
+  const [{ id }, rawSearchParams, { profile, user, avatarPreviewUrl }] = await Promise.all([
     params,
     searchParams ?? Promise.resolve({}),
     getProfile(),
   ]);
+  const resolvedSearchParams = rawSearchParams as EditEntrySearchParams;
   const supabase = await createClient();
 
-  const { data: entry } = await supabase.from("vault_entries").select("*").eq("id", id).maybeSingle();
+  const { data: entry } = await supabase.from("vault_entries").select("*").eq("id", id).maybeSingle<EntryRow>();
   if (!entry) {
     notFound();
   }
@@ -36,9 +45,9 @@ export default async function EditDraftEntryPage({
   }
 
   const [{ data: vault }, { data: tagRows }, { data: assetRows }] = await Promise.all([
-    supabase.from("vaults").select("id, name, subject_name, subject_birthdate").eq("id", entry.vault_id).maybeSingle(),
-    supabase.from("entry_tags").select("tag").eq("entry_id", id),
-    supabase.from("entry_assets").select("id, file_url").eq("entry_id", id),
+    supabase.from("vaults").select("id, name, subject_name, subject_birthdate").eq("id", entry.vault_id).maybeSingle<Pick<VaultRow, "id" | "name" | "subject_name" | "subject_birthdate">>(),
+    supabase.from("entry_tags").select("tag").eq("entry_id", id) as unknown as { data: Pick<EntryTagRow, "tag">[] | null },
+    supabase.from("entry_assets").select("id, file_url").eq("entry_id", id) as unknown as { data: Pick<EntryAssetRow, "id" | "file_url">[] | null },
   ]);
 
   if (!vault) {
@@ -87,7 +96,7 @@ export default async function EditDraftEntryPage({
             title: entry.title,
             message: entry.content_text ?? "",
             unlockType: "draft",
-            mood: entry.mood ?? "",
+            mood: (entry.mood ?? "") as "" | "Hopeful" | "Curious" | "Tender" | "Ambitious" | "Grateful" | "Restless" | "Grounded",
             tags: (tagRows ?? []).map((tag) => tag.tag).join(", "),
             predictionText: entry.prediction_text ?? "",
           }}
@@ -100,3 +109,6 @@ export default async function EditDraftEntryPage({
     </AppShell>
   );
 }
+
+
+

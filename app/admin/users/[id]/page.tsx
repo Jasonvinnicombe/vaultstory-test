@@ -15,6 +15,11 @@ const ROOT_ADMIN_EMAIL = "jasonvinnicombe2@gmail.com";
 const planOptions = ["free", "premium", "family", "lifetime"] as const;
 const statusOptions = ["active", "trialing", "inactive", "canceled", "past_due"] as const;
 
+type AdminUserDetailSearchParams = {
+  adminSuccess?: string;
+  adminError?: string;
+};
+
 function formatDate(value: string | null | undefined) {
   if (!value) return "Unknown";
   return new Intl.DateTimeFormat("en-US", {
@@ -37,13 +42,15 @@ export default async function AdminUserDetailPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams?: Promise<{ adminSuccess?: string; adminError?: string }>;
+  searchParams?: Promise<AdminUserDetailSearchParams>;
 }) {
-  const [{ id }, resolvedSearchParams, { profile, user, avatarPreviewUrl }] = await Promise.all([
+  const [{ id }, rawSearchParams, { profile, user, avatarPreviewUrl }] = await Promise.all([
     params,
     searchParams ?? Promise.resolve({}),
     requireAdmin(),
   ]);
+
+  const resolvedSearchParams = rawSearchParams as AdminUserDetailSearchParams;
 
   const { data: targetUser } = await supabaseAdmin
     .from("profiles")
@@ -229,3 +236,5 @@ export default async function AdminUserDetailPage({
     </AppShell>
   );
 }
+
+

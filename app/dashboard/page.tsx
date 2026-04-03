@@ -27,6 +27,12 @@ import { createClient } from "@/lib/supabase/server";
 import { getStorageObjectUrl } from "@/lib/storage";
 import { VaultCard } from "@/components/vaults/vault-card";
 import { StorageUsageCard } from "@/components/dashboard/storage-usage";
+import type { Database } from "@/types/database";
+
+type DashboardSearchParams = { onboarding?: string; q?: string };
+
+type VaultRow = Database["public"]["Tables"]["vaults"]["Row"];
+type EntryRow = Database["public"]["Tables"]["vault_entries"]["Row"];
 
 function formatDate(value: string | null) {
   if (!value) return "Waiting for a milestone";
@@ -61,11 +67,12 @@ function getHeroCopy(firstName: string | null, totalEntries: number, upcomingCou
   };
 }
 
-export default async function DashboardPage({ searchParams }: { searchParams?: Promise<{ onboarding?: string; q?: string }> }) {
-  const [resolvedSearchParams, { profile, user, avatarPreviewUrl }] = await Promise.all([
+export default async function DashboardPage({ searchParams }: { searchParams?: Promise<DashboardSearchParams> }) {
+  const [rawSearchParams, { profile, user, avatarPreviewUrl }] = await Promise.all([
     searchParams ?? Promise.resolve({}),
     getProfile(),
   ]);
+  const resolvedSearchParams = rawSearchParams as DashboardSearchParams;
   const supabase = await createClient();
 
   const [{ data: vaults }, { data: entries }] = await Promise.all([
@@ -73,9 +80,10 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
     supabase.from("vault_entries").select("*").order("created_at", { ascending: false }),
   ]);
 
-  const allEntries = (entries ?? []).filter((entry) => entry.is_deleted !== true);
-  const billingProfile = profile as { membership_plan?: string | null; membership_status?: string | null } | null;
-  const hasPremiumUnlockEntitlement = hasPaidFeatureAccess(billingProfile?.membership_plan, billingProfile?.membership_status);
+  const typedVaults = (vaults ?? []) as VaultRow[];
+  const typedEntries = (entries ?? []) as EntryRow[];
+  const allEntries = typedEntries.filter((entry) => entry.is_deleted !== true);
+  const hasPremiumUnlockEntitlement = hasPaidFeatureAccess(profile?.membership_plan, profile?.membership_status);
 
   const unlockedEntries = allEntries.filter((entry) => getEntryStatus(entry, { hasPremiumUnlockEntitlement }) === "unlocked");
   const upcomingEntries = allEntries.filter((entry) => getEntryStatus(entry, { hasPremiumUnlockEntitlement }) === "soon");
@@ -86,13 +94,13 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
 
   const stats = [
     { label: "Memories saved", value: String(allEntries.length), icon: Mailbox },
-    { label: "Vaults", value: String(vaults?.length ?? 0), icon: FolderLock },
+    { label: "Vaults", value: String(typedVaults.length), icon: FolderLock },
     { label: "Unlocking soon", value: String(upcomingEntries.length), icon: CalendarClock },
     { label: "Already revealed", value: String(unlockedEntries.length), icon: Sparkles },
   ];
 
   const vaultCards = await Promise.all(
-    (vaults ?? []).map(async (vault) => {
+    typedVaults.map(async (vault) => {
       const relatedEntries = allEntries.filter((entry) => entry.vault_id === vault.id);
       const nextUnlock =
         relatedEntries
@@ -118,8 +126,8 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
     }),
   );
 
-  const vaultById = new Map((vaults ?? []).map((vault) => [vault.id, vault]));
-  const firstVault = vaults?.[0] ?? null;
+  const vaultById = new Map(typedVaults.map((vault) => [vault.id, vault]));
+  const firstVault = typedVaults[0] ?? null;
   const query = resolvedSearchParams.q?.trim().toLowerCase() ?? "";
   const firstName = profile?.full_name?.split(" ")[0] ?? user.user_metadata.full_name?.split(" ")[0] ?? null;
   const heroCopy = getHeroCopy(firstName, allEntries.length, upcomingEntries.length);
@@ -132,8 +140,8 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
 
   const timelineEntries = [...allEntries]
     .sort((a, b) => {
-      const aStatus = getEntryStatus(a);
-      const bStatus = getEntryStatus(b);
+      const aStatus = getEntryStatus(a, { hasPremiumUnlockEntitlement });
+      const bStatus = getEntryStatus(b, { hasPremiumUnlockEntitlement });
       const priority = { soon: 0, unlocked: 1, locked: 2, draft: 3 } as const;
       const priorityDelta = priority[aStatus] - priority[bStatus];
       if (priorityDelta !== 0) return priorityDelta;
@@ -295,7 +303,7 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
           </Card>
         </section>
 
-        {(!vaults?.length || !allEntries.length || resolvedSearchParams.onboarding === "done") ? (
+        {(!typedVaults.length || !allEntries.length || resolvedSearchParams.onboarding === "done") ? (
           <Card className="overflow-hidden bg-primary text-primary-foreground shadow-[0_22px_56px_rgba(48,32,23,0.18)]">
             <CardContent className="grid gap-5 p-7 sm:p-8 lg:grid-cols-[1fr_auto] lg:items-center lg:p-10">
               <div className="section-stack">
@@ -457,7 +465,7 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
             {query ? <p className="text-sm leading-7 text-muted-foreground">Showing <strong className="text-foreground">{filteredVaultCards.length}</strong> vault{filteredVaultCards.length === 1 ? "" : "s"} for "{resolvedSearchParams.q}".</p> : null}
           </div>
 
-          {vaultCards.length ? (
+          {typedVaults.length ? (
             filteredVaultCards.length ? (
               <div className="grid gap-4 xl:grid-cols-2">{filteredVaultCards.map((vault) => <VaultCard key={vault.id} {...vault} />)}</div>
             ) : (
@@ -517,6 +525,10 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
     </AppShell>
   );
 }
+
+
+
+
 
 
 

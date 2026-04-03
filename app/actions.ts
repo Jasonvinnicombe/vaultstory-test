@@ -1,6 +1,32 @@
 "use server";
 
+import type { User } from "@supabase/supabase-js";
+
 import { canInviteAnotherFamilyMember, canUseFamilyInvites, getFamilyInviteUpgradeMessage, getFamilyMemberLimitMessage } from "@/lib/billing";
+import type { Database } from "@/types/database";
+
+type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
+type VaultRow = Database["public"]["Tables"]["vaults"]["Row"];
+type VaultMemberRow = Database["public"]["Tables"]["vault_members"]["Row"];
+type VaultInviteRow = Database["public"]["Tables"]["vault_invites"]["Row"];
+type EntryRow = Database["public"]["Tables"]["vault_entries"]["Row"];
+type EntryAssetRow = Database["public"]["Tables"]["entry_assets"]["Row"];
+type AdminInviteRow = Database["public"]["Tables"]["admin_invites"]["Row"];
+
+async function requireAuthenticatedUser() {
+  const { createClient } = await import("@/lib/supabase/server");
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error("Unauthorized.");
+  }
+
+  return { supabase, user: user as User };
+}
 export async function signOutAction() {
   const { redirect } = await import("next/navigation");
   const { createClient } = await import("@/lib/supabase/server");
@@ -19,16 +45,12 @@ export async function completeMilestoneAction(formData: FormData) {
   const vaultId = String(formData.get("vaultId") ?? "");
   if (!entryId || !vaultId) throw new Error("Missing milestone context.");
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error("Unauthorized.");
+  const { supabase, user } = await requireAuthenticatedUser();
 
-  const { data: profile } = await supabase.from("profiles").select("is_admin").eq("id", user.id).maybeSingle();
+  const { data: profile } = await supabase.from("profiles").select("is_admin").eq("id", user.id).maybeSingle<Pick<ProfileRow, "is_admin">>();
   if (profile?.is_admin) throw new Error("Admins cannot unlock customer milestones.");
 
-  const { error } = await supabase.from("vault_entries").update({ milestone_achieved_at: new Date().toISOString() }).eq("id", entryId);
+  const { error } = await supabase.from("vault_entries").update({ milestone_achieved_at: new Date().toISOString() } as never).eq("id", entryId);
   if (error) throw new Error(error.message);
 
   revalidatePath(`/entries/${entryId}`);
@@ -45,13 +67,9 @@ export async function saveRealityReflectionAction(formData: FormData) {
   const realityText = String(formData.get("realityText") ?? "").trim();
   if (!entryId || !vaultId || realityText.length < 3) throw new Error("Reflection is required.");
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error("Unauthorized.");
+  const { supabase, user } = await requireAuthenticatedUser();
 
-  const { error } = await supabase.from("vault_entries").update({ reality_text: realityText }).eq("id", entryId).eq("user_id", user.id);
+  const { error } = await supabase.from("vault_entries").update({ reality_text: realityText } as never).eq("id", entryId).eq("user_id", user.id);
   if (error) throw new Error(error.message);
 
   revalidatePath(`/entries/${entryId}`);
@@ -70,7 +88,7 @@ export async function inviteVaultMemberAction(formData: FormData) {
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const role = String(formData.get("role") ?? "viewer").trim();
 
-  const redirectWithMessage = (message: string, type: "inviteError" | "inviteSuccess") => {
+  const redirectWithMessage = (message: string, type: "inviteError" | "inviteSuccess")=> {
     redirect(`/vaults/${vaultId}/settings?${type}=${encodeURIComponent(message)}`);
   };
 
@@ -79,18 +97,11 @@ export async function inviteVaultMemberAction(formData: FormData) {
   }
 
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      redirectWithMessage("Sign in again to manage family members.", "inviteError");
-    }
+    const { supabase, user } = await requireAuthenticatedUser();
 
     const [{ data: vault }, { data: profile }] = await Promise.all([
-      supabase.from("vaults").select("*").eq("id", vaultId).maybeSingle(),
-      supabase.from("profiles").select("membership_plan,membership_status").eq("id", user.id).maybeSingle(),
+      supabase.from("vaults").select("*").eq("id", vaultId).maybeSingle<VaultRow>(),
+      supabase.from("profiles").select("membership_plan,membership_status").eq("id", user.id).maybeSingle<Pick<ProfileRow, "membership_plan" | "membership_status">>(),
     ]);
     if (!vault || vault.owner_user_id !== user.id) {
       redirectWithMessage("Only the vault owner can send invites.", "inviteError");
@@ -105,20 +116,20 @@ export async function inviteVaultMemberAction(formData: FormData) {
       .select("id,status")
       .eq("vault_id", vaultId)
       .eq("email", email)
-      .maybeSingle();
+      .maybeSingle<Pick<VaultInviteRow, "id" | "status">>();
 
     if (inviteLookupError) {
       throw inviteLookupError;
     }
 
-    const { data: profileMatch } = await supabaseAdmin.from("profiles").select("id,email,full_name").eq("email", email).maybeSingle();
+    const { data: profileMatch } = await supabaseAdmin.from("profiles").select("id,email,full_name").eq("email", email).maybeSingle<Pick<ProfileRow, "id" | "email" | "full_name">>();
     const { data: existingMember } = profileMatch?.id
       ? await supabase
           .from("vault_members")
           .select("id")
           .eq("vault_id", vaultId)
           .eq("user_id", profileMatch.id)
-          .maybeSingle()
+          .maybeSingle<Pick<VaultMemberRow, "id">>()
       : { data: null };
     const [{ count: memberCount }, { count: pendingInviteCount }] = await Promise.all([
       supabase.from("vault_members").select("id", { head: true, count: "exact" }).eq("vault_id", vaultId),
@@ -139,7 +150,7 @@ export async function inviteVaultMemberAction(formData: FormData) {
     if (profileMatch?.id) {
       const { error: memberError } = await supabase
         .from("vault_members")
-        .upsert({ vault_id: vaultId, user_id: profileMatch.id, role }, { onConflict: "vault_id,user_id" });
+        .upsert({ vault_id: vaultId, user_id: profileMatch.id, role } as never, { onConflict: "vault_id,user_id" });
 
       if (memberError) {
         throw memberError;
@@ -148,7 +159,7 @@ export async function inviteVaultMemberAction(formData: FormData) {
       if (existingInvite?.id) {
         const { error } = await supabase
           .from("vault_invites")
-          .update({ role, status: "accepted", invited_by_user_id: user.id })
+          .update({ role, status: "accepted", invited_by_user_id: user.id } as never)
           .eq("id", existingInvite.id);
         if (error) {
           throw error;
@@ -156,7 +167,7 @@ export async function inviteVaultMemberAction(formData: FormData) {
       } else {
         const { error } = await supabase
           .from("vault_invites")
-          .insert({ vault_id: vaultId, email, role, invited_by_user_id: user.id, status: "accepted" });
+          .insert({ vault_id: vaultId, email, role, invited_by_user_id: user.id, status: "accepted" } as never);
         if (error) {
           throw error;
         }
@@ -168,7 +179,7 @@ export async function inviteVaultMemberAction(formData: FormData) {
       if (existingInvite?.id) {
         const { error } = await supabase
           .from("vault_invites")
-          .update({ role, status: "pending", invited_by_user_id: user.id })
+          .update({ role, status: "pending", invited_by_user_id: user.id } as never)
           .eq("id", existingInvite.id);
         if (error) {
           throw error;
@@ -176,17 +187,18 @@ export async function inviteVaultMemberAction(formData: FormData) {
       } else {
         const { error } = await supabase
           .from("vault_invites")
-          .insert({ vault_id: vaultId, email, role, invited_by_user_id: user.id, status: "pending" });
+          .insert({ vault_id: vaultId, email, role, invited_by_user_id: user.id, status: "pending" } as never);
         if (error) {
           throw error;
         }
       }
     }
+    const confirmedVault = vault!;
 
     const emailResult = await sendVaultInviteEmail({
       to: email,
       vaultId,
-      vaultName: vault.name,
+      vaultName: confirmedVault.name,
       inviterName: user.user_metadata.full_name ?? user.email ?? "Someone close to you",
       role,
     });
@@ -227,16 +239,12 @@ export async function updateVaultMemberRoleAction(formData: FormData) {
   const memberId = String(formData.get("memberId") ?? "");
   const role = String(formData.get("role") ?? "viewer");
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error("Unauthorized.");
+  const { supabase, user } = await requireAuthenticatedUser();
 
-  const { data: vault } = await supabase.from("vaults").select("owner_user_id").eq("id", vaultId).maybeSingle();
+  const { data: vault } = await supabase.from("vaults").select("owner_user_id").eq("id", vaultId).maybeSingle<Pick<VaultRow, "owner_user_id">>();
   if (!vault || vault.owner_user_id !== user.id) throw new Error("Only owners can manage members.");
 
-  const { error } = await supabase.from("vault_members").update({ role }).eq("id", memberId);
+  const { error } = await supabase.from("vault_members").update({ role } as never).eq("id", memberId);
   if (error) throw new Error(error.message);
 
   revalidatePath(`/vaults/${vaultId}/settings`);
@@ -250,13 +258,9 @@ export async function removeVaultMemberAction(formData: FormData) {
   const memberId = String(formData.get("memberId") ?? "");
   const inviteId = String(formData.get("inviteId") ?? "");
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error("Unauthorized.");
+  const { supabase, user } = await requireAuthenticatedUser();
 
-  const { data: vault } = await supabase.from("vaults").select("owner_user_id").eq("id", vaultId).maybeSingle();
+  const { data: vault } = await supabase.from("vaults").select("owner_user_id").eq("id", vaultId).maybeSingle<Pick<VaultRow, "owner_user_id">>();
   if (!vault || vault.owner_user_id !== user.id) throw new Error("Only owners can manage members.");
 
   if (memberId) {
@@ -279,11 +283,11 @@ export async function deleteVaultAction(formData: FormData) {
 
   const vaultId = String(formData.get("vaultId") ?? "");
 
-  const redirectWithMessage = (message: string, type: "deleteError" | "deleteSuccess") => {
+  const redirectWithMessage = (message: string, type: "deleteError" | "deleteSuccess"): never => {
     const target = type === "deleteSuccess"
       ? `/dashboard?deleteSuccess=${encodeURIComponent(message)}`
       : `/vaults/${vaultId}/settings?${type}=${encodeURIComponent(message)}`;
-    redirect(target);
+    return redirect(target);
   };
 
   if (!vaultId) {
@@ -291,21 +295,14 @@ export async function deleteVaultAction(formData: FormData) {
   }
 
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      redirectWithMessage("Sign in again before deleting this vault.", "deleteError");
-    }
+    const { user } = await requireAuthenticatedUser();
 
     const { data: vault, error: vaultError } = await supabaseAdmin
       .from("vaults")
       .select("id, owner_user_id, cover_image_url, name")
       .eq("id", vaultId)
       .eq("owner_user_id", user.id)
-      .maybeSingle();
+      .maybeSingle<Pick<VaultRow, "id" | "owner_user_id" | "cover_image_url" | "name">>();
 
     if (vaultError) {
       throw vaultError;
@@ -318,25 +315,26 @@ export async function deleteVaultAction(formData: FormData) {
     const { data: entryRows, error: entryRowsError } = await supabaseAdmin
       .from("vault_entries")
       .select("id")
-      .eq("vault_id", vaultId);
+      .eq("vault_id", vaultId) as { data: Pick<EntryRow, "id">[] | null; error: { message: string } | null };
 
     if (entryRowsError) {
       throw entryRowsError;
     }
 
     const entryIds = (entryRows ?? []).map((entry) => entry.id);
+    const confirmedVault = vault!;
 
     const { deleteStorageObject } = await import("@/lib/storage");
 
-    if (vault.cover_image_url) {
-      await deleteStorageObject(vault.cover_image_url, { bucket: "vault-covers" });
+    if (confirmedVault.cover_image_url) {
+      await deleteStorageObject(confirmedVault.cover_image_url, { bucket: "vault-covers" });
     }
 
     if (entryIds.length > 0) {
       const { data: entryAssets, error: entryAssetsError } = await supabaseAdmin
         .from("entry_assets")
         .select("file_url")
-        .in("entry_id", entryIds);
+        .in("entry_id", entryIds) as { data: Pick<EntryAssetRow, "file_url">[] | null; error: { message: string } | null };
 
       if (entryAssetsError) {
         throw entryAssetsError;
@@ -357,7 +355,7 @@ export async function deleteVaultAction(formData: FormData) {
     }
 
     revalidatePath("/dashboard");
-    redirectWithMessage(`${vault.name} was deleted.`, "deleteSuccess");
+    redirectWithMessage(`${confirmedVault.name} was deleted.`, "deleteSuccess");
   } catch (error) {
     const { isRedirectError } = await import("next/dist/client/components/redirect-error");
 
@@ -380,11 +378,12 @@ export async function createCheckoutSessionAction(formData: FormData) {
   const { getStripePriceId } = await import("@/lib/stripe-pricing");
   const { upsertStripeCustomer } = await import("@/lib/billing");
 
-  const redirectWithMessage = (message: string) => {
-    redirect(`/settings?billingError=${encodeURIComponent(message)}`);
+  const redirectWithMessage = (message: string): never => {
+    return redirect(`/settings?billingError=${encodeURIComponent(message)}`);
   };
 
   try {
+    const { user } = await requireAuthenticatedUser();
     const requestedPlan = String(formData.get("planId") ?? "premium").toLowerCase();
     const selectedPlan = requestedPlan === "family" ? "family" : "premium";
     const currencyOverride = String(formData.get("currency") ?? "").trim().toUpperCase();
@@ -397,25 +396,23 @@ export async function createCheckoutSessionAction(formData: FormData) {
         : `Stripe is not configured yet for ${detectedCurrency}. Add the matching STRIPE_PREMIUM_PRICE_ID environment variable first.`);
     }
 
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const stripePriceId = selectedPriceId!;
 
-    if (!user) {
-      redirect("/login?next=/settings");
-    }
+    const { createClient } = await import("@/lib/supabase/server");
+    const supabase = await createClient();
 
     const { data: profile } = await supabase
       .from("profiles")
       .select("id,email,full_name,membership_plan,stripe_customer_id")
       .eq("id", user.id)
-      .maybeSingle();
+      .maybeSingle<Pick<ProfileRow, "id" | "email" | "full_name" | "membership_plan" | "stripe_customer_id">>();
 
     const email = profile?.email ?? user.email;
     if (!email) {
       redirectWithMessage("We could not find an email address for your account.");
     }
+
+    const resolvedEmail = email!;
 
     if (profile?.membership_plan === selectedPlan) {
       redirectWithMessage(`Your account is already on ${selectedPlan === "family" ? "Family" : "Premium"}. Use Manage billing instead.`);
@@ -425,12 +422,17 @@ export async function createCheckoutSessionAction(formData: FormData) {
       redirectWithMessage("Plan changes for existing paid memberships should go through billing management so you do not end up with two subscriptions.");
     }
 
+    const appUrl = env.NEXT_PUBLIC_APP_URL;
+    if (!appUrl) {
+      redirectWithMessage("NEXT_PUBLIC_APP_URL is missing.");
+    }
+
     const stripe = getStripe();
     let customerId = profile?.stripe_customer_id ?? null;
 
     if (!customerId) {
       const customer = await stripe.customers.create({
-        email,
+        email: resolvedEmail,
         name: profile?.full_name ?? user.user_metadata.full_name ?? undefined,
         metadata: { supabaseUserId: user.id },
       });
@@ -438,23 +440,29 @@ export async function createCheckoutSessionAction(formData: FormData) {
       customerId = customer.id;
       await upsertStripeCustomer({
         userId: user.id,
-        email,
+        email: resolvedEmail,
         fullName: profile?.full_name ?? user.user_metadata.full_name ?? null,
         stripeCustomerId: customer.id,
       });
     }
 
+    if (!customerId) {
+      redirectWithMessage("Stripe customer setup failed.");
+    }
+
+    const stripeCustomerId = customerId!;
+
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
-      customer: customerId,
+      customer: stripeCustomerId,
       client_reference_id: user.id,
-      success_url: `${env.NEXT_PUBLIC_APP_URL}/settings?billingSuccess=1&billingPlan=${selectedPlan}&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${env.NEXT_PUBLIC_APP_URL}/pricing?billingCanceled=1`,
+      success_url: `${appUrl}/settings?billingSuccess=1&billingPlan=${selectedPlan}&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${appUrl}/pricing?billingCanceled=1`,
       billing_address_collection: "auto",
       allow_promotion_codes: true,
       line_items: [
         {
-          price: selectedPriceId,
+          price: stripePriceId,
           quantity: 1,
         },
       ],
@@ -471,11 +479,12 @@ export async function createCheckoutSessionAction(formData: FormData) {
       },
     });
 
-    if (!session.url) {
+    const checkoutUrl: string = session.url as string;
+    if (!checkoutUrl) {
       redirectWithMessage("Stripe did not return a checkout URL.");
     }
 
-    redirect(session.url);
+    redirect(checkoutUrl);
   } catch (error) {
     const { isRedirectError } = await import("next/dist/client/components/redirect-error");
 
@@ -494,41 +503,44 @@ export async function createBillingPortalSessionAction() {
   const { env } = await import("@/lib/env");
   const { getStripe } = await import("@/lib/stripe");
 
-  const redirectWithMessage = (message: string) => {
-    redirect(`/settings?billingError=${encodeURIComponent(message)}`);
+  const redirectWithMessage = (message: string): never => {
+    return redirect(`/settings?billingError=${encodeURIComponent(message)}`);
   };
 
   try {
+    const { user } = await requireAuthenticatedUser();
     if (!env.STRIPE_SECRET_KEY) {
       redirectWithMessage("Stripe is not configured yet. Add STRIPE_SECRET_KEY first.");
     }
 
+    const { createClient } = await import("@/lib/supabase/server");
     const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      redirect("/login?next=/settings");
-    }
 
     const { data: profile } = await supabase
       .from("profiles")
       .select("stripe_customer_id")
       .eq("id", user.id)
-      .maybeSingle();
+      .maybeSingle<Pick<ProfileRow, "stripe_customer_id">>();
 
-    if (!profile?.stripe_customer_id) {
+    const customerId = profile?.stripe_customer_id;
+    if (!customerId) {
       redirectWithMessage("There is no Stripe billing account attached to this profile yet.");
     }
 
+    const appUrl = env.NEXT_PUBLIC_APP_URL;
+    if (!appUrl) {
+      redirectWithMessage("NEXT_PUBLIC_APP_URL is missing.");
+    }
+
+    const billingCustomerId = customerId!;
+
     const stripe = getStripe();
     const session = await stripe.billingPortal.sessions.create({
-      customer: profile.stripe_customer_id,
-      return_url: `${env.NEXT_PUBLIC_APP_URL}/settings`,
+      customer: billingCustomerId,
+      return_url: `${appUrl}/settings`,
     });
 
-    redirect(session.url);
+    redirect(session.url as string);
   } catch (error) {
     const { isRedirectError } = await import("next/dist/client/components/redirect-error");
 
@@ -581,7 +593,7 @@ export async function updateUserAccessAction(formData: FormData) {
   const rawStorageQuota = String(formData.get("storageQuotaGb") ?? "").trim();
   const storageQuotaGb = rawStorageQuota ? Number.parseInt(rawStorageQuota, 10) : null;
 
-  const redirectWithMessage = (message: string, type: "adminError" | "adminSuccess") => {
+  const redirectWithMessage = (message: string, type: "adminError" | "adminSuccess")=> {
     redirect(`/admin/users?${type}=${encodeURIComponent(message)}`);
   };
 
@@ -641,7 +653,7 @@ export async function inviteAdminAction(formData: FormData) {
 
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
 
-  const redirectWithMessage = (message: string, type: "adminError" | "adminSuccess") => {
+  const redirectWithMessage = (message: string, type: "adminError" | "adminSuccess")=> {
     redirect(`/admin/users?${type}=${encodeURIComponent(message)}`);
   };
 
@@ -656,7 +668,7 @@ export async function inviteAdminAction(formData: FormData) {
       .from("profiles")
       .select("id,email,is_admin")
       .eq("email", email)
-      .maybeSingle();
+      .maybeSingle<Pick<ProfileRow, "id" | "email" | "is_admin">>();
 
     if (existingProfile?.is_admin) {
       redirectWithMessage(`${email} already has admin access.`, "adminSuccess");
@@ -743,7 +755,7 @@ export async function removeAdminInviteAction(formData: FormData) {
 
   const inviteId = String(formData.get("inviteId") ?? "");
 
-  const redirectWithMessage = (message: string, type: "adminError" | "adminSuccess") => {
+  const redirectWithMessage = (message: string, type: "adminError" | "adminSuccess")=> {
     redirect(`/admin/users?${type}=${encodeURIComponent(message)}`);
   };
 
@@ -781,7 +793,7 @@ export async function deleteUserAction(formData: FormData) {
   const targetUserId = String(formData.get("targetUserId") ?? "");
   const targetEmail = String(formData.get("targetEmail") ?? "").trim().toLowerCase();
 
-  const redirectWithMessage = (message: string, type: "adminError" | "adminSuccess") => {
+  const redirectWithMessage = (message: string, type: "adminError" | "adminSuccess")=> {
     redirect(`/admin/users?${type}=${encodeURIComponent(message)}`);
   };
 
@@ -831,7 +843,7 @@ export async function triggerUnlockNotificationsAction(formData: FormData) {
   const mode = String(formData.get("mode") ?? "dry-run").trim().toLowerCase();
   const dryRun = mode !== "send";
 
-  const redirectWithMessage = (message: string, type: "unlockError" | "unlockSuccess") => {
+  const redirectWithMessage = (message: string, type: "unlockError" | "unlockSuccess")=> {
     redirect(`/admin/users?${type}=${encodeURIComponent(message)}`);
   };
 
@@ -874,6 +886,37 @@ export async function triggerUnlockNotificationsAction(formData: FormData) {
     redirectWithMessage(message, "unlockError");
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

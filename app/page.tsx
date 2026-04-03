@@ -94,7 +94,24 @@ const useCases = [
   },
 ];
 
-const milestoneMoments = [
+type MilestoneMask = {
+  left: string;
+  top: string;
+  width: string;
+  height: string;
+  rotate?: string;
+  borderRadius?: string;
+};
+
+type MilestoneMoment = {
+  label: string;
+  title: string;
+  src: string;
+  alt: string;
+  masks: MilestoneMask[];
+};
+
+const milestoneMoments: MilestoneMoment[] = [
   {
     label: "First Christmas",
     title: "Save the little season while it still feels magical.",
@@ -375,6 +392,8 @@ export default async function HomePage(props: HomePageProps) {
     </div>
   );
 }
+
+
 
 
 

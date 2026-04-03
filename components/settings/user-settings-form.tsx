@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -16,8 +16,10 @@ import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
 import { uploadFileToBucket, validateAsset } from "@/lib/uploads";
 import { userSettingsSchema } from "@/lib/validations/auth";
+import type { Database } from "@/types/database";
 
 type UserSettingsValues = z.infer<typeof userSettingsSchema>;
+type ProfileUpdate = Database["public"]["Tables"]["profiles"]["Update"];
 
 export function UserSettingsForm(props: {
   fullName: string;
@@ -85,7 +87,7 @@ export function UserSettingsForm(props: {
             emailReminders: values.emailReminders,
             unlockDigest: values.unlockDigest,
           },
-        })
+        } as ProfileUpdate as never)
         .eq("id", user.id);
 
       if (error) throw new Error(error.message);
@@ -198,3 +200,7 @@ export function UserSettingsForm(props: {
     </Card>
   );
 }
+
+
+
+

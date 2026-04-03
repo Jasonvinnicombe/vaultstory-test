@@ -9,6 +9,7 @@ import {
   Users,
   Video,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
@@ -135,7 +136,7 @@ export default function VaultUsesPage() {
         <section className="page-wrap pb-16 sm:pb-20 lg:pb-24">
           <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
             {vaultUses.map((item) => {
-              const Icon = item.icon;
+              const Icon = ("icon" in item ? item.icon : null) as LucideIcon | null;
               return (
                 <Card key={item.id} id={item.id} className="glass-panel overflow-hidden border-white/70 bg-card/90">
                   <div className={`relative aspect-[5/4] overflow-hidden ${item.imageClassName ?? ""}`.trim()}>
@@ -165,6 +166,12 @@ export default function VaultUsesPage() {
     </div>
   );
 }
+
+
+
+
+
+
 
 
 

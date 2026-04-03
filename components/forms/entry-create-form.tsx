@@ -21,8 +21,14 @@ import { normalizeTags, resolveUnlockAt } from "@/lib/entries";
 import { createClient } from "@/lib/supabase/client";
 import { getAssetKind, uploadFileToBucket, validateAsset } from "@/lib/uploads";
 import { createEntryWorkflowSchema } from "@/lib/validations/entries";
+import type { Database } from "@/types/database";
 
 type EntryValues = z.infer<typeof createEntryWorkflowSchema>;
+
+type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
+type VaultEntryInsert = Database["public"]["Tables"]["vault_entries"]["Insert"];
+type EntryAssetInsert = Database["public"]["Tables"]["entry_assets"]["Insert"];
+type EntryTagInsert = Database["public"]["Tables"]["entry_tags"]["Insert"];
 
 type ExistingAsset = {
   id: string;
@@ -244,7 +250,7 @@ export function EntryCreateForm({
         .from("profiles")
         .select("membership_plan,membership_status")
         .eq("id", user.id)
-        .maybeSingle();
+        .maybeSingle<Pick<ProfileRow, "membership_plan" | "membership_status">>();
 
       if (isMilestoneUnlockType(values.unlockType) && !canUseMilestoneUnlocks(latestProfile?.membership_plan, latestProfile?.membership_status)) {
         throw new Error(getMilestoneUnlockUpgradeMessage());
@@ -263,7 +269,7 @@ export function EntryCreateForm({
           unlockType: values.unlockType,
           unlockAt: values.unlockAt,
           relativeAmount: values.relativeAmount,
-          relativeUnit: values.relativeUnit,
+          relativeUnit: values.relativeUnit as "months" | "years" | undefined,
           subjectBirthdate,
           ageMilestone: values.ageMilestone,
         });
@@ -280,7 +286,7 @@ export function EntryCreateForm({
           ? "bundle"
           : getAssetKind(mediaFiles[0]);
 
-      const payload = {
+      const payload: VaultEntryInsert = {
         vault_id: vaultId,
         user_id: user.id,
         title: values.title,
@@ -300,7 +306,7 @@ export function EntryCreateForm({
       if (isEditing && entryId) {
         const { error } = await supabase
           .from("vault_entries")
-          .update(payload)
+          .update(payload as never)
           .eq("id", entryId)
           .eq("user_id", user.id);
 
@@ -312,9 +318,9 @@ export function EntryCreateForm({
       } else {
         const { data: entry, error } = await supabase
           .from("vault_entries")
-          .insert(payload)
+          .insert(payload as never)
           .select("id")
-          .single();
+          .single() as unknown as { data: { id: string }; error: { message: string } | null };
 
         if (error) {
           throw new Error(error.message);
@@ -324,7 +330,7 @@ export function EntryCreateForm({
       }
 
       if (mediaFiles.length) {
-        const assets = [] as { entry_id: string; file_url: string; file_type: string }[];
+        const assets: EntryAssetInsert[] = [];
 
         for (const file of mediaFiles) {
           const kind = getAssetKind(file);
@@ -343,7 +349,7 @@ export function EntryCreateForm({
           });
         }
 
-        const { error: assetsError } = await supabase.from("entry_assets").insert(assets);
+        const { error: assetsError } = await supabase.from("entry_assets").insert(assets as never);
         if (assetsError) {
           throw new Error(assetsError.message);
         }
@@ -358,12 +364,12 @@ export function EntryCreateForm({
       }
 
       if (tags.length) {
-        const { error: tagError } = await supabase.from("entry_tags").insert(
-          tags.map((tag) => ({
-            entry_id: targetEntryId,
-            tag,
-          })),
-        );
+        const tagRows = tags.map((tag): EntryTagInsert => ({
+          entry_id: targetEntryId,
+          tag,
+        }));
+
+        const { error: tagError } = await supabase.from("entry_tags").insert(tagRows as never);
 
         if (tagError) {
           throw new Error(tagError.message);
@@ -695,6 +701,11 @@ export function EntryCreateForm({
     </Card>
   );
 }
+
+
+
+
+
 
 
 

@@ -4,6 +4,8 @@ import { createServerClient } from "@supabase/ssr";
 import { getSupabaseEnv, hasSupabaseEnv } from "@/lib/supabase/config";
 import type { Database } from "@/types/database";
 
+type CookieMutation = { name: string; value: string; options: any };
+
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({
     request: {
@@ -22,8 +24,8 @@ export async function updateSession(request: NextRequest) {
       getAll() {
         return request.cookies.getAll();
       },
-      setAll(cookiesToSet) {
-        cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value));
+      setAll(cookiesToSet: CookieMutation[]) {
+        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
         response = NextResponse.next({
           request: {
             headers: request.headers,
