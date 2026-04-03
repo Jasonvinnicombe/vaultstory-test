@@ -11,6 +11,16 @@ export type VaultEntry = Database["public"]["Tables"]["vault_entries"]["Row"] & 
 
 export type EntryStatus = "draft" | "locked" | "soon" | "unlocked";
 
+type EntryTimingFields = Pick<VaultEntry, "unlock_type" | "unlock_at" | "milestone_label" | "milestone_achieved_at">;
+
+export function entryRequiresPremiumUnlock(entry: Pick<VaultEntry, "unlock_type">) {
+  return entry.unlock_type === "manual_milestone" || entry.unlock_type === "age_milestone";
+}
+
+export function isPremiumUnlockBlocked(entry: EntryTimingFields, options?: { hasPremiumUnlockEntitlement?: boolean }) {
+  return entryRequiresPremiumUnlock(entry) && options?.hasPremiumUnlockEntitlement === false;
+}
+
 export function resolveUnlockAt(input: {
   unlockType: VaultEntry["unlock_type"] | "age_milestone" | "draft";
   unlockAt?: string | null;
@@ -34,7 +44,7 @@ export function resolveUnlockAt(input: {
   return null;
 }
 
-export function isDraftEntry(entry: Pick<VaultEntry, "unlock_type" | "unlock_at" | "milestone_label" | "milestone_achieved_at">) {
+export function isDraftEntry(entry: EntryTimingFields) {
   return (
     entry.unlock_type === "manual_milestone" &&
     !entry.unlock_at &&
@@ -43,9 +53,10 @@ export function isDraftEntry(entry: Pick<VaultEntry, "unlock_type" | "unlock_at"
   );
 }
 
-export function getEntryStatus(entry: Pick<VaultEntry, "unlock_type" | "unlock_at" | "milestone_label" | "milestone_achieved_at">): EntryStatus {
-  if (entry.milestone_achieved_at) return "unlocked";
+export function getEntryStatus(entry: EntryTimingFields, options?: { hasPremiumUnlockEntitlement?: boolean }): EntryStatus {
   if (isDraftEntry(entry)) return "draft";
+  if (isPremiumUnlockBlocked(entry, options)) return "locked";
+  if (entry.milestone_achieved_at) return "unlocked";
   if (!entry.unlock_at) return "locked";
 
   const unlockDate = parseISO(entry.unlock_at);
@@ -62,8 +73,8 @@ export function getEntryStatus(entry: Pick<VaultEntry, "unlock_type" | "unlock_a
   return "locked";
 }
 
-export function isUnlocked(entry: Pick<VaultEntry, "unlock_type" | "unlock_at" | "milestone_label" | "milestone_achieved_at">) {
-  return getEntryStatus(entry) === "unlocked";
+export function isUnlocked(entry: EntryTimingFields, options?: { hasPremiumUnlockEntitlement?: boolean }) {
+  return getEntryStatus(entry, options) === "unlocked";
 }
 
 export function normalizeTags(tags?: string) {

@@ -214,12 +214,12 @@ const faqCategories: FaqCategory[] = [
       {
         question: "Can I cancel later?",
         answer:
-          "Yes, people should be able to stop a paid plan if they no longer need expanded capacity. The exact billing and downgrade behavior should follow whatever is currently offered on the pricing and account settings flows.",
+          "Yes. If a paid subscription ends, the account is downgraded to Free. Existing vaults and entries stay in place, but paid-only features pause and the account has 30 days to remove files until it is back within the Free storage allowance or the subscription is resumed.",
       },
       {
         question: "If I downgrade, will my existing memories disappear?",
         answer:
-          "A healthy product experience should protect the archive people already built rather than making memories feel disposable. In practice, downgrades are usually handled through limits on future usage rather than immediately destroying important existing content.",
+          "Your existing vaults and entries do not disappear immediately. After downgrade, Free limits apply, paid-only unlock behavior pauses, new uploads are limited by the Free plan, and if your account is above the Free storage allowance you have 30 days to delete files or resume your subscription.",
       },
       {
         question: "Where can I compare plans?",

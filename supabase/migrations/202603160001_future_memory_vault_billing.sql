@@ -14,7 +14,7 @@ alter table public.profiles
 
 alter table public.profiles
   add constraint profiles_membership_plan_check
-  check (membership_plan in ('free', 'premium'));
+  check (membership_plan in ('free', 'premium', 'family', 'lifetime'));
 
 alter table public.profiles
   drop constraint if exists profiles_membership_status_check;

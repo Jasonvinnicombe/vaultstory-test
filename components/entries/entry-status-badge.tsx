@@ -18,10 +18,11 @@ const variants: Record<EntryStatus, "outline" | "secondary" | "default"> = {
   unlocked: "default",
 };
 
-export function EntryStatusBadge({ entry }: { entry: Pick<EntryRow, "unlock_type" | "unlock_at" | "milestone_label" | "milestone_achieved_at"> }) {
-  const status = getEntryStatus(entry);
+export function EntryStatusBadge(props: {
+  entry: Pick<EntryRow, "unlock_type" | "unlock_at" | "milestone_label" | "milestone_achieved_at">;
+  hasPremiumUnlockEntitlement?: boolean;
+}) {
+  const status = getEntryStatus(props.entry, { hasPremiumUnlockEntitlement: props.hasPremiumUnlockEntitlement });
 
   return <Badge variant={variants[status]} className={status === "locked" ? "heartbeat-pulse bg-secondary text-slate-900 shadow-[0_10px_30px_rgba(230,184,106,0.35)] ring-1 ring-secondary/70" : undefined}>{labels[status]}</Badge>;
 }
-
-

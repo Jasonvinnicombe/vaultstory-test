@@ -12,10 +12,12 @@ export type BillingProfile = {
   stripe_subscription_id: string | null;
   stripe_price_id: string | null;
   stripe_current_period_end: string | null;
+  downgrade_grace_until: string | null;
 };
 
 const ENTITLED_STATUSES = new Set(["active", "trialing", "past_due"]);
 export const FAMILY_MEMBER_LIMIT = 6;
+export const DOWNGRADE_GRACE_DAYS = 30;
 
 export function normalizeMembershipPlan(plan?: string | null): MembershipPlanId {
   switch (plan?.toLowerCase()) {
@@ -69,6 +71,42 @@ export function getMembershipLabel(plan?: string | null) {
     default:
       return "Free";
   }
+}
+
+export function hasPaidFeatureAccess(plan?: string | null, status?: string | null) {
+  return resolveEntitledPlan(plan, status) !== "free";
+}
+
+export function getDowngradeGraceDeadline(referenceDate = new Date()) {
+  const deadline = new Date(referenceDate);
+  deadline.setDate(deadline.getDate() + DOWNGRADE_GRACE_DAYS);
+  return deadline.toISOString();
+}
+
+export function isWithinDowngradeGrace(downgradeGraceUntil?: string | null) {
+  if (!downgradeGraceUntil) {
+    return false;
+  }
+
+  const deadline = new Date(downgradeGraceUntil);
+  return Number.isFinite(deadline.getTime()) && deadline.getTime() > Date.now();
+}
+
+export function formatDowngradeGraceDate(downgradeGraceUntil?: string | null) {
+  if (!downgradeGraceUntil) {
+    return null;
+  }
+
+  const deadline = new Date(downgradeGraceUntil);
+  if (!Number.isFinite(deadline.getTime())) {
+    return null;
+  }
+
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(deadline);
 }
 
 export function getPlanStorageQuotaGb(plan?: string | null, status?: string | null) {
@@ -231,6 +269,7 @@ export async function syncProfileBillingFromSubscription(options: {
     stripe_subscription_id: options.subscription.id,
     stripe_price_id: priceId,
     stripe_current_period_end: getSubscriptionCurrentPeriodEnd(options.subscription),
+    downgrade_grace_until: null,
   };
 
   let query = supabaseAdmin.from("profiles").update(payload);
@@ -261,6 +300,7 @@ export async function syncProfileBillingFromCanceledSubscription(customerId: str
       stripe_subscription_id: subscriptionId,
       stripe_price_id: null,
       stripe_current_period_end: null,
+      downgrade_grace_until: getDowngradeGraceDeadline(),
     })
     .eq("stripe_customer_id", customerId);
 

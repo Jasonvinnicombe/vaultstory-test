@@ -28,7 +28,7 @@ const sections = [
   },
   {
     title: "Billing and paid plans",
-    body: "Paid memberships renew according to the billing terms shown at checkout unless canceled. Pricing, plan limits, storage allowances, and feature access may vary by plan and can change over time with reasonable notice where required.",
+    body: "Paid memberships renew according to the billing terms shown at checkout unless canceled. If a paid subscription ends, the account is downgraded to the Free plan, paid-only features may pause, and Free storage limits apply. If stored files exceed the Free allowance after downgrade, the account has 30 days to delete files or resume the subscription before remaining over-quota restrictions continue to apply.",
   },
   {
     title: "Availability",

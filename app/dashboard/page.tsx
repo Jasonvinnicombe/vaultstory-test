@@ -20,9 +20,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { getProfile } from "@/lib/auth";
+import { hasPaidFeatureAccess } from "@/lib/billing";
 import { formatDateTime } from "@/lib/date";
 import { getEntryStatus } from "@/lib/entries";
-import { supabaseAdmin } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { getStorageObjectUrl } from "@/lib/storage";
 import { VaultCard } from "@/components/vaults/vault-card";
@@ -74,12 +74,14 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
   ]);
 
   const allEntries = (entries ?? []).filter((entry) => entry.is_deleted !== true);
+  const billingProfile = profile as { membership_plan?: string | null; membership_status?: string | null } | null;
+  const hasPremiumUnlockEntitlement = hasPaidFeatureAccess(billingProfile?.membership_plan, billingProfile?.membership_status);
 
-  const unlockedEntries = allEntries.filter((entry) => getEntryStatus(entry) === "unlocked");
-  const upcomingEntries = allEntries.filter((entry) => getEntryStatus(entry) === "soon");
+  const unlockedEntries = allEntries.filter((entry) => getEntryStatus(entry, { hasPremiumUnlockEntitlement }) === "unlocked");
+  const upcomingEntries = allEntries.filter((entry) => getEntryStatus(entry, { hasPremiumUnlockEntitlement }) === "soon");
   const nextUnlockEntry =
     [...allEntries]
-      .filter((entry) => getEntryStatus(entry) !== "unlocked" && entry.unlock_at)
+      .filter((entry) => getEntryStatus(entry, { hasPremiumUnlockEntitlement }) !== "unlocked" && entry.unlock_at)
       .sort((a, b) => new Date(a.unlock_at ?? "").getTime() - new Date(b.unlock_at ?? "").getTime())[0] ?? null;
 
   const stats = [
@@ -94,7 +96,7 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
       const relatedEntries = allEntries.filter((entry) => entry.vault_id === vault.id);
       const nextUnlock =
         relatedEntries
-          .filter((entry) => entry.unlock_at && getEntryStatus(entry) !== "unlocked")
+          .filter((entry) => entry.unlock_at && getEntryStatus(entry, { hasPremiumUnlockEntitlement }) !== "unlocked")
           .sort(
             (a, b) =>
               new Date(a.unlock_at ?? "").getTime() - new Date(b.unlock_at ?? "").getTime(),
@@ -142,7 +144,7 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
     })
     .slice(0, 6)
     .map((entry) => {
-      const status = getEntryStatus(entry);
+      const status = getEntryStatus(entry, { hasPremiumUnlockEntitlement });
       const vault = vaultById.get(entry.vault_id);
 
       return {

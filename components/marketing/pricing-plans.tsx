@@ -4,6 +4,7 @@ import { PlanActionButton } from "@/components/billing/plan-action-button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { MEMBERSHIP_PLANS, type MembershipPlan } from "@/lib/pricing";
+
 export function PricingPlans(props: {
   title?: string;
   description?: string;
@@ -12,6 +13,7 @@ export function PricingPlans(props: {
   isAuthenticated?: boolean;
   familyCheckoutEnabled?: boolean;
   priceOverrides?: Partial<Record<MembershipPlan["id"], { priceLabel: string; cadence: string }>>;
+  currency?: string;
 }) {
   const title = props.title ?? "Choose the membership that fits how your family preserves memories.";
   const description = props.description ?? "Start free, then move up when you want richer media, milestone unlocks, and shared family access.";
@@ -85,6 +87,7 @@ export function PricingPlans(props: {
                     isAuthenticated={props.isAuthenticated ?? false}
                     highlight={plan.highlight}
                     checkoutEnabled={plan.id === "family" ? props.familyCheckoutEnabled : plan.id === "premium"}
+                    currency={props.currency}
                   />
                 </div>
               </CardContent>
@@ -95,4 +98,3 @@ export function PricingPlans(props: {
     </div>
   );
 }
-

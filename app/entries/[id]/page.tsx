@@ -11,36 +11,58 @@ import { AppShell } from "@/components/layout/app-shell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { formatDowngradeGraceDate, hasPaidFeatureAccess } from "@/lib/billing";
 import { getProfile } from "@/lib/auth";
 import { formatDateTime } from "@/lib/date";
-import { getEntryStatus, isDraftEntry } from "@/lib/entries";
+import { getEntryStatus, isDraftEntry, isPremiumUnlockBlocked } from "@/lib/entries";
 import { getStorageObjectUrl } from "@/lib/storage";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import type { Database } from "@/types/database";
+
+type EntryRow = Database["public"]["Tables"]["vault_entries"]["Row"];
+type VaultRow = Database["public"]["Tables"]["vaults"]["Row"];
+type AssetRow = Database["public"]["Tables"]["entry_assets"]["Row"];
+type TagRow = Database["public"]["Tables"]["entry_tags"]["Row"];
 
 export default async function EntryPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams?: Promise<{ preview?: string }> }) {
-  const [{ id }, resolvedSearchParams, { profile, user, avatarPreviewUrl }] = await Promise.all([params, searchParams ?? Promise.resolve({}), getProfile()]);
-  const supabase = profile?.is_admin ? supabaseAdmin : await createClient();
+  const [{ id }, rawSearchParams, { profile, user, avatarPreviewUrl }] = await Promise.all([params, searchParams ?? Promise.resolve({}), getProfile()]);
+  const resolvedSearchParams = rawSearchParams as { preview?: string };
+  const supabase = (profile?.is_admin ? supabaseAdmin : await createClient()) as typeof supabaseAdmin;
 
   const { data: entry } = await supabase.from("vault_entries").select("*").eq("id", id).maybeSingle();
-  if (!entry) notFound();
+  const typedEntry = entry as EntryRow | null;
+  if (!typedEntry) notFound();
 
   const [{ data: vault }, { data: assetRows }, { data: tagRows }] = await Promise.all([
-    supabase.from("vaults").select("*").eq("id", entry.vault_id).maybeSingle(),
+    supabase.from("vaults").select("*").eq("id", typedEntry.vault_id).maybeSingle(),
     supabase.from("entry_assets").select("*").eq("entry_id", id),
     supabase.from("entry_tags").select("*").eq("entry_id", id),
   ]);
 
-  if (!vault) notFound();
+  const typedVault = vault as VaultRow | null;
+  const typedAssets = (assetRows ?? []) as AssetRow[];
+  const typedTags = (tagRows ?? []) as TagRow[];
+  if (!typedVault) notFound();
 
-  const tags = (tagRows ?? []).map((tag) => tag.tag);
-  const status = getEntryStatus(entry);
+  const { data: ownerProfile } = await supabaseAdmin
+    .from("profiles")
+    .select("membership_plan,membership_status,downgrade_grace_until")
+    .eq("id", typedVault.owner_user_id)
+    .maybeSingle();
+
+  const fallbackProfile = profile as { full_name?: string | null; membership_plan?: string | null; membership_status?: string | null } | null;
+  const hasPremiumUnlockEntitlement = hasPaidFeatureAccess(ownerProfile?.membership_plan ?? fallbackProfile?.membership_plan, ownerProfile?.membership_status ?? fallbackProfile?.membership_status);
+  const tags = typedTags.map((tag) => tag.tag);
+  const status = getEntryStatus(typedEntry, { hasPremiumUnlockEntitlement });
+  const premiumUnlockBlocked = isPremiumUnlockBlocked(typedEntry, { hasPremiumUnlockEntitlement });
   const adminPreview = Boolean(profile?.is_admin && resolvedSearchParams.preview === "1" && status !== "draft");
   const downloadQuery = adminPreview ? "?preview=1" : "";
+  const graceDate = formatDowngradeGraceDate(ownerProfile?.downgrade_grace_until);
 
   const signedAssets = (
     await Promise.all(
-      (assetRows ?? []).map(async (asset) => {
+      typedAssets.map(async (asset) => {
         if (/^https?:\/\//i.test(asset.file_url)) {
           return {
             id: asset.id,
@@ -71,58 +93,66 @@ export default async function EntryPage({ params, searchParams }: { params: Prom
   ).filter((asset): asset is { id: string; fileUrl: string; fileType: string; downloadUrl: string } => Boolean(asset));
 
   const canCompleteMilestone =
-    entry.unlock_type === "manual_milestone" &&
-    !entry.milestone_achieved_at &&
-    !isDraftEntry(entry) &&
-    !profile?.is_admin;
+    typedEntry.unlock_type === "manual_milestone" &&
+    !typedEntry.milestone_achieved_at &&
+    !isDraftEntry(typedEntry) &&
+    !profile?.is_admin &&
+    hasPremiumUnlockEntitlement;
 
   const shouldReveal = status === "unlocked" || adminPreview;
+  const restrictionMessage = premiumUnlockBlocked
+    ? graceDate
+      ? `This milestone unlock is paused because the subscription attached to this vault is no longer active. Resume Premium or Family, and once the intended unlock condition is satisfied, this memory can open again. Downgraded accounts have until ${graceDate} to remove files that exceed the free storage allowance.`
+      : "This milestone unlock is paused because the subscription attached to this vault is no longer active. Resume Premium or Family, and once the intended unlock condition is satisfied, this memory can open again."
+    : null;
 
   return (
-    <AppShell fullName={profile?.full_name ?? user.user_metadata.full_name ?? null} email={user.email ?? ""} isAdmin={profile?.is_admin ?? false} avatarUrl={avatarPreviewUrl}>
+    <AppShell fullName={fallbackProfile?.full_name ?? user.user_metadata.full_name ?? null} email={user.email ?? ""} isAdmin={profile?.is_admin ?? false} avatarUrl={avatarPreviewUrl}>
       <div className="space-y-6 sm:space-y-7">
         <Card className="overflow-hidden border-white/60 bg-card/84 shadow-[0_24px_64px_rgba(66,46,31,0.1)]">
           <CardContent className="flex flex-col gap-5 p-7 sm:p-8 lg:flex-row lg:items-end lg:justify-between lg:p-10">
             <div className="section-stack max-w-3xl">
               <div className="flex flex-wrap items-center gap-3">
                 <Badge className="w-fit bg-secondary/88">Memory reveal</Badge>
-                <EntryStatusBadge entry={entry} />
+                <EntryStatusBadge entry={typedEntry} hasPremiumUnlockEntitlement={hasPremiumUnlockEntitlement} />
               </div>
-              <h1 className="text-balance font-display text-4xl leading-tight text-foreground sm:text-5xl">{entry.title}</h1>
+              <h1 className="text-balance font-display text-4xl leading-tight text-foreground sm:text-5xl">{typedEntry.title}</h1>
               <p className="text-sm leading-7 text-muted-foreground sm:text-base">
-                Inside {vault.name} for {vault.subject_name ?? "the future"}.
+                Inside {typedVault.name} for {typedVault.subject_name ?? "the future"}.
               </p>
               <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
                 <span className="inline-flex items-center gap-2 rounded-full bg-secondary/55 px-3 py-1.5">
                   <CalendarClock className="h-4 w-4" />
                   {status === "draft"
                     ? "Draft - not sealed yet"
-                    : entry.unlock_at
-                      ? formatDateTime(entry.unlock_at)
-                      : entry.milestone_label ?? "Manual milestone"}
+                    : premiumUnlockBlocked
+                      ? "Subscription required to reopen this unlock"
+                      : typedEntry.unlock_at
+                        ? formatDateTime(typedEntry.unlock_at)
+                        : typedEntry.milestone_label ?? "Manual milestone"}
                 </span>
                 <span className="inline-flex items-center gap-2 rounded-full bg-secondary/55 px-3 py-1.5">
-                  Recorded {formatDateTime(entry.created_at)}
+                  Recorded {formatDateTime(typedEntry.created_at)}
                 </span>
               </div>
             </div>
             <div className="flex flex-wrap gap-3">
               <Button asChild variant="outline">
-                <Link href={`/vaults/${vault.id}`}>
+                <Link href={`/vaults/${typedVault.id}`}>
                   <ArrowLeft className="h-4 w-4" />
                   Back to vault
                 </Link>
               </Button>
               {status === "draft" ? (
                 <Button asChild>
-                  <Link href={`/entries/${entry.id}/edit`}>
+                  <Link href={`/entries/${typedEntry.id}/edit`}>
                     <FilePenLine className="h-4 w-4" />
                     Continue editing
                   </Link>
                 </Button>
               ) : (
                 <Button asChild>
-                  <Link href={`/vaults/${vault.id}/entries/new`}>Add another memory</Link>
+                  <Link href={`/vaults/${typedVault.id}/entries/new`}>Add another memory</Link>
                 </Button>
               )}
             </div>
@@ -140,21 +170,21 @@ export default async function EntryPage({ params, searchParams }: { params: Prom
                 </p>
               </div>
 
-              {entry.content_text ? (
+              {typedEntry.content_text ? (
                 <div className="rounded-[30px] border border-white/65 bg-background/76 p-6 sm:p-8">
-                  <p className="whitespace-pre-wrap text-base leading-8 text-foreground/86">{entry.content_text}</p>
+                  <p className="whitespace-pre-wrap text-base leading-8 text-foreground/86">{typedEntry.content_text}</p>
                 </div>
               ) : null}
 
               <div className="flex flex-wrap gap-3">
                 <Button asChild>
-                  <Link href={`/entries/${entry.id}/edit`}>
+                  <Link href={`/entries/${typedEntry.id}/edit`}>
                     <FilePenLine className="h-4 w-4" />
                     Continue editing
                   </Link>
                 </Button>
                 <Button asChild variant="outline">
-                  <Link href={`/entries/${entry.id}/edit?step=2`}>
+                  <Link href={`/entries/${typedEntry.id}/edit?step=2`}>
                     <LockKeyhole className="h-4 w-4" />
                     Seal this entry
                   </Link>
@@ -164,18 +194,19 @@ export default async function EntryPage({ params, searchParams }: { params: Prom
           </Card>
         ) : !shouldReveal ? (
           <LockedEntryView
-            title={entry.title}
-            createdAt={entry.created_at}
-            unlockAt={entry.unlock_at}
-            milestoneLabel={entry.milestone_label}
+            title={typedEntry.title}
+            createdAt={typedEntry.created_at}
+            unlockAt={typedEntry.unlock_at}
+            milestoneLabel={typedEntry.milestone_label}
             canCompleteMilestone={canCompleteMilestone}
             milestoneForm={
               canCompleteMilestone ? (
-                <MilestoneCompleteForm entryId={entry.id} vaultId={entry.vault_id} />
+                <MilestoneCompleteForm entryId={typedEntry.id} vaultId={typedEntry.vault_id} />
               ) : undefined
             }
-            adminPreviewHref={profile?.is_admin ? `/entries/${entry.id}?preview=1` : undefined}
+            adminPreviewHref={profile?.is_admin ? `/entries/${typedEntry.id}?preview=1` : undefined}
             adminPreviewLabel="Preview entry as admin"
+            restrictionMessage={restrictionMessage}
           />
         ) : (
           <>
@@ -187,16 +218,16 @@ export default async function EntryPage({ params, searchParams }: { params: Prom
               </Card>
             ) : null}
             <RevealExperience
-              title={entry.title}
-              createdAt={entry.created_at}
-              contentText={entry.content_text}
-              mood={entry.mood}
+              title={typedEntry.title}
+              createdAt={typedEntry.created_at}
+              contentText={typedEntry.content_text}
+              mood={typedEntry.mood}
               tags={tags}
-              predictionText={entry.prediction_text}
-              realityText={entry.reality_text}
+              predictionText={typedEntry.prediction_text}
+              realityText={typedEntry.reality_text}
               assets={signedAssets}
               reflectionForm={
-                adminPreview ? undefined : entry.reality_text ? undefined : <ReflectionForm entryId={entry.id} vaultId={entry.vault_id} initialValue={entry.reality_text ?? ""} />
+                adminPreview ? undefined : typedEntry.reality_text ? undefined : <ReflectionForm entryId={typedEntry.id} vaultId={typedEntry.vault_id} initialValue={typedEntry.reality_text ?? ""} />
               }
             />
           </>

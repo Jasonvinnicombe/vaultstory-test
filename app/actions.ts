@@ -372,9 +372,12 @@ export async function deleteVaultAction(formData: FormData) {
 
 export async function createCheckoutSessionAction(formData: FormData) {
   const { redirect } = await import("next/navigation");
+  const { headers } = await import("next/headers");
   const { createClient } = await import("@/lib/supabase/server");
   const { env } = await import("@/lib/env");
+  const { getCurrencyFromHeaders } = await import("@/lib/currency");
   const { getStripe } = await import("@/lib/stripe");
+  const { getStripePriceId } = await import("@/lib/stripe-pricing");
   const { upsertStripeCustomer } = await import("@/lib/billing");
 
   const redirectWithMessage = (message: string) => {
@@ -384,12 +387,14 @@ export async function createCheckoutSessionAction(formData: FormData) {
   try {
     const requestedPlan = String(formData.get("planId") ?? "premium").toLowerCase();
     const selectedPlan = requestedPlan === "family" ? "family" : "premium";
-    const selectedPriceId = selectedPlan === "family" ? env.STRIPE_FAMILY_PRICE_ID : env.STRIPE_PREMIUM_PRICE_ID;
+    const currencyOverride = String(formData.get("currency") ?? "").trim().toUpperCase();
+    const detectedCurrency = getCurrencyFromHeaders(await headers(), currencyOverride || null);
+    const selectedPriceId = getStripePriceId(selectedPlan, detectedCurrency);
 
     if (!env.STRIPE_SECRET_KEY || !selectedPriceId) {
       redirectWithMessage(selectedPlan === "family"
-        ? "Family checkout is not configured yet. Add STRIPE_FAMILY_PRICE_ID first."
-        : "Stripe is not configured yet. Add STRIPE_PREMIUM_PRICE_ID first.");
+        ? `Family checkout is not configured yet for ${detectedCurrency}. Add the matching STRIPE_FAMILY_PRICE_ID environment variable first.`
+        : `Stripe is not configured yet for ${detectedCurrency}. Add the matching STRIPE_PREMIUM_PRICE_ID environment variable first.`);
     }
 
     const supabase = await createClient();
@@ -869,6 +874,7 @@ export async function triggerUnlockNotificationsAction(formData: FormData) {
     redirectWithMessage(message, "unlockError");
   }
 }
+
 
 
 

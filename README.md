@@ -109,26 +109,32 @@ When configured, vault owners can invite by email from vault settings and the re
 
 ## Stripe Billing
 
-Stripe now powers Premium checkout and billing management.
+Stripe powers Premium, Family, and billing management. The app is ready for live mode as soon as the environment variables point at live Stripe objects.
 
-1. Create a recurring monthly Price in Stripe for Premium.
-2. Add these environment variables to `.env.local` and your deployment target:
-   - `STRIPE_SECRET_KEY`
-   - `STRIPE_WEBHOOK_SECRET`
-   - `STRIPE_PREMIUM_PRICE_ID`
-3. In Stripe, add a webhook endpoint pointing to:
+1. In the Stripe live account, create the recurring monthly Prices you want to sell:
+   - Premium
+   - Family
+   - Optional currency-specific Prices for `AUD`, `USD`, `GBP`, and `EUR`
+2. Add these environment variables to `.env.local` and your production host:
+   - `STRIPE_SECRET_KEY` using your live secret key (`sk_live_...`)
+   - `STRIPE_WEBHOOK_SECRET` from the live webhook endpoint (`whsec_...`)
+   - `STRIPE_PREMIUM_PRICE_ID` and `STRIPE_FAMILY_PRICE_ID` for default live prices
+   - Optional overrides: `STRIPE_PREMIUM_PRICE_ID_AUD`, `STRIPE_PREMIUM_PRICE_ID_USD`, `STRIPE_PREMIUM_PRICE_ID_GBP`, `STRIPE_PREMIUM_PRICE_ID_EUR`
+   - Optional overrides: `STRIPE_FAMILY_PRICE_ID_AUD`, `STRIPE_FAMILY_PRICE_ID_USD`, `STRIPE_FAMILY_PRICE_ID_GBP`, `STRIPE_FAMILY_PRICE_ID_EUR`
+3. In Stripe live mode, add a webhook endpoint pointing to:
    - `/api/stripe/webhooks`
-4. Subscribe the webhook to:
+4. Subscribe the live webhook to:
    - `checkout.session.completed`
    - `customer.subscription.created`
    - `customer.subscription.updated`
    - `customer.subscription.deleted`
-5. Run the billing migration:
+5. In Stripe, configure the Billing Portal if you want customers to self-manage their subscription from Settings.
+6. Run the billing migration:
    - `supabase/migrations/20260316_future_memory_vault_billing.sql`
 
 What the integration does:
-- Premium checkout from pricing/settings
-- Billing portal access for current Premium members
+- Premium and Family checkout from pricing/settings
+- Billing portal access for current paid members
 - Profile sync of membership plan, status, customer id, subscription id, and renewal period
 
 Recommended local webhook testing:
@@ -272,3 +278,4 @@ README.md
 ## Notes
 
 This workspace snapshot does not currently include a top-level `package.json` or `tsconfig.json`, so local build verification depends on restoring the full project manifest files.
+

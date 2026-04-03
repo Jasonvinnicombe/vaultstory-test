@@ -5,22 +5,25 @@ import { EntryStatusBadge } from "@/components/entries/entry-status-badge";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatDateTime } from "@/lib/date";
-import { getEntryStatus } from "@/lib/entries";
+import { getEntryStatus, isPremiumUnlockBlocked } from "@/lib/entries";
 import type { Database } from "@/types/database";
 
 type EntryCardProps = {
   entry: Database["public"]["Tables"]["vault_entries"]["Row"];
   timeline?: boolean;
   contextLabel?: string | null;
+  hasPremiumUnlockEntitlement?: boolean;
 };
 
-export function EntryCard({ entry, timeline = false, contextLabel }: EntryCardProps) {
-  const status = getEntryStatus(entry);
+export function EntryCard({ entry, timeline = false, contextLabel, hasPremiumUnlockEntitlement }: EntryCardProps) {
+  const status = getEntryStatus(entry, { hasPremiumUnlockEntitlement });
   const unlockLabel = status === "draft"
     ? "Draft - keep editing until you're ready to seal it"
-    : entry.unlock_at
-      ? formatDateTime(entry.unlock_at)
-      : entry.milestone_label ?? "Manual unlock";
+    : isPremiumUnlockBlocked(entry, { hasPremiumUnlockEntitlement })
+      ? "Resume Premium or Family to re-enable this unlock"
+      : entry.unlock_at
+        ? formatDateTime(entry.unlock_at)
+        : entry.milestone_label ?? "Manual unlock";
 
   return (
     <div className={timeline ? "relative pl-9 sm:pl-12" : ""}>
@@ -41,7 +44,7 @@ export function EntryCard({ entry, timeline = false, contextLabel }: EntryCardPr
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 {entry.mood ? <Badge variant="secondary">{entry.mood}</Badge> : null}
-                <EntryStatusBadge entry={entry} />
+                <EntryStatusBadge entry={entry} hasPremiumUnlockEntitlement={hasPremiumUnlockEntitlement} />
               </div>
             </div>
           </CardContent>

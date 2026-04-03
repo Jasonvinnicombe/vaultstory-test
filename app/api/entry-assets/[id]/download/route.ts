@@ -2,6 +2,7 @@ import path from "node:path";
 
 import { NextRequest } from "next/server";
 
+import { hasPaidFeatureAccess } from "@/lib/billing";
 import { getEntryStatus } from "@/lib/entries";
 import { getStorageObjectUrl } from "@/lib/storage";
 import { supabaseAdmin } from "@/lib/supabase/admin";
@@ -58,8 +59,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   }
 
   const { data: profile } = await supabase.from("profiles").select("is_admin").eq("id", user.id).maybeSingle();
-  const adminPreview = Boolean(profile?.is_admin && preview);
-  const reader = adminPreview ? supabaseAdmin : supabase;
+  const typedProfile = profile as { is_admin?: boolean } | null;
+  const adminPreview = Boolean(typedProfile?.is_admin && preview);
+  const reader = (adminPreview ? supabaseAdmin : supabase) as typeof supabaseAdmin;
 
   const { data: asset } = await reader.from("entry_assets").select("id, entry_id, file_url, file_type").eq("id", id).maybeSingle();
   if (!asset) {
@@ -68,7 +70,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
   const { data: entry } = await reader
     .from("vault_entries")
-    .select("id, title, unlock_type, unlock_at, milestone_label, milestone_achieved_at")
+    .select("id, vault_id, title, unlock_type, unlock_at, milestone_label, milestone_achieved_at")
     .eq("id", asset.entry_id)
     .maybeSingle();
 
@@ -76,7 +78,17 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     return new Response("Not found", { status: 404 });
   }
 
-  const status = getEntryStatus(entry);
+  const { data: vault } = await reader.from("vaults").select("owner_user_id").eq("id", entry.vault_id).maybeSingle();
+  const { data: ownerProfile } = vault
+    ? await supabaseAdmin
+      .from("profiles")
+      .select("membership_plan,membership_status")
+      .eq("id", vault.owner_user_id)
+      .maybeSingle()
+    : { data: null };
+
+  const hasPremiumUnlockEntitlement = hasPaidFeatureAccess(ownerProfile?.membership_plan, ownerProfile?.membership_status);
+  const status = getEntryStatus(entry, { hasPremiumUnlockEntitlement });
   if (!(status === "unlocked" || adminPreview)) {
     return new Response("Forbidden", { status: 403 });
   }

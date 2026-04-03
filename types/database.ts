@@ -20,6 +20,7 @@ export type Database = {
           stripe_subscription_id: string | null;
           stripe_price_id: string | null;
           stripe_current_period_end: string | null;
+          downgrade_grace_until: string | null;
           created_at: string;
         };
         Insert: {
@@ -38,6 +39,7 @@ export type Database = {
           stripe_subscription_id?: string | null;
           stripe_price_id?: string | null;
           stripe_current_period_end?: string | null;
+          downgrade_grace_until?: string | null;
           created_at?: string;
         };
         Update: {
@@ -56,6 +58,7 @@ export type Database = {
           stripe_subscription_id?: string | null;
           stripe_price_id?: string | null;
           stripe_current_period_end?: string | null;
+          downgrade_grace_until?: string | null;
           created_at?: string;
         };
         Relationships: [];

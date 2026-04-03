@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { hasPaidFeatureAccess } from "@/lib/billing";
 import { sendUnlockReadyEmail } from "@/lib/email";
 import { getEntryStatus } from "@/lib/entries";
 import { supabaseAdmin } from "@/lib/supabase/admin";
@@ -39,6 +40,8 @@ type ProfileRow = {
   full_name: string | null;
   timezone: string | null;
   notification_preferences: Json | null;
+  membership_plan?: string;
+  membership_status?: string;
 };
 
 type UnlockNotificationRunOptions = {
@@ -84,13 +87,46 @@ function isMissingNotificationLogTable(message: string) {
 async function runUnlockNotifications({ dryRun = false }: UnlockNotificationRunOptions = {}) {
   const { data: entries, error: entriesError } = await supabaseAdmin
     .from("vault_entries")
-    .select("id,vault_id,title,created_at,unlock_type,unlock_at,milestone_label,milestone_achieved_at");
+    .select("id,vault_id,title,created_at,unlock_type,unlock_at,milestone_label,milestone_achieved_at,is_deleted");
 
   if (entriesError) {
     throw new Error(entriesError.message);
   }
 
-  const unlockedEntries = (entries ?? []).filter((entry: EntryRow) => entry.is_deleted !== true && getEntryStatus(entry) === "unlocked");
+  const availableEntries = (entries ?? []).filter((entry: EntryRow) => entry.is_deleted !== true);
+  const vaultIds = [...new Set(availableEntries.map((entry) => entry.vault_id))];
+
+  const [{ data: vaults, error: vaultsError }, { data: members, error: membersError }] = await Promise.all([
+    supabaseAdmin.from("vaults").select("id,name,subject_name,owner_user_id,cover_image_url").in("id", vaultIds),
+    supabaseAdmin.from("vault_members").select("vault_id,user_id").in("vault_id", vaultIds),
+  ]);
+
+  if (vaultsError) {
+    throw new Error(vaultsError.message);
+  }
+
+  if (membersError) {
+    throw new Error(membersError.message);
+  }
+
+  const ownerIds = [...new Set((vaults ?? []).map((vault: VaultRow) => vault.owner_user_id))];
+  const { data: ownerProfiles, error: ownerProfilesError } = await supabaseAdmin
+    .from("profiles")
+    .select("id,membership_plan,membership_status")
+    .in("id", ownerIds);
+
+  if (ownerProfilesError) {
+    throw new Error(ownerProfilesError.message);
+  }
+
+  const ownerProfileById = new Map((ownerProfiles ?? []).map((profile) => [profile.id, profile]));
+  const vaultById = new Map((vaults ?? []).map((vault: VaultRow) => [vault.id, vault]));
+  const unlockedEntries = availableEntries.filter((entry) => {
+    const vault = vaultById.get(entry.vault_id);
+    const ownerProfile = vault ? ownerProfileById.get(vault.owner_user_id) : null;
+    const hasPremiumUnlockEntitlement = hasPaidFeatureAccess(ownerProfile?.membership_plan, ownerProfile?.membership_status);
+    return getEntryStatus(entry, { hasPremiumUnlockEntitlement }) === "unlocked";
+  });
 
   if (unlockedEntries.length === 0) {
     return {
@@ -108,23 +144,7 @@ async function runUnlockNotifications({ dryRun = false }: UnlockNotificationRunO
     };
   }
 
-  const vaultIds = [...new Set(unlockedEntries.map((entry) => entry.vault_id))];
   const entryIds = unlockedEntries.map((entry) => entry.id);
-
-  const [{ data: vaults, error: vaultsError }, { data: members, error: membersError }] = await Promise.all([
-    supabaseAdmin.from("vaults").select("id,name,subject_name,owner_user_id,cover_image_url").in("id", vaultIds),
-    supabaseAdmin.from("vault_members").select("vault_id,user_id").in("vault_id", vaultIds),
-  ]);
-
-  if (vaultsError) {
-    throw new Error(vaultsError.message);
-  }
-
-  if (membersError) {
-    throw new Error(membersError.message);
-  }
-
-  const vaultById = new Map((vaults ?? []).map((vault: VaultRow) => [vault.id, vault]));
   const recipientIds = new Set<string>();
   const recipientsByVault = new Map<string, Set<string>>();
 
@@ -192,7 +212,6 @@ async function runUnlockNotifications({ dryRun = false }: UnlockNotificationRunO
 
     const recipientSet = recipientsByVault.get(entry.vault_id) ?? new Set<string>();
     const unlockedAt = entry.milestone_achieved_at || entry.unlock_at || entry.created_at;
-    const formattedUnlockedAt = formatUnlockedAt(unlockedAt, null);
     const coverImageUrl = vault.cover_image_url
       ? await getStorageObjectUrl(vault.cover_image_url, { bucket: "vault-covers", expiresIn: 60 * 60 * 24 * 7 })
       : null;
@@ -305,6 +324,3 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   return GET(request);
 }
-
-
-

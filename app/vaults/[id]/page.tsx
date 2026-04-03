@@ -9,27 +9,42 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { getProfile } from "@/lib/auth";
+import { hasPaidFeatureAccess } from "@/lib/billing";
 import { formatDateTime } from "@/lib/date";
 import { getEntryStatus } from "@/lib/entries";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import type { Database } from "@/types/database";
 
 const filters = new Set(["all", "locked", "unlocked", "upcoming"]);
 
+type VaultRow = Database["public"]["Tables"]["vaults"]["Row"];
+type EntryRow = Database["public"]["Tables"]["vault_entries"]["Row"];
+
 export default async function VaultPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams?: Promise<{ filter?: string }> }) {
-  const [{ id }, resolvedSearchParams, { profile, user, avatarPreviewUrl }] = await Promise.all([params, searchParams ?? Promise.resolve({}), getProfile()]);
-  const supabase = profile?.is_admin ? supabaseAdmin : await createClient();
+  const [{ id }, rawSearchParams, { profile, user, avatarPreviewUrl }] = await Promise.all([params, searchParams ?? Promise.resolve({}), getProfile()]);
+  const resolvedSearchParams = rawSearchParams as { filter?: string };
+  const supabase = (profile?.is_admin ? supabaseAdmin : await createClient()) as typeof supabaseAdmin;
   const [{ data: vault }, { data: entries }] = await Promise.all([
     supabase.from("vaults").select("*").eq("id", id).maybeSingle(),
     supabase.from("vault_entries").select("*").eq("vault_id", id).order("created_at", { ascending: false }),
   ]);
 
-  if (!vault) notFound();
+  const typedVault = vault as VaultRow | null;
+  if (!typedVault) notFound();
 
-  const filter = filters.has(resolvedSearchParams.filter ?? "all") ? (resolvedSearchParams.filter ?? "all") : "all";
-  const allEntries = entries ?? [];
+  const { data: ownerProfile } = await supabaseAdmin
+    .from("profiles")
+    .select("membership_plan,membership_status")
+    .eq("id", typedVault.owner_user_id)
+    .maybeSingle();
+
+  const fallbackProfile = profile as { full_name?: string | null; membership_plan?: string | null; membership_status?: string | null } | null;
+  const hasPremiumUnlockEntitlement = hasPaidFeatureAccess(ownerProfile?.membership_plan ?? fallbackProfile?.membership_plan, ownerProfile?.membership_status ?? fallbackProfile?.membership_status);
+  const filter = (filters.has(resolvedSearchParams.filter ?? "all") ? (resolvedSearchParams.filter ?? "all") : "all") as "all" | "locked" | "unlocked" | "upcoming";
+  const allEntries = (entries ?? []) as EntryRow[];
   const filteredEntries = allEntries.filter((entry) => {
-    const status = getEntryStatus(entry);
+    const status = getEntryStatus(entry, { hasPremiumUnlockEntitlement });
     if (filter === "all") return true;
     if (filter === "locked") return status !== "unlocked";
     if (filter === "upcoming") return status === "soon";
@@ -58,24 +73,24 @@ export default async function VaultPage({ params, searchParams }: { params: Prom
   const emptyState = emptyStateByFilter[filter];
 
   return (
-    <AppShell fullName={profile?.full_name ?? user.user_metadata.full_name ?? null} email={user.email ?? ""} isAdmin={profile?.is_admin ?? false} avatarUrl={avatarPreviewUrl}>
+    <AppShell fullName={fallbackProfile?.full_name ?? user.user_metadata.full_name ?? null} email={user.email ?? ""} isAdmin={profile?.is_admin ?? false} avatarUrl={avatarPreviewUrl}>
       <div className="space-y-6 sm:space-y-7">
         <Card className="overflow-hidden border-white/60 bg-card/84 shadow-[0_24px_64px_rgba(66,46,31,0.11)]">
           <CardContent className="relative flex flex-col gap-6 p-7 sm:p-8 lg:flex-row lg:items-end lg:justify-between lg:p-10">
             <div className="hero-orb absolute right-[-5rem] top-[-2rem] hidden h-56 w-56 rounded-full opacity-60 lg:block" />
             <div className="relative max-w-3xl section-stack">
               <Badge className="w-fit bg-secondary/88">Vault timeline</Badge>
-              <h1 className="text-balance font-display text-4xl text-foreground sm:text-5xl">{vault.name}</h1>
-              <p className="text-sm leading-7 text-muted-foreground sm:text-base">{vault.description || `A ${vault.vault_type} vault for ${vault.subject_name ?? "future moments"}.`}</p>
+              <h1 className="text-balance font-display text-4xl text-foreground sm:text-5xl">{typedVault.name}</h1>
+              <p className="text-sm leading-7 text-muted-foreground sm:text-base">{typedVault.description || `A ${typedVault.vault_type} vault for ${typedVault.subject_name ?? "future moments"}.`}</p>
               <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
-                <span className="inline-flex items-center gap-2 rounded-full bg-secondary/55 px-3 py-1.5">Subject: {vault.subject_name ?? "Private"}</span>
-                <span className="inline-flex items-center gap-2 rounded-full bg-secondary/55 px-3 py-1.5">Type: {vault.vault_type}</span>
-                <span className="inline-flex items-center gap-2 rounded-full bg-secondary/55 px-3 py-1.5">Created: {formatDateTime(vault.created_at)}</span>
+                <span className="inline-flex items-center gap-2 rounded-full bg-secondary/55 px-3 py-1.5">Subject: {typedVault.subject_name ?? "Private"}</span>
+                <span className="inline-flex items-center gap-2 rounded-full bg-secondary/55 px-3 py-1.5">Type: {typedVault.vault_type}</span>
+                <span className="inline-flex items-center gap-2 rounded-full bg-secondary/55 px-3 py-1.5">Created: {formatDateTime(typedVault.created_at)}</span>
               </div>
             </div>
             <div className="flex flex-wrap gap-3">
-              <Button asChild><Link href={`/vaults/${vault.id}/entries/new`}>New entry</Link></Button>
-              <Button asChild variant="outline"><Link href={`/vaults/${vault.id}/settings`}>Settings</Link></Button>
+              <Button asChild><Link href={`/vaults/${typedVault.id}/entries/new`}>New entry</Link></Button>
+              <Button asChild variant="outline"><Link href={`/vaults/${typedVault.id}/settings`}>Settings</Link></Button>
             </div>
           </CardContent>
         </Card>
@@ -83,7 +98,7 @@ export default async function VaultPage({ params, searchParams }: { params: Prom
         <section className="flex flex-wrap gap-2 sm:gap-3">
           {["all", "locked", "unlocked", "upcoming"].map((item) => (
             <Button key={item} asChild variant={filter === item ? "default" : "outline"} size="sm">
-              <Link href={`/vaults/${vault.id}?filter=${item}`}>{item[0].toUpperCase() + item.slice(1)}</Link>
+              <Link href={`/vaults/${typedVault.id}?filter=${item}`}>{item[0].toUpperCase() + item.slice(1)}</Link>
             </Button>
           ))}
         </section>
@@ -94,17 +109,13 @@ export default async function VaultPage({ params, searchParams }: { params: Prom
             <p className="text-sm leading-7 text-muted-foreground">A visual sequence of memories, promises, and moments waiting for their time.</p>
           </div>
           <div className="space-y-5">
-            {filteredEntries.length ? filteredEntries.map((entry) => <EntryCard key={entry.id} entry={entry} timeline contextLabel={vault.subject_name ? `For ${vault.subject_name}` : null} />) : <EmptyState icon={CalendarClock} title={emptyState.title} body={emptyState.body} action={filter === "all" ? <Button asChild><Link href={`/vaults/${vault.id}/entries/new`}>Create first entry</Link></Button> : undefined} />}
+            {filteredEntries.length ? filteredEntries.map((entry) => <EntryCard key={entry.id} entry={entry} timeline contextLabel={typedVault.subject_name ? `For ${typedVault.subject_name}` : null} hasPremiumUnlockEntitlement={hasPremiumUnlockEntitlement} />) : <EmptyState icon={CalendarClock} title={emptyState.title} body={emptyState.body} action={filter === "all" ? <Button asChild><Link href={`/vaults/${typedVault.id}/entries/new`}>Create first entry</Link></Button> : undefined} />}
           </div>
         </section>
 
-        {!allEntries.some((entry) => getEntryStatus(entry) === "unlocked") ? <EmptyState icon={Sparkles} title="No unlocked memories yet" body="This vault is still holding its breath. The first reveal will give the timeline emotional weight and context." /> : null}
-        {!allEntries.some((entry) => getEntryStatus(entry) === "soon") ? <EmptyState icon={HeartHandshake} title="No upcoming unlocks yet" body="There is nothing close to arrival right now. Add a memory with a near-term date or milestone to create anticipation." /> : null}
+        {!allEntries.some((entry) => getEntryStatus(entry, { hasPremiumUnlockEntitlement }) === "unlocked") ? <EmptyState icon={Sparkles} title="No unlocked memories yet" body="This vault is still holding its breath. The first reveal will give the timeline emotional weight and context." /> : null}
+        {!allEntries.some((entry) => getEntryStatus(entry, { hasPremiumUnlockEntitlement }) === "soon") ? <EmptyState icon={HeartHandshake} title="No upcoming unlocks yet" body="There is nothing close to arrival right now. Add a memory with a near-term date or milestone to create anticipation." /> : null}
       </div>
     </AppShell>
   );
 }
-
-
-
-

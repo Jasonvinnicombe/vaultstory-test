@@ -32,7 +32,7 @@ const sections = [
   },
   {
     title: "Retention and deletion",
-    body: "You can delete vaults, entries, and media from your account. Some operational logs may be retained for security, compliance, or billing requirements where applicable.",
+    body: "You can delete vaults, entries, and media from your account. If a paid subscription ends and the account is above the Free storage allowance, Vault Story may keep the archive intact for a limited downgrade grace period so you can delete files or resume service. Some operational logs may be retained for security, compliance, or billing requirements where applicable.",
   },
   {
     title: "Third-party services",

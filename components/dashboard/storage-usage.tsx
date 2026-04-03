@@ -9,6 +9,9 @@ type StorageQuotaResponse = {
   quotaGb?: number;
   usedBytes?: number;
   message?: string;
+  overQuota?: boolean;
+  inDowngradeGrace?: boolean;
+  downgradeGraceUntil?: string | null;
 };
 
 function formatGb(value: number) {
@@ -94,7 +97,7 @@ export function StorageUsageCard() {
             </div>
             <div className="h-3 w-full overflow-hidden rounded-full bg-secondary/25">
               <div
-                className="h-full rounded-full bg-primary transition-[width] duration-500"
+                className={`h-full rounded-full transition-[width] duration-500 ${data.overQuota ? "bg-destructive" : "bg-primary"}`}
                 style={{ width: usage.unlimited ? "12%" : `${usage.percent}%` }}
               />
             </div>
@@ -102,6 +105,9 @@ export function StorageUsageCard() {
               <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
                 {formatGb(usage.usedGb)} of {formatGb(data.quotaGb ?? 0)} used
               </p>
+            ) : null}
+            {data.message && (data.overQuota || data.inDowngradeGrace) ? (
+              <p className={`text-sm leading-6 ${data.overQuota ? "text-destructive" : "text-muted-foreground"}`}>{data.message}</p>
             ) : null}
           </div>
         ) : (

@@ -11,6 +11,7 @@ export function PlanActionButton(props: {
   isAuthenticated: boolean;
   highlight?: boolean;
   checkoutEnabled?: boolean;
+  currency?: string;
 }) {
   const variant = props.highlight ? "secondary" : "default";
   const isStripePlan = props.planId === "premium" || props.planId === "family";
@@ -30,6 +31,7 @@ export function PlanActionButton(props: {
       return (
         <form action={createCheckoutSessionAction}>
           <input type="hidden" name="planId" value={props.planId} />
+          {props.currency ? <input type="hidden" name="currency" value={props.currency} /> : null}
           <Button className="mt-8 w-full" variant={variant}>
             {props.ctaLabel}
           </Button>
