@@ -86,6 +86,7 @@ export async function uploadFileToBucket(params: {
       bucket: params.bucket,
       path: params.path,
       contentType: params.file.type || undefined,
+      additionalBytes: params.file.size,
     }),
   });
 
@@ -133,4 +134,3 @@ export async function uploadFileToBucket(params: {
     path: data.path,
   };
 }
-
