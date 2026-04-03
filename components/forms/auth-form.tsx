@@ -1,11 +1,12 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowRight, LockKeyhole, Sparkles } from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import type { z } from "zod";
 
@@ -296,8 +297,15 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
     <Card className="w-full max-w-lg overflow-hidden border-white/60 bg-card/90 shadow-[0_28px_90px_rgba(66,46,31,0.14)] backdrop-blur-xl">
       <CardHeader className="space-y-6 p-7 sm:p-9">
         <div className="flex items-start justify-between gap-4">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[0_16px_30px_rgba(91,60,35,0.22)]">
-            <LockKeyhole className="h-5 w-5" />
+          <div className="relative h-16 w-[11.5rem] shrink-0 sm:h-[4.5rem] sm:w-[13rem]">
+            <Image
+              src="/Vaultstory.png"
+              alt="Vault Story"
+              fill
+              priority
+              className="object-contain object-left"
+              sizes="(min-width: 640px) 13rem, 11.5rem"
+            />
           </div>
           <div className="hidden rounded-full border border-border/70 bg-background/80 px-3 py-1.5 text-xs text-muted-foreground sm:inline-flex sm:items-center sm:gap-2">
             <Sparkles className="h-3.5 w-3.5" />
@@ -465,8 +473,3 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
     </Card>
   );
 }
-
-
-
-
-
