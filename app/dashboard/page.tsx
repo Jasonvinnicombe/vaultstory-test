@@ -218,11 +218,11 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
             </Card>
 
             <div className="space-y-3 rounded-[34px] border border-white/60 bg-white/30 p-5 shadow-[0_18px_48px_rgba(66,46,31,0.06)] backdrop-blur-sm sm:p-6">
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
                 {stats.map((stat) => {
                   const Icon = stat.icon;
                   return (
-                    <div key={stat.label} className="flex h-full min-h-[196px] flex-col rounded-[28px] border border-white/65 bg-white/58 p-5 shadow-[0_18px_38px_rgba(66,46,31,0.06)] backdrop-blur-sm">
+                    <div key={stat.label} className="flex h-full min-h-[172px] flex-col rounded-[28px] border border-white/65 bg-white/58 p-5 shadow-[0_18px_38px_rgba(66,46,31,0.06)] backdrop-blur-sm sm:min-h-[196px]">
                       <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[0_12px_30px_rgba(30,42,68,0.16)]">
                         <Icon className="h-5 w-5" />
                       </div>
@@ -525,38 +525,3 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
     </AppShell>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
