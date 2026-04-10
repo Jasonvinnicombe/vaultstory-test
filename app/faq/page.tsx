@@ -344,7 +344,7 @@ export default function FaqPage() {
 
           <div className="mt-10 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {faqCategories.map((category) => (
-              <Card key={category.title} className="overflow-hidden border-white/65 bg-[linear-gradient(180deg,rgba(255,252,247,0.96),rgba(243,236,227,0.82))] shadow-[0_18px_48px_rgba(30,42,68,0.08)]">
+              <Card key={category.title} className="overflow-hidden border-white/65 bg-[linear-gradient(180deg,rgba(255,252,247,0.96),rgba(243,236,227,0.82))] shadow-[0_18px_48px_rgba(143,71,43,0.08)]">
                 <CardContent className="p-7 sm:p-8">
                   <p className="text-sm uppercase tracking-[0.22em] text-muted-foreground">{category.eyebrow}</p>
                   <h3 className="mt-4 text-balance font-display text-3xl leading-tight text-foreground">{category.title}</h3>
@@ -368,7 +368,7 @@ export default function FaqPage() {
 
                   <div className="mt-8 space-y-3">
                     {category.items.map((item) => (
-                      <details key={item.question} className="group rounded-[24px] border border-white/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.9),rgba(247,243,237,0.82))] px-5 py-5 shadow-[0_12px_30px_rgba(30,42,68,0.05)]">
+                      <details key={item.question} className="group rounded-[24px] border border-white/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.9),rgba(247,243,237,0.82))] px-5 py-5 shadow-[0_12px_30px_rgba(143,71,43,0.05)]">
                         <summary className="flex cursor-pointer list-none items-start justify-between gap-4 text-left">
                           <div className="flex items-start gap-3">
                             <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary/85 text-primary">
@@ -391,7 +391,7 @@ export default function FaqPage() {
         </section>
 
         <section className="page-wrap pb-24 lg:pb-32">
-          <Card className="overflow-hidden bg-[linear-gradient(135deg,rgba(30,42,68,1),rgba(49,63,95,0.96))] text-white shadow-[0_28px_72px_rgba(30,42,68,0.25)]">
+          <Card className="overflow-hidden bg-[linear-gradient(135deg,rgba(143,71,43,1),rgba(184,92,56,0.96),rgba(201,126,103,0.9))] text-white shadow-[0_28px_72px_rgba(143,71,43,0.25)]">
             <CardContent className="grid gap-6 p-8 sm:p-10 lg:grid-cols-[1fr_auto] lg:items-center lg:p-12">
               <div>
                 <p className="text-sm uppercase tracking-[0.22em] text-white/60">Still deciding?</p>
@@ -410,4 +410,5 @@ export default function FaqPage() {
     </div>
   );
 }
+
 

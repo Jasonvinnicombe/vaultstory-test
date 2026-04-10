@@ -123,7 +123,7 @@ export default function ReviewsPage() {
                     return (
                       <div
                         key={item.title}
-                        className="rounded-[28px] border border-white/65 bg-white/62 p-5 shadow-[0_12px_30px_rgba(30,42,68,0.05)] backdrop-blur-sm"
+                        className="rounded-[28px] border border-white/65 bg-white/62 p-5 shadow-[0_12px_30px_rgba(143,71,43,0.05)] backdrop-blur-sm"
                       >
                         <div className="flex items-center gap-3">
                           <div className="flex h-11 w-11 items-center justify-center rounded-full bg-secondary/18 text-primary">
@@ -143,7 +143,7 @@ export default function ReviewsPage() {
         </section>
 
         <section className="page-wrap pb-10 sm:pb-14">
-          <Card className="overflow-hidden border-white/60 bg-[linear-gradient(180deg,rgba(30,42,68,0.985),rgba(49,63,95,0.95))] text-white shadow-[0_30px_80px_rgba(30,42,68,0.25)]">
+          <Card className="overflow-hidden border-white/60 bg-[linear-gradient(180deg,rgba(143,71,43,0.985),rgba(184,92,56,0.95),rgba(201,126,103,0.92))] text-white shadow-[0_30px_80px_rgba(143,71,43,0.25)]">
             <CardContent className="grid gap-8 p-6 sm:p-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-10 lg:p-10">
               <div className="overflow-hidden rounded-[32px] border border-white/10 bg-white/5">
                 <img src={featuredReview.image} alt={featuredReview.alt} className="h-full min-h-[340px] w-full object-cover" />
@@ -204,7 +204,7 @@ export default function ReviewsPage() {
                   className="overflow-hidden border-white/60 bg-[linear-gradient(180deg,rgba(255,252,247,0.96),rgba(243,236,227,0.82))] shadow-[0_20px_56px_rgba(66,46,31,0.09)]"
                 >
                   <CardContent className="p-6 sm:p-7 lg:p-8">
-                    <div className="overflow-hidden rounded-[28px] border border-white/60 shadow-[0_18px_40px_rgba(30,42,68,0.08)]">
+                    <div className="overflow-hidden rounded-[28px] border border-white/60 shadow-[0_18px_40px_rgba(143,71,43,0.08)]">
                       <img src={testimonial.image} alt={testimonial.alt} className="h-72 w-full object-cover" />
                     </div>
 
@@ -256,7 +256,7 @@ export default function ReviewsPage() {
                 {closingNotes.map((note) => (
                   <div
                     key={note}
-                    className="flex items-start gap-4 rounded-[24px] border border-white/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.88),rgba(247,242,235,0.76))] px-5 py-5 shadow-[0_12px_30px_rgba(30,42,68,0.05)]"
+                    className="flex items-start gap-4 rounded-[24px] border border-white/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.88),rgba(247,242,235,0.76))] px-5 py-5 shadow-[0_12px_30px_rgba(143,71,43,0.05)]"
                   >
                     <div className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secondary/18 text-primary">
                       <Heart className="h-4 w-4" />
@@ -270,7 +270,7 @@ export default function ReviewsPage() {
         </section>
 
         <section className="page-wrap pb-24 lg:pb-32">
-          <Card className="overflow-hidden bg-[linear-gradient(135deg,rgba(30,42,68,1),rgba(49,63,95,0.96))] text-white shadow-[0_28px_72px_rgba(30,42,68,0.25)]">
+          <Card className="overflow-hidden bg-[linear-gradient(135deg,rgba(143,71,43,1),rgba(184,92,56,0.96),rgba(201,126,103,0.9))] text-white shadow-[0_28px_72px_rgba(143,71,43,0.25)]">
             <CardContent className="grid gap-6 p-8 sm:p-10 lg:grid-cols-[1fr_auto] lg:items-center lg:p-12">
               <div>
                 <p className="text-sm uppercase tracking-[0.22em] text-white/60">Create your own future moment</p>
@@ -289,5 +289,6 @@ export default function ReviewsPage() {
     </div>
   );
 }
+
 
 

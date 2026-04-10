@@ -195,7 +195,7 @@ export default async function PricingPage(props: PricingPageProps) {
         </section>
 
         <section className="page-wrap pb-24 lg:pb-32">
-          <Card className="overflow-hidden bg-[linear-gradient(135deg,rgba(30,42,68,1),rgba(49,63,95,0.96))] text-white shadow-[0_28px_72px_rgba(30,42,68,0.25)]">
+          <Card className="overflow-hidden bg-[linear-gradient(135deg,rgba(143,71,43,1),rgba(184,92,56,0.96),rgba(201,126,103,0.9))] text-white shadow-[0_28px_72px_rgba(143,71,43,0.25)]">
             <CardContent className="grid gap-6 p-8 sm:p-10 lg:grid-cols-[1fr_auto] lg:items-center lg:p-12">
               <div>
                 <p className="text-sm uppercase tracking-[0.22em] text-white/60">Ready to begin</p>
@@ -212,6 +212,7 @@ export default async function PricingPage(props: PricingPageProps) {
     </div>
   );
 }
+
 
 
 
