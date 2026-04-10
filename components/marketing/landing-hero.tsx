@@ -27,24 +27,6 @@ const navItems = [
   { label: "Upcoming", icon: CalendarClock },
 ];
 
-const timelineItems = [
-  {
-    age: "Age 2",
-    title: "First steps on the deck",
-    detail: "The wobble, the laugh after, and both parents cheering behind the camera.",
-  },
-  {
-    age: "Age 5",
-    title: "A letter before school began",
-    detail: "A note about who they were before the world started shaping them.",
-  },
-  {
-    age: "Age 8",
-    title: "Birthday wishes for later",
-    detail: "A message waiting for the version of them that hasn't arrived yet.",
-  },
-];
-
 const revealItems = [
   {
     title: "Video",
@@ -114,19 +96,19 @@ export function LandingHero() {
 
 function VaultTimelinePreview() {
   return (
-    <Card className="overflow-hidden border-white/15 bg-[radial-gradient(circle_at_18%_18%,rgba(255,255,255,0.08),transparent_20%),radial-gradient(circle_at_88%_14%,rgba(230,184,106,0.12),transparent_18%),linear-gradient(180deg,rgba(29,42,70,0.99),rgba(57,74,112,0.95))] text-white shadow-[0_32px_90px_rgba(30,42,68,0.24)]">
+    <Card className="overflow-hidden border-white/15 bg-[radial-gradient(circle_at_18%_18%,rgba(255,255,255,0.08),transparent_20%),radial-gradient(circle_at_88%_14%,rgba(216,161,91,0.14),transparent_18%),linear-gradient(180deg,rgba(143,71,43,0.99),rgba(184,92,56,0.95),rgba(201,126,103,0.92))] text-white shadow-[0_32px_90px_rgba(143,71,43,0.24)]">
       <CardContent className="p-4 sm:p-5">
-        <div className="overflow-hidden rounded-[30px] border border-white/10 bg-[rgba(10,16,30,0.22)]">
+        <div className="overflow-hidden rounded-[30px] border border-white/10 bg-[rgba(70,36,22,0.22)]">
           <div className="relative h-[460px] sm:h-[560px] lg:h-[640px]">
             <img
               src="https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=1400&q=80"
               alt="A family memory preserved inside a vault"
               className="h-full w-full object-cover"
             />
-            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(11,18,34,0.12),rgba(11,18,34,0.38)_34%,rgba(11,18,34,0.84))]" />
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(230,184,106,0.14),transparent_24%)]" />
+            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(66,35,24,0.1),rgba(66,35,24,0.38)_34%,rgba(66,35,24,0.84))]" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(216,161,91,0.18),transparent_24%)]" />
 
-            <div className="absolute left-4 top-6 inline-flex items-center gap-2 rounded-full border border-white/14 bg-[rgba(20,28,48,0.48)] px-4 py-2 text-[11px] uppercase tracking-[0.24em] text-white/76 backdrop-blur-sm sm:left-6 sm:top-8">
+            <div className="absolute left-4 top-6 inline-flex items-center gap-2 rounded-full border border-white/14 bg-[rgba(88,45,28,0.44)] px-4 py-2 text-[11px] uppercase tracking-[0.24em] text-white/76 backdrop-blur-sm sm:left-6 sm:top-8">
               <Sparkles className="h-3.5 w-3.5 text-secondary" />
               Vault preview
             </div>
@@ -142,26 +124,26 @@ function VaultTimelinePreview() {
                 </p>
 
                 <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-                  <div className="inline-flex items-center gap-2 rounded-full border border-white/14 bg-[rgba(20,28,48,0.48)] px-4 py-2 text-sm text-white/82 backdrop-blur-sm">
+                  <div className="inline-flex items-center gap-2 rounded-full border border-white/14 bg-[rgba(88,45,28,0.44)] px-4 py-2 text-sm text-white/82 backdrop-blur-sm">
                     <CalendarClock className="h-4 w-4 text-secondary" />
                     Next opening: June 12, 2036
                   </div>
-                  <div className="inline-flex items-center gap-2 rounded-full border border-white/14 bg-[rgba(20,28,48,0.48)] px-4 py-2 text-sm text-white/82 backdrop-blur-sm">
+                  <div className="inline-flex items-center gap-2 rounded-full border border-white/14 bg-[rgba(88,45,28,0.44)] px-4 py-2 text-sm text-white/82 backdrop-blur-sm">
                     <LockKeyhole className="h-4 w-4 text-secondary" />
                     Saved now, felt later
                   </div>
                 </div>
 
                 <div className="mt-6 grid gap-3 sm:grid-cols-3">
-                  <div className="rounded-[22px] border border-white/10 bg-[rgba(20,28,48,0.42)] p-4 backdrop-blur-sm">
+                  <div className="rounded-[22px] border border-white/10 bg-[rgba(88,45,28,0.38)] p-4 backdrop-blur-sm">
                     <p className="text-[11px] uppercase tracking-[0.18em] text-white/54">Why it matters</p>
                     <p className="mt-2 text-sm leading-6 text-white/82">A memory returns with the age, voice, room, and reason it was saved.</p>
                   </div>
-                  <div className="rounded-[22px] border border-white/10 bg-[rgba(20,28,48,0.42)] p-4 backdrop-blur-sm">
+                  <div className="rounded-[22px] border border-white/10 bg-[rgba(88,45,28,0.38)] p-4 backdrop-blur-sm">
                     <p className="text-[11px] uppercase tracking-[0.18em] text-white/54">What it holds</p>
                     <p className="mt-2 text-sm leading-6 text-white/82">Videos, letters, voice notes, and the emotional context around them.</p>
                   </div>
-                  <div className="rounded-[22px] border border-white/10 bg-[rgba(20,28,48,0.42)] p-4 backdrop-blur-sm">
+                  <div className="rounded-[22px] border border-white/10 bg-[rgba(88,45,28,0.38)] p-4 backdrop-blur-sm">
                     <p className="text-[11px] uppercase tracking-[0.18em] text-white/54">How it lands</p>
                     <p className="mt-2 text-sm leading-6 text-white/82">Opened at the right milestone, not lost in everyday storage.</p>
                   </div>
@@ -177,7 +159,7 @@ function VaultTimelinePreview() {
 
 export function LandingProductPreview() {
   return (
-    <Card className="overflow-hidden border-white/15 bg-[linear-gradient(180deg,rgba(30,42,68,0.98),rgba(49,63,95,0.94))] text-white shadow-[0_32px_90px_rgba(42,29,20,0.24)]">
+    <Card className="overflow-hidden border-white/15 bg-[linear-gradient(180deg,rgba(143,71,43,0.98),rgba(184,92,56,0.94),rgba(201,126,103,0.9))] text-white shadow-[0_32px_90px_rgba(143,71,43,0.24)]">
       <CardContent className="p-4 sm:p-5">
         <div className="rounded-[30px] border border-white/10 bg-[rgba(255,255,255,0.06)] p-3 sm:p-4">
           <div className="flex items-center justify-between border-b border-white/10 pb-3 text-xs uppercase tracking-[0.22em] text-white/58">
@@ -189,7 +171,7 @@ export function LandingProductPreview() {
           </div>
 
           <div className="mt-4 grid gap-3 md:grid-cols-[180px_1fr]">
-            <div className="rounded-[24px] border border-white/10 bg-[rgba(13,18,32,0.26)] p-4">
+            <div className="rounded-[24px] border border-white/10 bg-[rgba(70,36,22,0.28)] p-4">
               <div className="flex items-center gap-3 rounded-[18px] border border-white/10 bg-white/6 p-3">
                 <div className="flex h-11 w-11 items-center justify-center rounded-full bg-secondary font-semibold text-secondary-foreground">
                   HV
@@ -214,14 +196,14 @@ export function LandingProductPreview() {
             </div>
 
             <div className="space-y-3">
-              <div className="overflow-hidden rounded-[24px] border border-white/10 bg-[rgba(13,18,32,0.22)]">
+              <div className="overflow-hidden rounded-[24px] border border-white/10 bg-[rgba(70,36,22,0.22)]">
                 <div className="relative h-40 overflow-hidden border-b border-white/10 sm:h-48">
                   <img
                     src="https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=1200&q=80"
                     alt="A family memory used as a vault cover"
                     className="h-full w-full object-cover"
                   />
-                  <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(20,23,35,0.1),rgba(20,23,35,0.75))]" />
+                  <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(66,35,24,0.08),rgba(66,35,24,0.75))]" />
                   <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5">
                     <div className="flex items-end justify-between gap-4">
                       <div>
@@ -255,7 +237,7 @@ export function LandingProductPreview() {
                 </div>
               </div>
 
-              <div className="rounded-[24px] border border-white/10 bg-[rgba(13,18,32,0.22)] p-4 sm:p-5">
+              <div className="rounded-[24px] border border-white/10 bg-[rgba(70,36,22,0.22)] p-4 sm:p-5">
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="text-xs uppercase tracking-[0.2em] text-white/54">Upcoming reveals</p>
@@ -291,5 +273,3 @@ export function LandingProductPreview() {
     </Card>
   );
 }
-
-

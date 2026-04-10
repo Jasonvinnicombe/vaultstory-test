@@ -223,7 +223,7 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
                   const Icon = stat.icon;
                   return (
                     <div key={stat.label} className="flex h-full min-h-[172px] flex-col rounded-[28px] border border-white/65 bg-white/58 p-5 shadow-[0_18px_38px_rgba(66,46,31,0.06)] backdrop-blur-sm sm:min-h-[196px]">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[0_12px_30px_rgba(30,42,68,0.16)]">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[0_12px_30px_rgba(143,71,43,0.16)]">
                         <Icon className="h-5 w-5" />
                       </div>
                       <div className="mt-4 min-h-[56px]">
@@ -249,7 +249,7 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
             </div>
           </div>
 
-          <Card className="overflow-hidden border-white/12 bg-[radial-gradient(circle_at_18%_18%,rgba(113,157,255,0.22),transparent_28%),radial-gradient(circle_at_82%_18%,rgba(230,184,106,0.16),transparent_24%),linear-gradient(180deg,rgba(16,28,52,0.98),rgba(28,44,82,0.96)_58%,rgba(42,63,110,0.92))] text-white shadow-[0_30px_86px_rgba(30,42,68,0.26)]">
+          <Card className="overflow-hidden border-white/12 bg-[radial-gradient(circle_at_18%_18%,rgba(255,255,255,0.08),transparent_28%),radial-gradient(circle_at_82%_18%,rgba(216,161,91,0.16),transparent_24%),linear-gradient(180deg,rgba(143,71,43,0.98),rgba(184,92,56,0.96)_58%,rgba(201,126,103,0.92))] text-white shadow-[0_30px_86px_rgba(143,71,43,0.26)]">
             <CardContent className="space-y-6 p-7 sm:p-8">
               <div className="section-stack">
                 <p className="text-sm uppercase tracking-[0.22em] text-white/68">Featured unlock</p>
@@ -262,7 +262,7 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
                   <div className="rounded-[30px] border border-white/14 bg-white/10 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
                     <div className="flex items-start justify-between gap-4">
                       <div className="space-y-3">
-                        <Badge className="bg-secondary text-slate-900">Next unlock</Badge>
+                        <Badge className="bg-secondary text-secondary-foreground">Next unlock</Badge>
                         <div>
                           <h3 className="font-display text-3xl text-white">{nextUnlockEntry.title}</h3>
                           <p className="mt-2 text-sm leading-7 text-white/74">Inside {vaultById.get(nextUnlockEntry.vault_id)?.name ?? "your vault"}{vaultById.get(nextUnlockEntry.vault_id)?.subject_name ? ` for ${vaultById.get(nextUnlockEntry.vault_id)?.subject_name}` : ""}.</p>
@@ -326,7 +326,7 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
               <Link key={action.title} href={action.href} className="group">
                 <Card className="glass-panel h-full border-white/60 transition duration-200 group-hover:-translate-y-1 group-hover:shadow-[0_22px_54px_rgba(66,46,31,0.1)]">
                   <div className="flex h-full flex-col px-6 py-8 sm:px-7 sm:py-8">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary/90 text-primary shadow-[0_12px_26px_rgba(30,42,68,0.08)]">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary/90 text-primary shadow-[0_12px_26px_rgba(143,71,43,0.08)]">
                       <Icon className="h-5 w-5" />
                     </div>
                     <div className="mt-6 space-y-2">
@@ -395,7 +395,7 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
                               <CalendarClock className="h-4 w-4 text-primary/75" />
                               <span>{entry.status === "soon" ? "Approaching unlock" : entry.status === "unlocked" ? "Ready now" : entry.status === "draft" ? "In progress" : "Locked safely"}</span>
                             </div>
-                            <span className="inline-flex items-center justify-center gap-2 rounded-full border border-primary/10 bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-[0_10px_22px_rgba(30,42,68,0.12)] transition group-hover:translate-x-1 group-hover:bg-primary/92">
+                            <span className="inline-flex items-center justify-center gap-2 rounded-full border border-primary/10 bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-[0_10px_22px_rgba(143,71,43,0.12)] transition group-hover:translate-x-1 group-hover:bg-primary/92">
                               View memory
                               <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
                             </span>
@@ -525,3 +525,4 @@ export default async function DashboardPage({ searchParams }: { searchParams?: P
     </AppShell>
   );
 }
+

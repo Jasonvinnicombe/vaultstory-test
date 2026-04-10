@@ -7,7 +7,7 @@ type BrandMarkProps = {
 
 function ModernBrandMark({ className }: { className?: string }) {
   return (
-    <span className={`flex min-w-0 items-center gap-3 text-[#243457] ${className ?? ""}`.trim()}>
+    <span className={`flex min-w-0 items-center gap-3 text-[#8F472B] ${className ?? ""}`.trim()}>
       <svg
         viewBox="0 0 92 92"
         aria-hidden="true"
@@ -28,7 +28,7 @@ function ModernBrandMark({ className }: { className?: string }) {
           <path d="M0 1.5v3.5" />
         </g>
       </svg>
-      <span className="truncate text-[1.05rem] font-extrabold tracking-[0.08em] text-[#243457] sm:text-[1.15rem]">
+      <span className="truncate text-[1.05rem] font-extrabold tracking-[0.08em] text-[#8F472B] sm:text-[1.15rem]">
         VAULT STORY
       </span>
     </span>
@@ -38,7 +38,7 @@ function ModernBrandMark({ className }: { className?: string }) {
 function LegacyBrandMark({ className }: { className?: string }) {
   return (
     <span className={`flex min-w-0 items-center gap-3 text-primary ${className ?? ""}`.trim()}>
-      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[0_12px_24px_rgba(61,41,28,0.18)]">
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[0_12px_24px_rgba(143,71,43,0.18)]">
         <LockKeyhole className="h-4 w-4" />
       </span>
       <span className="truncate text-sm font-semibold tracking-[0.16em]">VAULT STORY</span>

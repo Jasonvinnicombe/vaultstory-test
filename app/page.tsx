@@ -211,7 +211,7 @@ export default async function HomePage(props: HomePageProps) {
               {coreHighlights.map((item) => {
                 const Icon = item.icon;
                 return (
-                  <Card key={item.title} className="glass-panel overflow-hidden border-white/65 bg-[linear-gradient(180deg,rgba(255,252,247,0.97),rgba(243,236,227,0.84))] shadow-[0_18px_48px_rgba(30,42,68,0.08)]">
+                  <Card key={item.title} className="glass-panel overflow-hidden border-white/65 bg-[linear-gradient(180deg,rgba(255,250,244,0.97),rgba(245,234,222,0.84))] shadow-[0_18px_48px_rgba(143,71,43,0.08)]">
                     <CardContent className="p-6 sm:p-7">
                       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary/16 text-secondary-foreground ring-1 ring-secondary/25">
                         <Icon className="h-5 w-5" />
@@ -273,7 +273,7 @@ export default async function HomePage(props: HomePageProps) {
                 {mediaTypes.map((item) => {
                   const Icon = item.icon;
                   return (
-                    <Card key={item.label} className="overflow-hidden border-white/65 bg-[linear-gradient(180deg,rgba(255,252,247,0.96),rgba(243,236,227,0.82))] shadow-[0_18px_48px_rgba(30,42,68,0.07)]">
+                    <Card key={item.label} className="overflow-hidden border-white/65 bg-[linear-gradient(180deg,rgba(255,250,244,0.96),rgba(245,234,222,0.82))] shadow-[0_18px_48px_rgba(143,71,43,0.07)]">
                       <CardContent className="p-6 sm:p-7">
                         <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary/16 text-secondary-foreground ring-1 ring-secondary/25">
                           <Icon className="h-5 w-5" />
@@ -289,13 +289,13 @@ export default async function HomePage(props: HomePageProps) {
 
             <div className="grid gap-4 sm:grid-cols-2">
               {milestoneMoments.map((item) => (
-                <Card key={item.label} className="overflow-hidden border-white/15 bg-[linear-gradient(180deg,rgba(30,42,68,0.98),rgba(49,63,95,0.94))] text-white shadow-[0_24px_60px_rgba(30,42,68,0.18)]">
+                <Card key={item.label} className="overflow-hidden border-white/15 bg-[linear-gradient(180deg,rgba(143,71,43,0.98),rgba(184,92,56,0.94),rgba(201,126,103,0.9))] text-white shadow-[0_24px_60px_rgba(143,71,43,0.18)]">
                   <div className="relative aspect-[4/5] overflow-hidden">
                     <Image src={item.src} alt={item.alt} fill className="object-cover" sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" />
                     {item.masks.map((mask, index) => (
                       <div
                         key={`${item.label}-mask-${index}`}
-                        className="absolute border border-white/12 bg-[rgba(18,28,47,0.52)] backdrop-blur-md"
+                        className="absolute border border-white/12 bg-[rgba(88,45,28,0.46)] backdrop-blur-md"
                         style={{
                           left: mask.left,
                           top: mask.top,
@@ -306,7 +306,7 @@ export default async function HomePage(props: HomePageProps) {
                         }}
                       />
                     ))}
-                    <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(17,24,39,0.04),rgba(17,24,39,0.72))]" />
+                    <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(66,35,24,0.04),rgba(66,35,24,0.72))]" />
                     <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6">
                       <p className="text-xs uppercase tracking-[0.2em] text-white/68">{item.label}</p>
                       <p className="mt-2 text-lg leading-7 text-white">{item.title}</p>
@@ -327,7 +327,7 @@ export default async function HomePage(props: HomePageProps) {
               </h2>
             </div>
 
-            <Card className="overflow-hidden border-white/15 bg-[linear-gradient(180deg,rgba(30,42,68,0.98),rgba(49,63,95,0.94))] text-white shadow-[0_28px_72px_rgba(30,42,68,0.22)]">
+            <Card className="overflow-hidden border-white/15 bg-[linear-gradient(180deg,rgba(143,71,43,0.98),rgba(184,92,56,0.94),rgba(201,126,103,0.9))] text-white shadow-[0_28px_72px_rgba(143,71,43,0.22)]">
               <CardContent className="p-6 sm:p-7">
                 <Badge className="bg-secondary/90 text-secondary-foreground">Vault uses</Badge>
                 <div className="mt-5 space-y-4">
@@ -370,7 +370,7 @@ export default async function HomePage(props: HomePageProps) {
         </section>
 
         <section className="page-wrap pb-16 pt-10 sm:pb-20 sm:pt-12 lg:pb-24 lg:pt-14">
-          <Card className="overflow-hidden bg-[linear-gradient(135deg,rgba(30,42,68,1),rgba(49,63,95,0.96))] text-white shadow-[0_28px_72px_rgba(30,42,68,0.25)]">
+          <Card className="overflow-hidden bg-[linear-gradient(135deg,rgba(143,71,43,1),rgba(184,92,56,0.96),rgba(201,126,103,0.9))] text-white shadow-[0_28px_72px_rgba(143,71,43,0.25)]">
             <CardContent className="grid gap-6 p-8 sm:p-10 lg:grid-cols-[1fr_auto] lg:items-center lg:p-12">
               <div>
                 <p className="text-sm uppercase tracking-[0.22em] text-white/60">Start preserving now</p>
@@ -392,16 +392,3 @@ export default async function HomePage(props: HomePageProps) {
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

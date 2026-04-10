@@ -38,8 +38,8 @@ export function PricingPlans(props: {
               key={plan.id}
               className={
                 `${plan.highlight
-                  ? "overflow-hidden border-primary/18 bg-[linear-gradient(180deg,rgba(30,42,68,0.98),rgba(49,63,95,0.94))] text-white shadow-[0_26px_72px_rgba(30,42,68,0.22)]"
-                  : "overflow-hidden border-white/65 bg-card/88 shadow-[0_20px_56px_rgba(66,46,31,0.09)]"
+                  ? "overflow-hidden border-primary/18 bg-[linear-gradient(180deg,rgba(143,71,43,0.98),rgba(184,92,56,0.94),rgba(201,126,103,0.9))] text-white shadow-[0_26px_72px_rgba(143,71,43,0.22)]"
+                  : "overflow-hidden border-white/65 bg-card/88 shadow-[0_20px_56px_rgba(143,71,43,0.09)]"
                 } h-full min-w-0`
               }
             >

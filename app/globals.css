@@ -3,24 +3,24 @@
 @tailwind utilities;
 
 :root {
-  --background: 36 16% 96%;
-  --foreground: 0 0% 16%;
-  --card: 36 25% 97%;
-  --card-foreground: 0 0% 16%;
-  --popover: 36 25% 97%;
-  --popover-foreground: 0 0% 16%;
-  --primary: 219 40% 19%;
-  --primary-foreground: 40 40% 98%;
-  --secondary: 39 71% 66%;
-  --secondary-foreground: 219 40% 19%;
-  --muted: 35 22% 92%;
-  --muted-foreground: 0 0% 33%;
-  --accent: 39 71% 66%;
-  --accent-foreground: 219 40% 19%;
-  --border: 33 22% 84%;
-  --input: 33 22% 84%;
-  --ring: 219 40% 19%;
-  --destructive: 0 75% 56%;
+  --background: 32 43% 95%;
+  --foreground: 20 29% 23%;
+  --card: 34 53% 97%;
+  --card-foreground: 20 29% 23%;
+  --popover: 34 53% 97%;
+  --popover-foreground: 20 29% 23%;
+  --primary: 19 53% 47%;
+  --primary-foreground: 35 60% 97%;
+  --secondary: 34 62% 60%;
+  --secondary-foreground: 20 29% 23%;
+  --muted: 30 31% 90%;
+  --muted-foreground: 20 18% 45%;
+  --accent: 15 47% 60%;
+  --accent-foreground: 20 29% 23%;
+  --border: 28 35% 80%;
+  --input: 28 35% 80%;
+  --ring: 19 53% 47%;
+  --destructive: 4 69% 53%;
   --destructive-foreground: 0 0% 98%;
   --radius: 1.5rem;
 }
@@ -36,13 +36,13 @@ html {
 body {
   @apply min-h-screen bg-background text-foreground antialiased;
   background-image:
-    radial-gradient(circle at top left, rgba(230, 184, 106, 0.18), transparent 28%),
-    radial-gradient(circle at 82% 16%, rgba(30, 42, 68, 0.06), transparent 26%),
-    linear-gradient(180deg, rgba(247, 245, 242, 1) 0%, rgba(243, 239, 233, 1) 100%);
+    radial-gradient(circle at top left, rgba(216, 161, 91, 0.18), transparent 28%),
+    radial-gradient(circle at 84% 14%, rgba(201, 126, 103, 0.14), transparent 24%),
+    linear-gradient(180deg, rgba(251, 246, 240, 1) 0%, rgba(242, 229, 216, 1) 100%);
 }
 
 ::selection {
-  background: rgba(230, 184, 106, 0.28);
+  background: rgba(216, 161, 91, 0.32);
 }
 
 img,
@@ -63,7 +63,7 @@ video {
   background-image:
     linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.06)),
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' fill='none'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.08'/%3E%3C/svg%3E");
-  opacity: 0.3;
+  opacity: 0.26;
   mix-blend-mode: multiply;
 }
 
@@ -89,6 +89,7 @@ video {
     transform: scale(0.99);
   }
 }
+
 @layer base {
   body {
     font-family: var(--font-sans);
@@ -133,11 +134,11 @@ video {
   }
 
   .warm-ring {
-    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.62), 0 24px 60px rgba(30, 42, 68, 0.09);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.62), 0 24px 60px rgba(143, 71, 43, 0.12);
   }
 
   .hero-orb {
-    background: radial-gradient(circle at center, rgba(230, 184, 106, 0.38), rgba(230, 184, 106, 0.09) 48%, transparent 72%);
+    background: radial-gradient(circle at center, rgba(216, 161, 91, 0.34), rgba(201, 126, 103, 0.12) 48%, transparent 72%);
     filter: blur(12px);
   }
 
@@ -150,8 +151,8 @@ video {
   }
 
   .glow-hover:hover {
-    border-color: rgba(230, 184, 106, 0.45);
-    box-shadow: 0 0 0 1px rgba(230, 184, 106, 0.35), 0 24px 60px rgba(30, 42, 68, 0.16);
+    border-color: rgba(201, 126, 103, 0.5);
+    box-shadow: 0 0 0 1px rgba(201, 126, 103, 0.35), 0 24px 60px rgba(143, 71, 43, 0.16);
     transform: translateY(-2px);
   }
 
@@ -160,5 +161,3 @@ video {
     transform-origin: center;
   }
 }
-
-
