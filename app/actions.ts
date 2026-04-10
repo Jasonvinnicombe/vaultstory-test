@@ -275,6 +275,66 @@ export async function removeVaultMemberAction(formData: FormData) {
   revalidatePath(`/vaults/${vaultId}/settings`);
 }
 
+export async function adminDeleteEntryAction(formData: FormData) {
+  const { revalidatePath } = await import("next/cache");
+  const { redirect } = await import("next/navigation");
+  const { supabaseAdmin } = await import("@/lib/supabase/admin");
+
+  const entryId = String(formData.get("entryId") ?? "");
+  const vaultId = String(formData.get("vaultId") ?? "");
+
+  if (!entryId || !vaultId) {
+    redirect("/dashboard");
+  }
+
+  try {
+    const { supabase, user } = await requireAuthenticatedUser();
+    const { data: profile } = await supabase.from("profiles").select("is_admin").eq("id", user.id).maybeSingle<Pick<ProfileRow, "is_admin">>();
+
+    if (!profile?.is_admin) {
+      throw new Error("Only admins can delete entries.");
+    }
+
+    const { data: entry, error: entryError } = await supabaseAdmin
+      .from("vault_entries")
+      .select("id,vault_id,title,is_deleted")
+      .eq("id", entryId)
+      .eq("vault_id", vaultId)
+      .maybeSingle<Pick<EntryRow, "id" | "vault_id" | "title" | "is_deleted">>();
+
+    if (entryError) {
+      throw entryError;
+    }
+
+    if (!entry || entry.is_deleted) {
+      redirect(`/vaults/${vaultId}`);
+    }
+
+    const { error: deleteError } = await supabaseAdmin
+      .from("vault_entries")
+      .update({ is_deleted: true } as never)
+      .eq("id", entryId)
+      .eq("vault_id", vaultId);
+
+    if (deleteError) {
+      throw deleteError;
+    }
+
+    revalidatePath(`/entries/${entryId}`);
+    revalidatePath(`/vaults/${vaultId}`);
+    revalidatePath("/dashboard");
+    redirect(`/vaults/${vaultId}`);
+  } catch (error) {
+    const { isRedirectError } = await import("next/dist/client/components/redirect-error");
+
+    if (isRedirectError(error)) {
+      throw error;
+    }
+
+    const message = error instanceof Error ? error.message : "Something went wrong while deleting this entry.";
+    redirect(`/entries/${entryId}?deleteError=${encodeURIComponent(message)}`);
+  }
+}
 export async function deleteVaultAction(formData: FormData) {
   const { revalidatePath } = await import("next/cache");
   const { redirect } = await import("next/navigation");
@@ -886,6 +946,7 @@ export async function triggerUnlockNotificationsAction(formData: FormData) {
     redirectWithMessage(message, "unlockError");
   }
 }
+
 
 
 

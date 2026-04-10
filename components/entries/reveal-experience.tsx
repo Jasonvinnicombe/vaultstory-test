@@ -117,7 +117,7 @@ export function RevealExperience(props: RevealExperienceProps) {
   }
 
   const introPanel = (
-    <Card className="micro-fade overflow-hidden border-white/12 bg-[radial-gradient(circle_at_18%_20%,rgba(113,157,255,0.22),transparent_28%),radial-gradient(circle_at_82%_14%,rgba(230,184,106,0.18),transparent_22%),radial-gradient(circle_at_50%_120%,rgba(117,203,255,0.18),transparent_34%),linear-gradient(180deg,rgba(17,28,52,0.98),rgba(28,44,82,0.96)_58%,rgba(38,58,106,0.94))] text-white shadow-[0_34px_92px_rgba(30,42,68,0.28)]">
+    <Card className="micro-fade overflow-hidden border-white/12 bg-[radial-gradient(circle_at_18%_20%,rgba(246,238,229,0.12),transparent_28%),radial-gradient(circle_at_82%_14%,rgba(216,161,91,0.18),transparent_22%),radial-gradient(circle_at_50%_120%,rgba(201,126,103,0.14),transparent_34%),linear-gradient(180deg,rgba(77,39,25,0.98),rgba(108,55,34,0.96)_58%,rgba(143,71,43,0.94))] text-white shadow-[0_34px_92px_rgba(66,35,24,0.28)]">
       <CardContent className={`relative flex flex-col items-center justify-center overflow-hidden text-center ${isFullscreen ? "min-h-[calc(100vh-3rem)] p-8 sm:p-12 lg:p-16" : "min-h-[460px] p-8 sm:p-10 lg:min-h-[520px] lg:p-14"}`}>
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.08),transparent_28%,transparent_72%,rgba(255,255,255,0.04))]" />
         <motion.div
@@ -128,7 +128,7 @@ export function RevealExperience(props: RevealExperienceProps) {
         />
         <motion.div
           aria-hidden
-          className="pointer-events-none absolute bottom-[14%] right-[12%] h-36 w-36 rounded-full border border-white/8 bg-[radial-gradient(circle,rgba(117,203,255,0.18),rgba(117,203,255,0.02)_72%,transparent_78%)] blur-sm"
+          className="pointer-events-none absolute bottom-[14%] right-[12%] h-36 w-36 rounded-full border border-white/8 bg-[radial-gradient(circle,rgba(201,126,103,0.18),rgba(201,126,103,0.02)_72%,transparent_78%)] blur-sm"
           animate={{ y: [0, 10, 0], opacity: [0.25, 0.55, 0.25], scale: [1, 1.12, 1] }}
           transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
         />
@@ -148,7 +148,7 @@ export function RevealExperience(props: RevealExperienceProps) {
 
         {screen === "recorded" ? (
           <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="relative z-10 max-w-2xl section-stack">
-            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-white/12 bg-white/8 shadow-[0_20px_50px_rgba(12,18,36,0.24)]">
+            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-white/12 bg-white/8 shadow-[0_20px_50px_rgba(66,35,24,0.24)]">
               <CalendarClock className="h-9 w-9 text-secondary" />
             </div>
             <p className="text-sm uppercase tracking-[0.24em] text-white/60">Recorded</p>
@@ -161,7 +161,7 @@ export function RevealExperience(props: RevealExperienceProps) {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="relative z-10 flex flex-col items-center">
             <motion.div
               aria-hidden
-              className="absolute top-12 h-48 w-48 rounded-full bg-[radial-gradient(circle,rgba(230,184,106,0.28),rgba(117,203,255,0.06)_58%,transparent_72%)] blur-2xl"
+              className="absolute top-12 h-48 w-48 rounded-full bg-[radial-gradient(circle,rgba(216,161,91,0.30),rgba(201,126,103,0.08)_58%,transparent_72%)] blur-2xl"
               animate={{ scale: [0.92, 1.06, 1], opacity: [0.42, 0.8, 0.6] }}
               transition={{ duration: 1.8, ease: "easeOut" }}
             />
@@ -169,7 +169,7 @@ export function RevealExperience(props: RevealExperienceProps) {
               initial={{ scale: 0.76, opacity: 0.5 }}
               animate={{ scale: [0.82, 1.08, 1], opacity: [0.6, 1, 1], rotate: [-10, 0, 0], y: [0, -6, 0] }}
               transition={{ duration: 1.4, ease: "easeInOut" }}
-              className="relative flex h-36 w-36 items-center justify-center rounded-full border border-white/16 bg-[radial-gradient(circle,rgba(255,255,255,0.16),rgba(255,255,255,0.06))] shadow-[0_24px_68px_rgba(13,21,39,0.3)]"
+              className="relative flex h-36 w-36 items-center justify-center rounded-full border border-white/16 bg-[radial-gradient(circle,rgba(255,255,255,0.16),rgba(255,255,255,0.06))] shadow-[0_24px_68px_rgba(66,35,24,0.3)]"
             >
               <motion.div
                 aria-hidden
@@ -210,7 +210,7 @@ export function RevealExperience(props: RevealExperienceProps) {
         <Button
           onClick={goNext}
           variant={panelButtonVariant}
-          className={`relative z-10 mt-10 min-w-52 px-8 py-6 text-base font-semibold ${unlockPulse ? "glow-hover bg-secondary text-slate-900 shadow-[0_22px_52px_rgba(230,184,106,0.45)] ring-2 ring-secondary/60 hover:bg-secondary/90" : ""}`}
+          className={`relative z-10 mt-10 min-w-52 px-8 py-6 text-base font-semibold ${unlockPulse ? "glow-hover bg-secondary text-[#4a3429] shadow-[0_22px_52px_rgba(216,161,91,0.38)] ring-2 ring-secondary/60 hover:bg-[#f0ba66]" : ""}`}
         >
           {stepLabel}
         </Button>
@@ -370,12 +370,12 @@ export function RevealExperience(props: RevealExperienceProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 bg-[rgba(10,16,30,0.82)] backdrop-blur-md"
+            className="fixed inset-0 z-40 bg-[rgba(43,23,15,0.78)] backdrop-blur-md"
           >
             <button
               type="button"
               onClick={closeExperience}
-              className="absolute right-4 top-4 z-50 flex h-12 w-12 items-center justify-center rounded-full border border-white/12 bg-black/30 text-white transition hover:bg-black/45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 sm:right-6 sm:top-6"
+              className="absolute right-4 top-4 z-50 flex h-12 w-12 items-center justify-center rounded-full border border-white/12 bg-[rgba(61,30,20,0.46)] text-white transition hover:bg-[rgba(61,30,20,0.62)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 sm:right-6 sm:top-6"
               aria-label="Close full-screen reveal"
             >
               <X className="h-5 w-5" />
@@ -394,7 +394,7 @@ export function RevealExperience(props: RevealExperienceProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(12,18,34,0.84)] p-4 backdrop-blur-md sm:p-6"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(43,23,15,0.82)] p-4 backdrop-blur-md sm:p-6"
             onClick={closePhoto}
           >
             <motion.div
@@ -402,20 +402,20 @@ export function RevealExperience(props: RevealExperienceProps) {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.96, y: 10 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
-              className="relative w-full max-w-6xl overflow-hidden rounded-[34px] border border-white/10 bg-[radial-gradient(circle_at_top,rgba(113,157,255,0.18),transparent_24%),linear-gradient(180deg,rgba(18,28,50,0.98),rgba(30,45,76,0.95))] p-3 shadow-[0_30px_90px_rgba(0,0,0,0.36)] sm:p-4"
+              className="relative w-full max-w-6xl overflow-hidden rounded-[34px] border border-white/10 bg-[radial-gradient(circle_at_top,rgba(216,161,91,0.18),transparent_24%),linear-gradient(180deg,rgba(77,39,25,0.98),rgba(108,55,34,0.95))] p-3 shadow-[0_30px_90px_rgba(44,21,14,0.36)] sm:p-4"
               onClick={(event) => event.stopPropagation()}
             >
               <button
                 type="button"
                 onClick={closePhoto}
-                className="absolute right-5 top-5 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-black/30 text-white transition hover:bg-black/45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+                className="absolute right-5 top-5 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-[rgba(61,30,20,0.46)] text-white transition hover:bg-[rgba(61,30,20,0.62)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
                 aria-label="Close enlarged photo"
               >
                 <X className="h-5 w-5" />
               </button>
 
               <div className="grid gap-4 lg:grid-cols-[1fr_220px]">
-                <div className="overflow-hidden rounded-[28px] bg-black/25">
+                <div className="overflow-hidden rounded-[28px] bg-[rgba(61,30,20,0.34)]">
                   <img src={selectedPhoto.fileUrl} alt={`Expanded memory photo ${selectedPhotoIndex! + 1}`} className="max-h-[78vh] w-full object-contain" />
                 </div>
 
@@ -457,6 +457,8 @@ export function RevealExperience(props: RevealExperienceProps) {
     </>
   );
 }
+
+
 
 
 

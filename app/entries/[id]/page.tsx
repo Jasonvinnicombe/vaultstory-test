@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, CalendarClock, FilePenLine, LockKeyhole } from "lucide-react";
+import { ArrowLeft, CalendarClock, FilePenLine, LockKeyhole, Trash2 } from "lucide-react";
 
+import { adminDeleteEntryAction } from "@/app/actions";
 import { EntryStatusBadge } from "@/components/entries/entry-status-badge";
 import { LockedEntryView } from "@/components/entries/locked-entry-view";
 import { MilestoneCompleteForm } from "@/components/entries/milestone-complete-form";
@@ -25,14 +26,14 @@ type VaultRow = Database["public"]["Tables"]["vaults"]["Row"];
 type AssetRow = Database["public"]["Tables"]["entry_assets"]["Row"];
 type TagRow = Database["public"]["Tables"]["entry_tags"]["Row"];
 
-export default async function EntryPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams?: Promise<{ preview?: string }> }) {
+export default async function EntryPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams?: Promise<{ preview?: string; deleteError?: string }> }) {
   const [{ id }, rawSearchParams, { profile, user, avatarPreviewUrl }] = await Promise.all([params, searchParams ?? Promise.resolve({}), getProfile()]);
-  const resolvedSearchParams = rawSearchParams as { preview?: string };
+  const resolvedSearchParams = rawSearchParams as { preview?: string; deleteError?: string };
   const supabase = (profile?.is_admin ? supabaseAdmin : await createClient()) as typeof supabaseAdmin;
 
   const { data: entry } = await supabase.from("vault_entries").select("*").eq("id", id).maybeSingle();
   const typedEntry = entry as EntryRow | null;
-  if (!typedEntry) notFound();
+  if (!typedEntry || typedEntry.is_deleted) notFound();
 
   const [{ data: vault }, { data: assetRows }, { data: tagRows }] = await Promise.all([
     supabase.from("vaults").select("*").eq("id", typedEntry.vault_id).maybeSingle(),
@@ -155,9 +156,27 @@ export default async function EntryPage({ params, searchParams }: { params: Prom
                   <Link href={`/vaults/${typedVault.id}/entries/new`}>Add another memory</Link>
                 </Button>
               )}
+              {profile?.is_admin ? (
+                <form action={adminDeleteEntryAction}>
+                  <input type="hidden" name="entryId" value={typedEntry.id} />
+                  <input type="hidden" name="vaultId" value={typedVault.id} />
+                  <Button type="submit" variant="destructive">
+                    <Trash2 className="h-4 w-4" />
+                    Delete entry
+                  </Button>
+                </form>
+              ) : null}
             </div>
           </CardContent>
         </Card>
+
+        {resolvedSearchParams.deleteError ? (
+          <Card className="border-destructive/30 bg-destructive/10">
+            <div className="flex min-h-12 items-center px-5 text-left text-sm text-foreground">
+              {resolvedSearchParams.deleteError}
+            </div>
+          </Card>
+        ) : null}
 
         {status === "draft" ? (
           <Card className="overflow-hidden border-white/60 bg-[linear-gradient(180deg,rgba(255,252,247,0.96),rgba(243,236,227,0.8))] shadow-[0_24px_64px_rgba(66,46,31,0.1)]">

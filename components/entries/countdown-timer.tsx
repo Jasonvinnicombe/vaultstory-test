@@ -22,7 +22,7 @@ export function CountdownTimer({ unlockAt, variant = "default" }: { unlockAt: st
   }, [unlockAt]);
 
   if (!unlockAt) {
-    return <p className="text-sm leading-7 text-white/78">Unlocks when the milestone is completed.</p>;
+    return <p className="text-sm leading-7 text-white/80">Unlocks when the milestone is completed.</p>;
   }
 
   if (variant === "inline") {
@@ -36,7 +36,7 @@ export function CountdownTimer({ unlockAt, variant = "default" }: { unlockAt: st
       : "--h --m --s";
 
     return (
-      <div className="rounded-[24px] border border-white/12 bg-black/20 px-4 py-3 text-white backdrop-blur-sm">
+      <div className="rounded-[24px] border border-white/12 bg-[rgba(246,238,229,0.08)] px-4 py-3 text-white backdrop-blur-sm">
         <div className="flex flex-wrap items-center gap-3">
           <span className="text-[11px] uppercase tracking-[0.2em] text-white/54">Opens in</span>
           <span className="font-display text-2xl leading-none text-white sm:text-3xl">{inlineLabel}</span>
@@ -62,7 +62,7 @@ export function CountdownTimer({ unlockAt, variant = "default" }: { unlockAt: st
   return (
     <div className="grid grid-cols-4 gap-3">
       {items.map((item) => (
-        <div key={item.label} className="min-w-0 rounded-3xl border border-white/10 bg-black/20 px-3 py-5 text-center text-white sm:px-4">
+        <div key={item.label} className="min-w-0 rounded-3xl border border-white/10 bg-[rgba(246,238,229,0.08)] px-3 py-5 text-center text-white sm:px-4">
           <p className="font-display text-3xl leading-none">{typeof item.value === "number" ? String(item.value).padStart(2, "0") : item.value}</p>
           <p className="mt-3 whitespace-nowrap text-[11px] uppercase leading-none tracking-[0.16em] text-white/60 sm:text-xs sm:tracking-[0.22em]">{item.label}</p>
         </div>
@@ -70,5 +70,6 @@ export function CountdownTimer({ unlockAt, variant = "default" }: { unlockAt: st
     </div>
   );
 }
+
 
 
