@@ -188,7 +188,7 @@ export default async function HomePage(props: HomePageProps) {
         <LandingHero />
 
         <section className="page-wrap border-t border-white/55 py-10 sm:py-14 lg:py-18">
-          <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+          <div className="grid gap-8 xl:grid-cols-[0.9fr_1.1fr] xl:items-start">
             <div className="section-stack max-w-2xl">
               <p className="text-sm uppercase tracking-[0.22em] text-muted-foreground">What Vault Story does</p>
               <h2 className="text-balance font-display text-4xl leading-tight text-foreground sm:text-5xl">
@@ -227,7 +227,7 @@ export default async function HomePage(props: HomePageProps) {
         </section>
 
         <section id="how-it-works" className="page-wrap scroll-mt-28 border-t border-white/55 py-10 sm:py-14 lg:py-18">
-          <div className="grid gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:items-start">
+          <div className="grid gap-8 xl:grid-cols-[0.92fr_1.08fr] xl:items-start">
             <div className="section-stack max-w-2xl">
               <p className="text-sm uppercase tracking-[0.22em] text-muted-foreground">How it works</p>
               <h2 className="text-balance font-display text-4xl leading-tight text-foreground sm:text-5xl">
@@ -259,7 +259,7 @@ export default async function HomePage(props: HomePageProps) {
         </section>
 
         <section className="page-wrap border-t border-white/55 py-10 sm:py-14 lg:py-18">
-          <div className="grid gap-8 lg:grid-cols-[1.02fr_0.98fr] lg:items-start">
+          <div className="grid gap-8 xl:grid-cols-[1.02fr_0.98fr] xl:items-start">
             <div className="section-stack max-w-3xl">
               <p className="text-sm uppercase tracking-[0.22em] text-muted-foreground">What people keep inside</p>
               <h2 className="text-balance font-display text-4xl leading-tight text-foreground sm:text-5xl">
@@ -319,7 +319,7 @@ export default async function HomePage(props: HomePageProps) {
         </section>
 
         <section id="features" className="page-wrap scroll-mt-28 border-t border-white/55 py-10 sm:py-14 lg:py-18">
-          <div className="grid gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:items-start">
+          <div className="grid gap-8 xl:grid-cols-[0.92fr_1.08fr] xl:items-start">
             <div className="section-stack max-w-3xl">
               <p className="text-sm uppercase tracking-[0.22em] text-muted-foreground">Vault uses</p>
               <h2 className="text-balance font-display text-4xl sm:text-5xl">
@@ -371,7 +371,7 @@ export default async function HomePage(props: HomePageProps) {
 
         <section className="page-wrap pb-16 pt-10 sm:pb-20 sm:pt-12 lg:pb-24 lg:pt-14">
           <Card className="overflow-hidden bg-[linear-gradient(135deg,rgba(143,71,43,1),rgba(184,92,56,0.96),rgba(201,126,103,0.9))] text-white shadow-[0_28px_72px_rgba(143,71,43,0.25)]">
-            <CardContent className="grid gap-6 p-8 sm:p-10 lg:grid-cols-[1fr_auto] lg:items-center lg:p-12">
+            <CardContent className="grid gap-6 p-8 sm:p-10 xl:grid-cols-[1fr_auto] xl:items-center xl:p-12">
               <div>
                 <p className="text-sm uppercase tracking-[0.22em] text-white/60">Start preserving now</p>
                 <h2 className="mt-4 text-balance font-display text-4xl leading-tight sm:text-5xl">
@@ -392,3 +392,4 @@ export default async function HomePage(props: HomePageProps) {
     </div>
   );
 }
+

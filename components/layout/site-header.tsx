@@ -25,12 +25,12 @@ const marketingLinks = [
 export function SiteHeader() {
   return (
     <header id="top" className="sticky top-0 z-40 border-b border-white/35 bg-background/75 backdrop-blur-xl">
-      <div className="page-wrap flex items-center justify-between gap-3 py-4">
+      <div className="page-wrap flex items-center justify-between gap-3 py-4 xl:gap-6">
         <Link href="/" className="min-w-0">
           <BrandMark />
         </Link>
 
-        <nav className="hidden items-center gap-7 text-sm text-muted-foreground lg:flex">
+        <nav className="hidden items-center gap-6 text-sm text-muted-foreground xl:flex">
           {marketingLinks.map((link) => (
             link.href.startsWith("/#") ? (
               <a key={link.href} href={link.href} className="transition-colors hover:text-foreground">{link.label}</a>
@@ -43,7 +43,7 @@ export function SiteHeader() {
         <div className="flex items-center gap-2 sm:gap-3">
           <Dialog>
             <DialogTrigger asChild>
-              <Button variant="outline" size="icon" className="lg:hidden" aria-label="Open navigation menu">
+              <Button variant="outline" size="icon" className="xl:hidden" aria-label="Open navigation menu">
                 <Menu className="h-5 w-5" />
               </Button>
             </DialogTrigger>
@@ -91,11 +91,10 @@ export function SiteHeader() {
             </DialogContent>
           </Dialog>
 
-          <Button asChild variant="ghost" className="hidden sm:inline-flex"><Link href="/login">Log in</Link></Button>
-          <Button asChild size="sm" className="hidden sm:inline-flex sm:h-11 sm:px-5"><Link href="/signup"><Sparkles className="h-4 w-4" />Create account</Link></Button>
+          <Button asChild variant="ghost" className="hidden lg:inline-flex xl:inline-flex"><Link href="/login">Log in</Link></Button>
+          <Button asChild size="sm" className="hidden md:inline-flex sm:h-11 sm:px-5"><Link href="/signup"><Sparkles className="h-4 w-4" />Create account</Link></Button>
         </div>
       </div>
     </header>
   );
 }
-
