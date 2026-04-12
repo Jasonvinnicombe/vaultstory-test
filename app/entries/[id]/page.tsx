@@ -144,7 +144,7 @@ export default async function EntryPage({ params, searchParams }: { params: Prom
                   Back to vault
                 </Link>
               </Button>
-              {status === "draft" ? (
+              {status === "draft" && !profile?.is_admin ? (
                 <Button asChild>
                   <Link href={`/entries/${typedEntry.id}/edit`}>
                     <FilePenLine className="h-4 w-4" />
@@ -195,20 +195,26 @@ export default async function EntryPage({ params, searchParams }: { params: Prom
                 </div>
               ) : null}
 
-              <div className="flex flex-wrap gap-3">
-                <Button asChild>
-                  <Link href={`/entries/${typedEntry.id}/edit`}>
-                    <FilePenLine className="h-4 w-4" />
-                    Continue editing
-                  </Link>
-                </Button>
-                <Button asChild variant="outline">
-                  <Link href={`/entries/${typedEntry.id}/edit?step=2`}>
-                    <LockKeyhole className="h-4 w-4" />
-                    Seal this entry
-                  </Link>
-                </Button>
-              </div>
+              {profile?.is_admin ? (
+                <div className="rounded-[24px] border border-secondary/20 bg-secondary/10 p-4 text-sm leading-7 text-muted-foreground">
+                  Admin preview only. Drafts can be reviewed here, but only the entry owner can keep editing or seal them.
+                </div>
+              ) : (
+                <div className="flex flex-wrap gap-3">
+                  <Button asChild>
+                    <Link href={`/entries/${typedEntry.id}/edit`}>
+                      <FilePenLine className="h-4 w-4" />
+                      Continue editing
+                    </Link>
+                  </Button>
+                  <Button asChild variant="outline">
+                    <Link href={`/entries/${typedEntry.id}/edit?step=2`}>
+                      <LockKeyhole className="h-4 w-4" />
+                      Seal this entry
+                    </Link>
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         ) : !shouldReveal ? (
