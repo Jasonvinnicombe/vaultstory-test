@@ -10,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { getMembershipLabel } from "@/lib/billing";
 import { getProfile } from "@/lib/auth";
 import { getEntryStatus } from "@/lib/entries";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/types/database";
 
@@ -33,7 +34,7 @@ export default async function EditDraftEntryPage({
     getProfile(),
   ]);
   const resolvedSearchParams = rawSearchParams as EditEntrySearchParams;
-  const supabase = await createClient();
+  const supabase = (profile?.is_admin ? supabaseAdmin : await createClient()) as typeof supabaseAdmin;
 
   const { data: entry } = await supabase.from("vault_entries").select("*").eq("id", id).maybeSingle<EntryRow>();
   if (!entry) {
@@ -41,6 +42,10 @@ export default async function EditDraftEntryPage({
   }
 
   if (getEntryStatus(entry) !== "draft") {
+    redirect(`/entries/${id}`);
+  }
+
+  if (profile?.is_admin && entry.user_id !== user.id) {
     redirect(`/entries/${id}`);
   }
 
