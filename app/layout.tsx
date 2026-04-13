@@ -14,8 +14,8 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: "/icon.svg", type: "image/svg+xml" },
-      { url: "/icon.svg", rel: "shortcut icon", type: "image/svg+xml" },
+      { url: "/icon.svg?v=20260414", type: "image/svg+xml" },
+      { url: "/icon.svg?v=20260414", rel: "shortcut icon", type: "image/svg+xml" },
     ],
   },
   openGraph: {
