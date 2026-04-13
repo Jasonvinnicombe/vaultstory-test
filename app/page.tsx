@@ -180,9 +180,25 @@ export default async function HomePage(props: HomePageProps) {
     family: familyDisplay ?? undefined,
   };
   const familyCheckoutEnabled = Boolean(getStripePriceId("family", detectedCurrency));
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "Vault Story",
+    url: "https://www.vaultstory.app",
+    logo: {
+      "@type": "ImageObject",
+      url: "https://www.vaultstory.app/Vaultstory.png",
+      width: 2736,
+      height: 1388,
+    },
+  };
 
   return (
     <div className="grain min-h-screen overflow-x-hidden">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+      />
       <SiteHeader />
       <main>
         <LandingHero />
