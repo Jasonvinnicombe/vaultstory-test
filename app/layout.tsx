@@ -14,11 +14,9 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: "/google-favicon.png", sizes: "512x512", type: "image/png" },
       { url: "/icon.svg", type: "image/svg+xml" },
-      { url: "/google-favicon.png", rel: "shortcut icon", sizes: "512x512", type: "image/png" },
+      { url: "/icon.svg", rel: "shortcut icon", type: "image/svg+xml" },
     ],
-    apple: [{ url: "/Vaultstory.png", sizes: "2736x1388", type: "image/png" }],
   },
   openGraph: {
     title: "Vault Story",

@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { LockKeyhole } from "lucide-react";
 
 type BrandMarkProps = {
@@ -8,15 +7,30 @@ type BrandMarkProps = {
 
 function ModernBrandMark({ className }: { className?: string }) {
   return (
-    <span className={`flex min-w-0 items-center ${className ?? ""}`.trim()}>
-      <Image
-        src="/vaultstory-logo-horizontal-orange.png"
-        alt="Vault Story"
-        width={1500}
-        height={266}
-        priority
-        className="h-9 w-auto shrink-0 sm:h-11"
-      />
+    <span className={`flex min-w-0 items-center gap-3 text-[#8F472B] ${className ?? ""}`.trim()}>
+      <svg
+        viewBox="0 0 92 92"
+        aria-hidden="true"
+        className="h-9 w-9 shrink-0 sm:h-10 sm:w-10"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="4.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M30 17h32l3 10H27l3-10Z" />
+        <rect x="10" y="27" width="72" height="56" rx="12" />
+        <path d="M20 38h7" />
+        <circle cx="46" cy="55" r="18" />
+        <g transform="translate(46 55)">
+          <path d="M-5 -2.5v-3a5 5 0 0 1 10 0v3" />
+          <rect x="-8" y="-2.5" width="16" height="13" rx="4" />
+          <path d="M0 1.5v3.5" />
+        </g>
+      </svg>
+      <span className="truncate text-[1.05rem] font-extrabold tracking-[0.08em] text-[#8F472B] sm:text-[1.15rem]">
+        VAULT STORY
+      </span>
     </span>
   );
 }
