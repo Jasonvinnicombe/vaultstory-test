@@ -431,12 +431,8 @@ export async function deleteVaultAction(formData: FormData) {
 export async function createCheckoutSessionAction(formData: FormData) {
   const { redirect } = await import("next/navigation");
   const { headers } = await import("next/headers");
-  const { createClient } = await import("@/lib/supabase/server");
-  const { env } = await import("@/lib/env");
   const { getCurrencyFromHeaders } = await import("@/lib/currency");
-  const { getStripe } = await import("@/lib/stripe");
-  const { getStripePriceId } = await import("@/lib/stripe-pricing");
-  const { upsertStripeCustomer } = await import("@/lib/billing");
+  const { createStripeCheckoutUrl } = await import("@/lib/mobile-billing");
 
   const redirectWithMessage = (message: string): never => {
     return redirect(`/settings?billingError=${encodeURIComponent(message)}`);
@@ -448,102 +444,12 @@ export async function createCheckoutSessionAction(formData: FormData) {
     const selectedPlan = requestedPlan === "family" ? "family" : "premium";
     const currencyOverride = String(formData.get("currency") ?? "").trim().toUpperCase();
     const detectedCurrency = getCurrencyFromHeaders(await headers(), currencyOverride || null);
-    const selectedPriceId = getStripePriceId(selectedPlan, detectedCurrency);
-
-    if (!env.STRIPE_SECRET_KEY || !selectedPriceId) {
-      redirectWithMessage(selectedPlan === "family"
-        ? `Family checkout is not configured yet for ${detectedCurrency}. Add the matching STRIPE_FAMILY_PRICE_ID environment variable first.`
-        : `Stripe is not configured yet for ${detectedCurrency}. Add the matching STRIPE_PREMIUM_PRICE_ID environment variable first.`);
-    }
-
-    const stripePriceId = selectedPriceId!;
-
-    const { createClient } = await import("@/lib/supabase/server");
-    const supabase = await createClient();
-
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("id,email,full_name,membership_plan,stripe_customer_id")
-      .eq("id", user.id)
-      .maybeSingle<Pick<ProfileRow, "id" | "email" | "full_name" | "membership_plan" | "stripe_customer_id">>();
-
-    const email = profile?.email ?? user.email;
-    if (!email) {
-      redirectWithMessage("We could not find an email address for your account.");
-    }
-
-    const resolvedEmail = email!;
-
-    if (profile?.membership_plan === selectedPlan) {
-      redirectWithMessage(`Your account is already on ${selectedPlan === "family" ? "Family" : "Premium"}. Use Manage billing instead.`);
-    }
-
-    if (profile?.membership_plan && profile.membership_plan !== "free") {
-      redirectWithMessage("Plan changes for existing paid memberships should go through billing management so you do not end up with two subscriptions.");
-    }
-
-    const appUrl = env.NEXT_PUBLIC_APP_URL;
-    if (!appUrl) {
-      redirectWithMessage("NEXT_PUBLIC_APP_URL is missing.");
-    }
-
-    const stripe = getStripe();
-    let customerId = profile?.stripe_customer_id ?? null;
-
-    if (!customerId) {
-      const customer = await stripe.customers.create({
-        email: resolvedEmail,
-        name: profile?.full_name ?? user.user_metadata.full_name ?? undefined,
-        metadata: { supabaseUserId: user.id },
-      });
-
-      customerId = customer.id;
-      await upsertStripeCustomer({
-        userId: user.id,
-        email: resolvedEmail,
-        fullName: profile?.full_name ?? user.user_metadata.full_name ?? null,
-        stripeCustomerId: customer.id,
-      });
-    }
-
-    if (!customerId) {
-      redirectWithMessage("Stripe customer setup failed.");
-    }
-
-    const stripeCustomerId = customerId!;
-
-    const session = await stripe.checkout.sessions.create({
-      mode: "subscription",
-      customer: stripeCustomerId,
-      client_reference_id: user.id,
-      success_url: `${appUrl}/settings?billingSuccess=1&billingPlan=${selectedPlan}&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${appUrl}/pricing?billingCanceled=1`,
-      billing_address_collection: "auto",
-      allow_promotion_codes: true,
-      line_items: [
-        {
-          price: stripePriceId,
-          quantity: 1,
-        },
-      ],
-      metadata: {
-        supabaseUserId: user.id,
-        membershipPlan: selectedPlan,
-      },
-      subscription_data: {
-        trial_period_days: 7,
-        metadata: {
-          supabaseUserId: user.id,
-          membershipPlan: selectedPlan,
-        },
-      },
+    const checkoutUrl = await createStripeCheckoutUrl({
+      user,
+      planId: selectedPlan,
+      currency: detectedCurrency,
+      returnMode: "web",
     });
-
-    const checkoutUrl: string = session.url as string;
-    if (!checkoutUrl) {
-      redirectWithMessage("Stripe did not return a checkout URL.");
-    }
-
     redirect(checkoutUrl);
   } catch (error) {
     const { isRedirectError } = await import("next/dist/client/components/redirect-error");
@@ -559,9 +465,7 @@ export async function createCheckoutSessionAction(formData: FormData) {
 
 export async function createBillingPortalSessionAction() {
   const { redirect } = await import("next/navigation");
-  const { createClient } = await import("@/lib/supabase/server");
-  const { env } = await import("@/lib/env");
-  const { getStripe } = await import("@/lib/stripe");
+  const { createStripeBillingPortalUrl } = await import("@/lib/mobile-billing");
 
   const redirectWithMessage = (message: string): never => {
     return redirect(`/settings?billingError=${encodeURIComponent(message)}`);
@@ -569,38 +473,12 @@ export async function createBillingPortalSessionAction() {
 
   try {
     const { user } = await requireAuthenticatedUser();
-    if (!env.STRIPE_SECRET_KEY) {
-      redirectWithMessage("Stripe is not configured yet. Add STRIPE_SECRET_KEY first.");
-    }
-
-    const { createClient } = await import("@/lib/supabase/server");
-    const supabase = await createClient();
-
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("stripe_customer_id")
-      .eq("id", user.id)
-      .maybeSingle<Pick<ProfileRow, "stripe_customer_id">>();
-
-    const customerId = profile?.stripe_customer_id;
-    if (!customerId) {
-      redirectWithMessage("There is no Stripe billing account attached to this profile yet.");
-    }
-
-    const appUrl = env.NEXT_PUBLIC_APP_URL;
-    if (!appUrl) {
-      redirectWithMessage("NEXT_PUBLIC_APP_URL is missing.");
-    }
-
-    const billingCustomerId = customerId!;
-
-    const stripe = getStripe();
-    const session = await stripe.billingPortal.sessions.create({
-      customer: billingCustomerId,
-      return_url: `${appUrl}/settings`,
+    const portalUrl = await createStripeBillingPortalUrl({
+      userId: user.id,
+      returnMode: "web",
     });
 
-    redirect(session.url as string);
+    redirect(portalUrl);
   } catch (error) {
     const { isRedirectError } = await import("next/dist/client/components/redirect-error");
 

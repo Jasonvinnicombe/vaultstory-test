@@ -94,6 +94,34 @@ npm install
 npm run dev
 ```
 
+## Capacitor Setup
+
+Capacitor is installed for the `mobile-app-setup` branch, but the website build and runtime are unchanged.
+
+Current mobile setup includes:
+
+- `@capacitor/core`
+- `@capacitor/cli`
+- `@capacitor/android`
+- `capacitor.config.ts`
+- npm scripts for `cap:sync`, `cap:add:android`, `cap:open:android`, and `cap:run:android`
+
+The current Capacitor config is set up as a hosted wrapper around the existing site. It reads:
+
+- `CAPACITOR_SERVER_URL` if present
+- `CAPACITOR_SERVER_PATH` if present
+- otherwise `NEXT_PUBLIC_APP_URL`
+- otherwise defaults to `http://10.0.2.2:3000` for Android emulator local testing
+
+That keeps the existing Next.js website behavior unchanged while making Android setup possible without converting the app to a static export.
+
+For the current Android setup, the native shell intentionally opens a lighter auth route first:
+
+- `/mobile-login`
+- `/mobile-signup`
+
+Those routes exist to reduce startup pressure in the Android WebView while preserving the main website experience for browsers.
+
 
 ## Invitation Emails
 

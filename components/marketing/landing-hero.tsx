@@ -99,7 +99,10 @@ export function LandingProductPreview() {
     <Card className="mx-auto w-full max-w-[42rem] overflow-hidden border-white/15 bg-[linear-gradient(180deg,rgba(143,71,43,0.98),rgba(184,92,56,0.94),rgba(201,126,103,0.9))] text-white shadow-[0_32px_90px_rgba(143,71,43,0.24)] xl:mx-0 xl:max-w-none">
       <CardContent className="p-4 sm:p-5">
         <div className="rounded-[30px] border border-white/10 bg-[rgba(255,255,255,0.06)] p-3 sm:p-4">
-          <div className="flex flex-col gap-3 border-b border-white/10 pb-3 text-xs uppercase tracking-[0.22em] text-white/58 sm:flex-row sm:items-center sm:justify-end">
+          <div className="flex flex-col gap-3 border-b border-white/10 pb-3 text-xs uppercase tracking-[0.22em] text-white/58 sm:flex-row sm:items-center sm:justify-between">
+            <span className="inline-flex w-fit items-center gap-2 rounded-full border border-white/12 bg-white/6 px-3 py-1 text-[11px] tracking-[0.16em] text-white/72">
+              Special reveal
+            </span>
             <span className="inline-flex w-fit items-center gap-2 rounded-full border border-white/12 bg-white/6 px-3 py-1 text-[11px] tracking-[0.16em] text-white/72">
               <LockKeyhole className="h-3.5 w-3.5 text-secondary" />
               Private family archive
@@ -111,11 +114,16 @@ export function LandingProductPreview() {
               <img
                 src="https://images.unsplash.com/photo-1761735142515-e0175a5a0b3f?auto=format&fit=crop&w=1400&q=80"
                 alt="A bride sharing a tender wedding-day moment that supports the timed memory scenario"
-                className="h-full w-full object-cover"
+                className="h-full w-full object-cover brightness-[1.05]"
               />
               <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(66,35,24,0.08),rgba(66,35,24,0.22)_36%,rgba(66,35,24,0.78))]" />
-              <div className="pointer-events-none absolute right-0 top-0 h-full w-[36%] bg-[linear-gradient(270deg,rgba(255,255,255,0.38),rgba(255,255,255,0.16)_42%,rgba(255,255,255,0)_86%)] mix-blend-screen" />
-              <div className="pointer-events-none absolute right-[0%] top-[8%] h-[72%] w-[27%] bg-[radial-gradient(circle_at_48%_38%,rgba(255,255,255,0.48),rgba(255,255,255,0.22)_36%,rgba(255,255,255,0.05)_62%,transparent_78%)] blur-[12px]" />
+              <div className="pointer-events-none absolute right-0 top-0 h-full w-[38%] bg-[linear-gradient(270deg,rgba(255,255,255,0.46),rgba(255,255,255,0.2)_42%,rgba(255,255,255,0)_86%)] mix-blend-screen" />
+              <div className="pointer-events-none absolute right-[0%] top-[7%] h-[74%] w-[29%] bg-[radial-gradient(circle_at_48%_38%,rgba(255,255,255,0.56),rgba(255,255,255,0.26)_36%,rgba(255,255,255,0.06)_62%,transparent_78%)] blur-[14px]" />
+              <div className="pointer-events-none absolute left-[24%] top-[29%] h-[34%] w-[18%] bg-[radial-gradient(circle_at_34%_28%,rgba(255,255,255,0.16),rgba(255,255,255,0.05)_36%,rgba(255,255,255,0.01)_62%,transparent_76%)] blur-[12px]" />
+              <div className="pointer-events-none absolute left-[40%] top-[54%] h-[44%] w-[11%] rotate-[7deg] bg-[linear-gradient(180deg,rgba(255,255,255,0.16),rgba(255,255,255,0.04)_55%,rgba(255,255,255,0.01)_82%,transparent)] blur-[13px]" />
+              <div className="pointer-events-none absolute left-[47%] top-[24%] h-[44%] w-[18%] bg-[radial-gradient(circle_at_48%_40%,rgba(255,255,255,0.18),rgba(255,255,255,0.04)_42%,transparent_74%)] mix-blend-screen" />
+              <div className="pointer-events-none absolute left-[51%] top-[30%] h-[30%] w-[13%] bg-[radial-gradient(circle_at_50%_42%,rgba(255,255,255,0.16),rgba(255,255,255,0.03)_50%,transparent_78%)] blur-[9px]" />
+              <div className="pointer-events-none absolute left-[50%] top-[44%] h-[18%] w-[14%] bg-[radial-gradient(circle_at_50%_42%,rgba(255,255,255,0.1),rgba(255,255,255,0.02)_56%,transparent_82%)] blur-[10px]" />
               <div className="absolute left-4 top-4 inline-flex items-center gap-2 rounded-full border border-white/12 bg-[rgba(255,255,255,0.08)] px-3 py-1.5 text-[11px] uppercase tracking-[0.18em] text-white/72 sm:left-6 sm:top-6">
                 <CalendarClock className="h-3.5 w-3.5 text-secondary" />
                 Wedding day unlock
