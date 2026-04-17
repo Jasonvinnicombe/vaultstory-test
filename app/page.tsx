@@ -218,6 +218,9 @@ export default async function HomePage(props: HomePageProps) {
                   <Link href="/signup">Start free trial</Link>
                 </Button>
                 <Button asChild variant="outline">
+                  <Link href="/vault-uses">Explore vault uses</Link>
+                </Button>
+                <Button asChild variant="outline">
                   <Link href="/#pricing">View pricing</Link>
                 </Button>
               </div>

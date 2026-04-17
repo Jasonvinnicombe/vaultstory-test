@@ -5,11 +5,7 @@ import { motion } from "framer-motion";
 import {
   ArrowRight,
   CalendarClock,
-  LayoutDashboard,
   LockKeyhole,
-  Sparkles,
-  Vault,
-  Video,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -20,30 +16,6 @@ const fadeUp = {
   initial: { opacity: 0, y: 18 },
   animate: { opacity: 1, y: 0 },
 };
-
-const navItems = [
-  { label: "Dashboard", icon: LayoutDashboard },
-  { label: "Vaults", icon: Vault },
-  { label: "Upcoming", icon: CalendarClock },
-];
-
-const revealItems = [
-  {
-    title: "Video",
-    detail: "Hear the room, the laughter, the little voice.",
-    type: "Archive",
-  },
-  {
-    title: "Letter",
-    detail: "Keep the tone, handwriting, and feeling intact.",
-    type: "Meaning",
-  },
-  {
-    title: "Voice note",
-    detail: "Let love return in the exact voice it was spoken in.",
-    type: "Return",
-  },
-];
 
 export function LandingHero() {
   return (
@@ -103,51 +75,16 @@ function VaultTimelinePreview() {
             <img
               src="https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=1400&q=80"
               alt="A family memory preserved inside a vault"
-              className="h-full w-full object-cover"
+              className="h-full w-full object-cover brightness-[1.14] saturate-[1.08]"
             />
-            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(66,35,24,0.1),rgba(66,35,24,0.38)_34%,rgba(66,35,24,0.84))]" />
+            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(66,35,24,0.04),rgba(66,35,24,0.18)_34%,rgba(66,35,24,0.46))]" />
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(216,161,91,0.18),transparent_24%)]" />
 
-            <div className="absolute left-4 top-6 inline-flex items-center gap-2 rounded-full border border-white/14 bg-[rgba(88,45,28,0.44)] px-4 py-2 text-[11px] uppercase tracking-[0.24em] text-white/76 backdrop-blur-sm sm:left-6 sm:top-8">
-              <Sparkles className="h-3.5 w-3.5 text-secondary" />
-              Vault preview
-            </div>
-
-            <div className="absolute inset-x-0 top-0 p-4 pt-20 sm:p-6 sm:pt-28 md:p-5 md:pt-24 lg:p-6 lg:pt-24 xl:p-8 xl:pt-32">
+            <div className="absolute inset-x-0 top-0 p-4 pt-12 sm:p-6 sm:pt-16 md:p-5 md:pt-14 lg:p-6 lg:pt-16 xl:p-8 xl:pt-18">
               <div className="max-w-3xl">
-                <p className="text-[11px] uppercase tracking-[0.28em] text-white/58 sm:text-xs">Preserved from the past</p>
-                <h2 className="mt-3 max-w-[10ch] text-balance font-display text-4xl leading-[0.94] text-white sm:mt-4 sm:text-[3.25rem] md:text-[3.9rem] lg:text-[3.45rem] xl:text-[4.4rem]">
+                <h2 className="max-w-[10ch] text-balance font-display text-4xl leading-[0.94] text-white sm:text-[3.25rem] md:text-[3.9rem] lg:text-[3.45rem] xl:text-[4.4rem]">
                   Keep the feeling, not just the file.
                 </h2>
-                <p className="mt-4 max-w-xl text-sm leading-7 text-white/78 sm:max-w-2xl sm:text-base sm:leading-8 md:max-w-[25rem] md:text-[0.98rem] md:leading-7 lg:max-w-[28rem] xl:max-w-2xl xl:text-lg xl:leading-8">
-                  Vault Story keeps photos, letters, voice notes, and video memories wrapped in their meaning until the right future day arrives.
-                </p>
-
-                <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-                  <div className="inline-flex items-center gap-2 rounded-full border border-white/14 bg-[rgba(88,45,28,0.44)] px-4 py-2 text-sm text-white/82 backdrop-blur-sm">
-                    <CalendarClock className="h-4 w-4 text-secondary" />
-                    Next opening: June 12, 2036
-                  </div>
-                  <div className="inline-flex items-center gap-2 rounded-full border border-white/14 bg-[rgba(88,45,28,0.44)] px-4 py-2 text-sm text-white/82 backdrop-blur-sm">
-                    <LockKeyhole className="h-4 w-4 text-secondary" />
-                    Saved now, felt later
-                  </div>
-                </div>
-
-                <div className="mt-6 grid gap-3 md:grid-cols-1 lg:grid-cols-3 lg:mt-5 xl:mt-6 xl:grid-cols-3">
-                  <div className="rounded-[22px] border border-white/10 bg-[rgba(88,45,28,0.38)] p-4 backdrop-blur-sm">
-                    <p className="text-[11px] uppercase tracking-[0.18em] text-white/54">Why it matters</p>
-                    <p className="mt-2 text-sm leading-6 text-white/82">A memory returns with the age, voice, room, and reason it was saved.</p>
-                  </div>
-                  <div className="rounded-[22px] border border-white/10 bg-[rgba(88,45,28,0.38)] p-4 backdrop-blur-sm">
-                    <p className="text-[11px] uppercase tracking-[0.18em] text-white/54">What it holds</p>
-                    <p className="mt-2 text-sm leading-6 text-white/82">Videos, letters, voice notes, and the emotional context around them.</p>
-                  </div>
-                  <div className="rounded-[22px] border border-white/10 bg-[rgba(88,45,28,0.38)] p-4 backdrop-blur-sm">
-                    <p className="text-[11px] uppercase tracking-[0.18em] text-white/54">How it lands</p>
-                    <p className="mt-2 text-sm leading-6 text-white/82">Opened at the right milestone, not lost in everyday storage.</p>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
@@ -162,109 +99,34 @@ export function LandingProductPreview() {
     <Card className="mx-auto w-full max-w-[42rem] overflow-hidden border-white/15 bg-[linear-gradient(180deg,rgba(143,71,43,0.98),rgba(184,92,56,0.94),rgba(201,126,103,0.9))] text-white shadow-[0_32px_90px_rgba(143,71,43,0.24)] xl:mx-0 xl:max-w-none">
       <CardContent className="p-4 sm:p-5">
         <div className="rounded-[30px] border border-white/10 bg-[rgba(255,255,255,0.06)] p-3 sm:p-4">
-          <div className="flex flex-col gap-3 border-b border-white/10 pb-3 text-xs uppercase tracking-[0.22em] text-white/58 sm:flex-row sm:items-center sm:justify-between">
-            <span>Vault Story Preview</span>
+          <div className="flex flex-col gap-3 border-b border-white/10 pb-3 text-xs uppercase tracking-[0.22em] text-white/58 sm:flex-row sm:items-center sm:justify-end">
             <span className="inline-flex w-fit items-center gap-2 rounded-full border border-white/12 bg-white/6 px-3 py-1 text-[11px] tracking-[0.16em] text-white/72">
               <LockKeyhole className="h-3.5 w-3.5 text-secondary" />
               Private family archive
             </span>
           </div>
 
-          <div className="mt-4 grid gap-3 lg:grid-cols-[160px_1fr] xl:grid-cols-[180px_1fr]">
-            <div className="rounded-[24px] border border-white/10 bg-[rgba(70,36,22,0.28)] p-4">
-              <div className="flex items-center gap-3 rounded-[18px] border border-white/10 bg-white/6 p-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-secondary font-semibold text-secondary-foreground">
-                  HV
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-white">Hugo&apos;s vault</p>
-                  <p className="text-xs text-white/60">Family timeline</p>
-                </div>
+          <div className="mt-4 overflow-hidden rounded-[24px] border border-white/10 bg-[rgba(70,36,22,0.22)]">
+            <div className="relative h-[420px] overflow-hidden sm:h-[500px] lg:h-[460px] xl:h-[500px]">
+              <img
+                src="https://images.unsplash.com/photo-1761735142515-e0175a5a0b3f?auto=format&fit=crop&w=1400&q=80"
+                alt="A bride sharing a tender wedding-day moment that supports the timed memory scenario"
+                className="h-full w-full object-cover"
+              />
+              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(66,35,24,0.08),rgba(66,35,24,0.22)_36%,rgba(66,35,24,0.78))]" />
+              <div className="pointer-events-none absolute right-0 top-0 h-full w-[36%] bg-[linear-gradient(270deg,rgba(255,255,255,0.38),rgba(255,255,255,0.16)_42%,rgba(255,255,255,0)_86%)] mix-blend-screen" />
+              <div className="pointer-events-none absolute right-[0%] top-[8%] h-[72%] w-[27%] bg-[radial-gradient(circle_at_48%_38%,rgba(255,255,255,0.48),rgba(255,255,255,0.22)_36%,rgba(255,255,255,0.05)_62%,transparent_78%)] blur-[12px]" />
+              <div className="absolute left-4 top-4 inline-flex items-center gap-2 rounded-full border border-white/12 bg-[rgba(255,255,255,0.08)] px-3 py-1.5 text-[11px] uppercase tracking-[0.18em] text-white/72 sm:left-6 sm:top-6">
+                <CalendarClock className="h-3.5 w-3.5 text-secondary" />
+                Wedding day unlock
               </div>
-
-              <div className="mt-4 grid gap-2 sm:grid-cols-3 lg:grid-cols-1">
-                {navItems.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <div key={item.label} className="flex items-center gap-3 rounded-[16px] border border-white/8 bg-white/5 px-3 py-2.5 text-sm text-white/78">
-                      <Icon className="h-4 w-4 text-secondary" />
-                      <span>{item.label}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <div className="overflow-hidden rounded-[24px] border border-white/10 bg-[rgba(70,36,22,0.22)]">
-                <div className="relative h-40 overflow-hidden border-b border-white/10 sm:h-48 lg:h-44 xl:h-48">
-                  <img
-                    src="https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=1200&q=80"
-                    alt="A family memory used as a vault cover"
-                    className="h-full w-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(66,35,24,0.08),rgba(66,35,24,0.75))]" />
-                  <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5">
-                    <div className="flex items-end justify-between gap-4">
-                      <div>
-                        <p className="text-xs uppercase tracking-[0.2em] text-white/64">Family vault</p>
-                        <h2 className="mt-2 text-balance font-display text-3xl leading-tight text-white sm:text-[2rem] lg:text-[1.9rem] xl:text-[2rem]">
-                          Hugo&apos;s Life In Action
-                        </h2>
-                        <p className="mt-2 max-w-[22rem] text-sm text-white/78">A private timeline of letters, videos, and voice notes saved for Hugo.</p>
-                      </div>
-                      <div className="hidden rounded-[18px] border border-white/12 bg-[rgba(255,255,255,0.08)] px-4 py-3 text-right lg:block">
-                        <p className="text-[11px] uppercase tracking-[0.18em] text-white/54">Next unlock</p>
-                        <p className="mt-1 text-sm font-semibold text-white">June 12, 2036</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid gap-3 p-4 text-sm text-white/84 sm:grid-cols-3 sm:p-5">
-                  <div className="rounded-[18px] border border-white/10 bg-white/6 p-3">
-                    <p className="text-[11px] uppercase tracking-[0.18em] text-white/54">Entries</p>
-                    <p className="mt-2 text-lg font-semibold text-white">12 memories</p>
-                  </div>
-                  <div className="rounded-[18px] border border-white/10 bg-white/6 p-3">
-                    <p className="text-[11px] uppercase tracking-[0.18em] text-white/54">Media</p>
-                    <p className="mt-2 text-lg font-semibold text-white">Photos, voice, video</p>
-                  </div>
-                  <div className="rounded-[18px] border border-white/10 bg-white/6 p-3">
-                    <p className="text-[11px] uppercase tracking-[0.18em] text-white/54">Access</p>
-                    <p className="mt-2 text-lg font-semibold text-white">Parents + family</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-[24px] border border-white/10 bg-[rgba(70,36,22,0.22)] p-4 sm:p-5">
-                <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.2em] text-white/54">Upcoming reveals</p>
-                    <h3 className="mt-2 max-w-[26rem] text-xl font-semibold text-white">What the future timeline actually looks like</h3>
-                  </div>
-                  <div className="hidden rounded-full border border-white/12 bg-white/6 px-3 py-2 text-xs text-white/70 sm:inline-flex sm:items-center sm:gap-2">
-                    <CalendarClock className="h-3.5 w-3.5 text-secondary" />
-                    Timed future unlocks
-                  </div>
-                </div>
-
-                <div className="mt-4 space-y-3">
-                  {revealItems.map((item) => (
-                    <div key={item.title} className="flex items-center gap-3 rounded-[20px] border border-white/10 bg-white/6 px-4 py-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary/92 text-secondary-foreground">
-                        {item.title === "Video" ? <Video className="h-4 w-4" /> : <Sparkles className="h-4 w-4" />}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-semibold text-white">{item.title}</p>
-                        <p className="mt-1 text-xs text-white/62">{item.detail}</p>
-                      </div>
-                      <div className="rounded-full border border-white/12 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-white/62">
-                        Locked
-                      </div>
-                    </div>
-                  ))}
-                </div>
+              <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6">
+                <h2 className="max-w-[19rem] text-balance font-display text-[2.05rem] leading-[1.02] text-white sm:max-w-[26rem] sm:text-[2.65rem]">
+                  On the morning of her wedding, she hears her mum again.
+                </h2>
+                <p className="mt-4 max-w-[29rem] text-sm leading-6 text-white/82 sm:text-base sm:leading-7">
+                  Recorded while she was ill, this video was locked away for years so it could arrive on the one day her daughter would need her most.
+                </p>
               </div>
             </div>
           </div>
