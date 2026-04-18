@@ -22,7 +22,7 @@ export default async function MobileBillingReturnPage(props: MobileBillingReturn
 
   const fallbackUrl = (() => {
     const url = new URL(
-      params.billingCanceled === "1" ? "/pricing" : "/settings",
+      params.billingCanceled === "1" ? "/dashboard" : "/settings",
       process.env.NEXT_PUBLIC_APP_URL ?? "https://www.vaultstory.app",
     );
 

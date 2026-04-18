@@ -106,14 +106,27 @@ Current mobile setup includes:
 - `capacitor.config.ts`
 - npm scripts for `cap:sync`, `cap:add:android`, `cap:open:android`, and `cap:run:android`
 
-The current Capacitor config is set up as a hosted wrapper around the existing site. It reads:
+The current Capacitor config is set up as a hosted wrapper around the existing site by default. It reads:
 
-- `CAPACITOR_SERVER_URL` if present
+- `NEXT_PUBLIC_APP_URL` as the default app host
 - `CAPACITOR_SERVER_PATH` if present
-- otherwise `NEXT_PUBLIC_APP_URL`
-- otherwise defaults to `http://10.0.2.2:3000` for Android emulator local testing
+- `CAPACITOR_SERVER_URL` only when `CAPACITOR_USE_LOCAL_SERVER=true`
+- otherwise defaults to `http://10.0.2.2:3000` if no hosted app URL is available
 
 That keeps the existing Next.js website behavior unchanged while making Android setup possible without converting the app to a static export.
+
+For reliable styled app loads, leave `CAPACITOR_USE_LOCAL_SERVER=false` so the native shell points at the hosted app.
+
+For Android emulator local development, set:
+
+- `CAPACITOR_USE_LOCAL_SERVER=true`
+- `CAPACITOR_SERVER_URL=http://10.0.2.2:3001`
+
+Then run your local server with:
+
+```bash
+npm run dev:android
+```
 
 For the current Android setup, the native shell intentionally opens a lighter auth route first:
 
