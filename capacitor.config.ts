@@ -50,17 +50,32 @@ function readEnvFile(fileName: string) {
   return entries;
 }
 
+function normalizeBooleanEnvValue(value: string | undefined) {
+  const normalized = normalizeEnvValue(value)?.toLowerCase();
+
+  return normalized === "1" || normalized === "true" || normalized === "yes" || normalized === "on";
+}
+
 const fileEnv = {
   ...readEnvFile(".env"),
   ...readEnvFile(".env.local"),
 };
 
-const baseServerUrl =
-  normalizeEnvValue(process.env.CAPACITOR_SERVER_URL) ||
-  fileEnv.CAPACITOR_SERVER_URL ||
+const hostedServerUrl =
   normalizeEnvValue(process.env.NEXT_PUBLIC_APP_URL) ||
   fileEnv.NEXT_PUBLIC_APP_URL ||
   "http://10.0.2.2:3000";
+
+const localDevServerUrl =
+  normalizeEnvValue(process.env.CAPACITOR_SERVER_URL) ||
+  fileEnv.CAPACITOR_SERVER_URL ||
+  "http://10.0.2.2:3000";
+
+const useLocalDevServer =
+  normalizeBooleanEnvValue(process.env.CAPACITOR_USE_LOCAL_SERVER) ||
+  normalizeBooleanEnvValue(fileEnv.CAPACITOR_USE_LOCAL_SERVER);
+
+const baseServerUrl = useLocalDevServer ? localDevServerUrl : hostedServerUrl;
 
 const serverPath =
   normalizeEnvValue(process.env.CAPACITOR_SERVER_PATH) ||

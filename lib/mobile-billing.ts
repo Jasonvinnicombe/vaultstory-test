@@ -143,7 +143,7 @@ export async function createStripeCheckoutUrl(options: {
   const cancelUrl =
     options.returnMode === "app"
       ? getMobileReturnTargets(cancelParams).hostedReturnUrl
-      : buildWebUrl("/pricing", cancelParams);
+      : buildWebUrl("/dashboard", cancelParams);
 
   const session = await stripe.checkout.sessions.create({
     mode: "subscription",
