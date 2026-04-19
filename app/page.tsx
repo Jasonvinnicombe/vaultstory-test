@@ -1,13 +1,17 @@
 import Image from "next/image";
 import Link from "next/link";
 import {
+  Calendar,
   CalendarClock,
+  ChevronDown,
   HeartHandshake,
   ImageIcon,
-  LockKeyhole,
+  MessageSquareText,
   Mic,
+  Quote,
   ShieldCheck,
   Sparkles,
+  Upload,
   Users,
   Video,
 } from "lucide-react";
@@ -27,18 +31,18 @@ export const dynamic = "force-dynamic";
 
 const coreHighlights = [
   {
-    title: "Save private memories",
-    body: "Keep letters, photos, voice notes, and video in one calm family archive.",
-    icon: LockKeyhole,
+    title: "Capture memories",
+    body: "Upload letters, photos, voice notes, and videos in one private place.",
+    icon: Upload,
   },
   {
-    title: "Choose the future moment",
-    body: "Tie each memory to a date, age, or milestone so it arrives at the right time.",
-    icon: CalendarClock,
+    title: "Choose the unlock moment",
+    body: "Set a date, age, or milestone so each memory opens with intention.",
+    icon: Calendar,
   },
   {
-    title: "Let it land with meaning",
-    body: "A future unlock feels intentional, personal, and emotionally on time.",
+    title: "Deliver meaningfully",
+    body: "When the future arrives, the memory feels chosen instead of forgotten.",
     icon: Sparkles,
   },
 ];
@@ -46,51 +50,70 @@ const coreHighlights = [
 const mediaTypes = [
   {
     label: "Letters",
-    detail: "For reassurance, guidance, promises, and future birthdays.",
+    detail: "For birthdays, future advice, reassurance, and family milestones.",
     icon: HeartHandshake,
   },
   {
     label: "Voice notes",
-    detail: "So a future child or family member can hear the real voice again.",
+    detail: "So children and loved ones can hear your real voice again.",
     icon: Mic,
   },
   {
-    label: "Photos + video",
-    detail: "Keep the room, faces, movement, and season of life intact.",
+    label: "Photos",
+    detail: "Preserve faces, places, and everyday moments before they fade.",
     icon: ImageIcon,
+  },
+  {
+    label: "Videos",
+    detail: "Capture movement, emotion, and stories that photos cannot hold alone.",
+    icon: Video,
   },
 ];
 
 const journeySteps = [
   {
     step: "01",
-    title: "Capture it now",
-    body: "Save the story while it is still warm, clear, and true.",
+    title: "Create a vault",
+    body: "Start a private space for a child, loved one, shared family archive, or future self.",
   },
   {
     step: "02",
-    title: "Set the unlock moment",
-    body: "Pick a date, age, or milestone that gives it meaning.",
+    title: "Add your memories",
+    body: "Save letters, photos, voice notes, and videos while the moment is still fresh.",
   },
   {
     step: "03",
-    title: "Let the future open it",
-    body: "When it arrives later, it feels chosen instead of forgotten.",
+    title: "Set the unlock",
+    body: "Choose a date, age, or milestone for when each memory should be opened.",
+  },
+  {
+    step: "04",
+    title: "Invite the right people",
+    body: "Share access where needed so trusted family members can help care for the archive.",
+  },
+  {
+    step: "05",
+    title: "Let it arrive with meaning",
+    body: "When the moment comes, it feels intentional, personal, and emotionally on time.",
   },
 ];
 
 const useCases = [
   {
-    eyebrow: "For children",
-    title: "Birthday messages, life advice, and years they have not reached yet.",
+    eyebrow: "Parents",
+    title: "Record messages for birthdays, graduations, and the years ahead.",
   },
   {
-    eyebrow: "For family history",
-    title: "Stories, voices, and memories that should not disappear with time.",
+    eyebrow: "Grandparents",
+    title: "Preserve stories, wisdom, and family history for future generations.",
   },
   {
-    eyebrow: "For future you",
-    title: "Promises, hopes, and honest messages for a later version of yourself.",
+    eyebrow: "Families",
+    title: "Build a shared archive of milestones, voices, and memories together.",
+  },
+  {
+    eyebrow: "Future self",
+    title: "Keep promises, reflections, and honest messages for a later chapter of life.",
   },
 ];
 
@@ -145,23 +168,69 @@ const milestoneMoments: MilestoneMoment[] = [
 const trustPoints = [
   {
     icon: ShieldCheck,
-    title: "Private by default",
-    body: "Built for personal memory-keeping, not public sharing.",
+    title: "Private vaults and controlled access",
+    body: "Built for personal memory-keeping, with access designed around trusted family relationships.",
   },
   {
-    icon: Video,
-    title: "Rich media ready",
-    body: "Photos, voice, and video live alongside written memories.",
+    icon: CalendarClock,
+    title: "Unlock by date, age, or milestone",
+    body: "Every memory can be tied to the moment that gives it the most meaning.",
   },
   {
     icon: Users,
-    title: "Family access controls",
-    body: "Invite the right people and decide how they can help care for the archive.",
+    title: "Invite family carefully",
+    body: "Bring in the right people and decide how they help preserve or manage the archive.",
   },
   {
-    icon: HeartHandshake,
-    title: "Made for emotional moments",
-    body: "The whole product is built around timing, trust, and human meaning.",
+    icon: Video,
+    title: "Built for rich memories",
+    body: "Store photos, letters, voice notes, and video together instead of scattering them across apps.",
+  },
+];
+
+const audienceFeatureImage = {
+  src: "https://images.pexels.com/photos/7086018/pexels-photo-7086018.jpeg?auto=compress&cs=tinysrgb&w=1200",
+  alt: "A young girl sharing a warm moment with her grandfather beside the water.",
+};
+
+const scenarioCards = [
+  {
+    eyebrow: "Wedding day unlock",
+    title: "A mother records a message for the morning her daughter gets married.",
+    body: "Saved years earlier, it arrives on the day it will mean the most.",
+  },
+  {
+    eyebrow: "18th birthday letter",
+    title: "A parent leaves advice, encouragement, and love for adulthood.",
+    body: "The message opens when a child reaches a milestone worth marking intentionally.",
+  },
+  {
+    eyebrow: "Grandparent story",
+    title: "Family history, voice, and memories are preserved for future generations.",
+    body: "Instead of fading with time, they become part of a living archive.",
+  },
+];
+
+const reassurancePoints = [
+  {
+    question: "Who can access my vault and when?",
+    answer:
+      "You decide who can view or help manage each vault, so family access feels intentional instead of open-ended.",
+  },
+  {
+    question: "How do timed unlocks actually work?",
+    answer:
+      "Each memory can be tied to a date, age, or milestone, so it opens when the moment matters instead of getting lost in everyday storage.",
+  },
+  {
+    question: "Can I invite trusted family members later?",
+    answer:
+      "Yes. Start privately, then add the right people as your archive grows and your family needs change.",
+  },
+  {
+    question: "Can I keep photos, voice notes, videos, and letters together?",
+    answer:
+      "Yes. Vault Story is designed to hold written memories, images, voice notes, and video in one place with shared context.",
   },
 ];
 
@@ -208,20 +277,17 @@ export default async function HomePage(props: HomePageProps) {
             <div className="section-stack max-w-2xl">
               <p className="text-sm uppercase tracking-[0.22em] text-muted-foreground">What Vault Story does</p>
               <h2 className="text-balance font-display text-4xl leading-tight text-foreground sm:text-5xl">
-                A private vault for memories that should arrive later, not get lost now.
+                A private vault for the memories that matter later.
               </h2>
               <p className="text-base leading-8 text-muted-foreground sm:text-lg">
-                Record something meaningful today, protect it, and choose when the future should receive it.
+                Save meaningful messages and moments today, then choose exactly when they should be opened in the future.
               </p>
               <div className="flex flex-col gap-3 pt-2 sm:flex-row">
                 <Button asChild>
-                  <Link href="/signup">Start free trial</Link>
+                  <Link href="/signup">Start free</Link>
                 </Button>
                 <Button asChild variant="outline">
-                  <Link href="/vault-uses">Explore vault uses</Link>
-                </Button>
-                <Button asChild variant="outline">
-                  <Link href="/#pricing">View pricing</Link>
+                  <Link href="/#features">Explore vault uses</Link>
                 </Button>
               </div>
             </div>
@@ -250,10 +316,10 @@ export default async function HomePage(props: HomePageProps) {
             <div className="section-stack max-w-2xl">
               <p className="text-sm uppercase tracking-[0.22em] text-muted-foreground">How it works</p>
               <h2 className="text-balance font-display text-4xl leading-tight text-foreground sm:text-5xl">
-                Three simple actions: save it, time it, and let it mean more later.
+                Create a memory, choose when it should open, and let the future receive it at the right time.
               </h2>
               <p className="text-base leading-8 text-muted-foreground sm:text-lg">
-                Vault Story turns ordinary media into a future experience by connecting the memory to the moment it belongs to.
+                Vault Story combines private storage, timed delivery, and family access so meaningful moments feel deliberate instead of forgotten.
               </p>
 
               <div className="grid gap-3 pt-2">
@@ -278,17 +344,34 @@ export default async function HomePage(props: HomePageProps) {
         </section>
 
         <section className="page-wrap border-t border-white/55 py-10 sm:py-14 lg:py-18">
+          <div className="grid gap-4 lg:grid-cols-3">
+            {scenarioCards.map((item) => (
+              <Card key={item.title} className="overflow-hidden border-white/65 bg-[linear-gradient(180deg,rgba(255,250,244,0.97),rgba(245,234,222,0.84))] shadow-[0_18px_48px_rgba(143,71,43,0.08)]">
+                <CardContent className="p-6 sm:p-7">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary/16 text-secondary-foreground ring-1 ring-secondary/25">
+                    <Quote className="h-5 w-5" />
+                  </div>
+                  <p className="mt-5 text-xs uppercase tracking-[0.22em] text-muted-foreground">{item.eyebrow}</p>
+                  <h3 className="mt-3 font-display text-2xl leading-tight text-foreground">{item.title}</h3>
+                  <p className="mt-3 text-sm leading-7 text-muted-foreground sm:text-base">{item.body}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </section>
+
+        <section className="page-wrap border-t border-white/55 py-10 sm:py-14 lg:py-18">
           <div className="grid gap-8 xl:grid-cols-[1.02fr_0.98fr] xl:items-start">
             <div className="section-stack max-w-3xl">
-              <p className="text-sm uppercase tracking-[0.22em] text-muted-foreground">What people keep inside</p>
+              <p className="text-sm uppercase tracking-[0.22em] text-muted-foreground">What you can save</p>
               <h2 className="text-balance font-display text-4xl leading-tight text-foreground sm:text-5xl">
-                Milestones are where ordinary photos become the memories families return to forever.
+                What you can save in Vault Story
               </h2>
               <p className="text-base leading-8 text-muted-foreground sm:text-lg">
-                Birthdays, first days, last days, and family seasons are exactly the moments people do not want to leave to chance.
+                Keep the words, voices, images, and videos that deserve more context than a camera roll or notes app can give them.
               </p>
 
-              <div className="grid gap-4 sm:grid-cols-3">
+              <div className="grid gap-4 sm:grid-cols-2">
                 {mediaTypes.map((item) => {
                   const Icon = item.icon;
                   return (
@@ -340,15 +423,37 @@ export default async function HomePage(props: HomePageProps) {
         <section id="features" className="page-wrap scroll-mt-28 border-t border-white/55 py-10 sm:py-14 lg:py-18">
           <div className="grid gap-8 xl:grid-cols-[0.92fr_1.08fr] xl:items-start">
             <div className="section-stack max-w-3xl">
-              <p className="text-sm uppercase tracking-[0.22em] text-muted-foreground">Vault uses</p>
+              <p className="text-sm uppercase tracking-[0.22em] text-muted-foreground">Who Vault Story is for</p>
               <h2 className="text-balance font-display text-4xl sm:text-5xl">
-                Built for the messages and milestones people want their family to feel, not just store.
+                Built for the people who want memories to land with meaning, not just sit in storage.
               </h2>
+              <p className="text-base leading-8 text-muted-foreground sm:text-lg">
+                The strongest use cases are easy to understand: parents preserving the years ahead, grandparents saving family history, and households building a shared archive over time.
+              </p>
+
+              <Card className="overflow-hidden border-white/65 bg-[linear-gradient(180deg,rgba(255,250,244,0.97),rgba(245,234,222,0.84))] shadow-[0_18px_48px_rgba(143,71,43,0.08)]">
+                <div className="relative aspect-[4/3] overflow-hidden">
+                  <img
+                    src={audienceFeatureImage.src}
+                    alt={audienceFeatureImage.alt}
+                    className="h-full w-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(66,35,24,0.06),rgba(66,35,24,0.14),rgba(66,35,24,0.46))]" />
+                  <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6">
+                    <div className="inline-flex items-center rounded-full border border-white/30 bg-[rgba(255,250,244,0.2)] px-3 py-1 text-[11px] uppercase tracking-[0.22em] text-white/86 backdrop-blur-sm">
+                      Grandparents and family history
+                    </div>
+                    <p className="mt-3 max-w-md text-lg leading-7 text-white sm:text-xl sm:leading-8">
+                      A shared archive feels more real when it protects voices, stories, and moments across generations.
+                    </p>
+                  </div>
+                </div>
+              </Card>
             </div>
 
             <Card className="overflow-hidden border-white/15 bg-[linear-gradient(180deg,rgba(143,71,43,0.98),rgba(184,92,56,0.94),rgba(201,126,103,0.9))] text-white shadow-[0_28px_72px_rgba(143,71,43,0.22)]">
               <CardContent className="p-6 sm:p-7">
-                <Badge className="bg-secondary/90 text-secondary-foreground">Vault uses</Badge>
+                <Badge className="bg-secondary/90 text-secondary-foreground">Best-fit audiences</Badge>
                 <div className="mt-5 space-y-4">
                   {useCases.map((item) => (
                     <div key={item.title} className="rounded-[24px] border border-white/12 bg-white/6 p-5">
@@ -379,10 +484,58 @@ export default async function HomePage(props: HomePageProps) {
           </div>
         </section>
 
+        <section className="page-wrap border-t border-white/55 py-10 sm:py-14 lg:py-18">
+          <div className="grid gap-8 xl:grid-cols-[0.95fr_1.05fr] xl:items-start">
+            <div className="section-stack max-w-2xl">
+              <p className="text-sm uppercase tracking-[0.22em] text-muted-foreground">Trust and clarity</p>
+              <h2 className="text-balance font-display text-4xl leading-tight text-foreground sm:text-5xl">
+                The questions people ask before they trust a family archive.
+              </h2>
+              <p className="text-base leading-8 text-muted-foreground sm:text-lg">
+                Memory products are emotional purchases, but they are also trust purchases. This section should answer the practical questions that sit behind the emotional decision to start.
+              </p>
+            </div>
+
+            <Card className="glass-panel overflow-hidden border-white/65 bg-[linear-gradient(180deg,rgba(255,250,244,0.97),rgba(245,234,222,0.84))] shadow-[0_18px_48px_rgba(143,71,43,0.08)]">
+              <CardContent className="p-6 sm:p-7">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary/16 text-secondary-foreground ring-1 ring-secondary/25">
+                    <MessageSquareText className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Questions to answer clearly</p>
+                    <h3 className="mt-1 font-display text-2xl leading-tight text-foreground">Trust cues that reduce hesitation</h3>
+                  </div>
+                </div>
+
+                <div className="mt-6 grid gap-4">
+                  {reassurancePoints.map((item) => (
+                    <details
+                      key={item.question}
+                      name="trust-clarity"
+                      className="group rounded-[24px] border border-white/75 bg-white/70 px-5 py-4 shadow-[0_10px_26px_rgba(143,71,43,0.05)] transition-colors open:bg-white/82"
+                    >
+                      <summary className="flex cursor-pointer list-none items-center justify-between gap-4">
+                        <p className="text-base font-medium leading-7 text-foreground">{item.question}</p>
+                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-secondary/20 bg-secondary/10 text-secondary-foreground transition-transform duration-200 group-open:rotate-180">
+                          <ChevronDown className="h-4 w-4" />
+                        </span>
+                      </summary>
+                      <p className="mt-3 pr-12 text-sm leading-7 text-muted-foreground sm:text-[0.95rem]">
+                        {item.answer}
+                      </p>
+                    </details>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+
         <section id="pricing" className="page-wrap scroll-mt-28 border-t border-white/55 py-10 sm:py-14 lg:py-18">
           <PricingPlans
             title="Start simply, then grow into richer media, more family access, and a deeper archive."
-            description="Start free with one meaningful vault, then upgrade when you want more media, milestone timing, and shared family access."
+            description="Start free with one meaningful vault, then upgrade when you want more storage, richer media, and family access."
             familyCheckoutEnabled={familyCheckoutEnabled}
             priceOverrides={priceOverrides}
           />
@@ -394,13 +547,16 @@ export default async function HomePage(props: HomePageProps) {
               <div>
                 <p className="text-sm uppercase tracking-[0.22em] text-white/60">Start preserving now</p>
                 <h2 className="mt-4 text-balance font-display text-4xl leading-tight sm:text-5xl">
-                  Start the vault your future family will be able to open, hear, and feel.
+                  Start building the family archive they will one day open, hear, and feel.
                 </h2>
+                <p className="mt-4 max-w-2xl text-base leading-8 text-white/80 sm:text-lg">
+                  Create your first private vault in minutes and start preserving what matters now.
+                </p>
               </div>
               <Button asChild size="lg" variant="secondary">
                 <Link href="/signup">
                   <Sparkles className="h-4 w-4" />
-                  Start free trial
+                  Start free
                 </Link>
               </Button>
             </CardContent>
@@ -411,4 +567,3 @@ export default async function HomePage(props: HomePageProps) {
     </div>
   );
 }
-
