@@ -25,10 +25,10 @@ export function getStripePriceId(planId: MembershipPlan["id"], currency: Currenc
     return env.STRIPE_PREMIUM_PRICE_ID_USD ?? env.STRIPE_PREMIUM_PRICE_ID;
   }
 
-  if (currency === "AUD") return env.STRIPE_FAMILY_PRICE_ID_AUD ?? env.STRIPE_FAMILY_PRICE_ID;
-  if (currency === "GBP") return env.STRIPE_FAMILY_PRICE_ID_GBP ?? env.STRIPE_FAMILY_PRICE_ID;
-  if (currency === "EUR") return env.STRIPE_FAMILY_PRICE_ID_EUR ?? env.STRIPE_FAMILY_PRICE_ID;
   if (planId === "family") {
+    if (currency === "AUD") return env.STRIPE_FAMILY_PRICE_ID_AUD ?? env.STRIPE_FAMILY_PRICE_ID;
+    if (currency === "GBP") return env.STRIPE_FAMILY_PRICE_ID_GBP ?? env.STRIPE_FAMILY_PRICE_ID;
+    if (currency === "EUR") return env.STRIPE_FAMILY_PRICE_ID_EUR ?? env.STRIPE_FAMILY_PRICE_ID;
     return env.STRIPE_FAMILY_PRICE_ID_USD ?? env.STRIPE_FAMILY_PRICE_ID;
   }
 
