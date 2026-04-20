@@ -106,6 +106,8 @@ export default async function FounderOfferPage() {
                             <form action={createCheckoutSessionAction}>
                               <input type="hidden" name="planId" value="lifetime" />
                               <input type="hidden" name="currency" value={detectedCurrency} />
+                              <input type="hidden" name="cancelPath" value="/founder-offer" />
+                              <input type="hidden" name="errorPath" value="/founder-offer" />
                               <Button className="h-12 w-full">
                                 Continue to founder checkout
                                 <ArrowRight className="h-4 w-4" />

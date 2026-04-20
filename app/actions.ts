@@ -434,8 +434,11 @@ export async function createCheckoutSessionAction(formData: FormData) {
   const { getCurrencyFromHeaders } = await import("@/lib/currency");
   const { createStripeCheckoutUrl } = await import("@/lib/mobile-billing");
 
+  const errorPathValue = String(formData.get("errorPath") ?? "").trim();
+  const errorPath = errorPathValue.startsWith("/") ? errorPathValue : "/settings";
+
   const redirectWithMessage = (message: string): never => {
-    return redirect(`/settings?billingError=${encodeURIComponent(message)}`);
+    return redirect(`${errorPath}?billingError=${encodeURIComponent(message)}`);
   };
 
   try {
@@ -443,12 +446,15 @@ export async function createCheckoutSessionAction(formData: FormData) {
     const requestedPlan = String(formData.get("planId") ?? "premium").toLowerCase();
     const selectedPlan = requestedPlan === "family" ? "family" : requestedPlan === "lifetime" ? "lifetime" : "premium";
     const currencyOverride = String(formData.get("currency") ?? "").trim().toUpperCase();
+    const cancelPathValue = String(formData.get("cancelPath") ?? "").trim();
+    const cancelPath = cancelPathValue.startsWith("/") ? cancelPathValue : undefined;
     const detectedCurrency = getCurrencyFromHeaders(await headers(), currencyOverride || null);
     const checkoutUrl = await createStripeCheckoutUrl({
       user,
       planId: selectedPlan,
       currency: detectedCurrency,
       returnMode: "web",
+      webCancelPath: cancelPath,
     });
     redirect(checkoutUrl);
   } catch (error) {
@@ -459,7 +465,7 @@ export async function createCheckoutSessionAction(formData: FormData) {
     }
 
     const message = error instanceof Error ? error.message : "Unable to start Stripe checkout.";
-    redirect(`/settings?billingError=${encodeURIComponent(message)}`);
+    redirectWithMessage(message);
   }
 }
 

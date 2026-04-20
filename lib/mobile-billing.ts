@@ -60,6 +60,7 @@ export async function createStripeCheckoutUrl(options: {
   planId: StripePlan;
   currency?: string | null;
   returnMode?: ReturnMode;
+  webCancelPath?: string;
 }) {
   if (!env.STRIPE_SECRET_KEY) {
     throw new Error("Stripe is not configured yet. Add STRIPE_SECRET_KEY first.");
@@ -148,7 +149,7 @@ export async function createStripeCheckoutUrl(options: {
   const cancelUrl =
     options.returnMode === "app"
       ? getMobileReturnTargets(cancelParams).hostedReturnUrl
-      : buildWebUrl("/dashboard", cancelParams);
+      : buildWebUrl(options.webCancelPath ?? "/dashboard", cancelParams);
 
   const session = await stripe.checkout.sessions.create({
     mode: selectedPlan === "lifetime" ? "payment" : "subscription",
