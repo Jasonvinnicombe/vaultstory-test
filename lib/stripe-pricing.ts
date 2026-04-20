@@ -14,7 +14,7 @@ function formatMoney(amount: number, currency: CurrencyCode) {
 }
 
 export function getStripePriceId(planId: MembershipPlan["id"], currency: CurrencyCode) {
-  if (planId !== "premium" && planId !== "family") {
+  if (planId !== "premium" && planId !== "family" && planId !== "lifetime") {
     return null;
   }
 
@@ -28,7 +28,14 @@ export function getStripePriceId(planId: MembershipPlan["id"], currency: Currenc
   if (currency === "AUD") return env.STRIPE_FAMILY_PRICE_ID_AUD ?? env.STRIPE_FAMILY_PRICE_ID;
   if (currency === "GBP") return env.STRIPE_FAMILY_PRICE_ID_GBP ?? env.STRIPE_FAMILY_PRICE_ID;
   if (currency === "EUR") return env.STRIPE_FAMILY_PRICE_ID_EUR ?? env.STRIPE_FAMILY_PRICE_ID;
-  return env.STRIPE_FAMILY_PRICE_ID_USD ?? env.STRIPE_FAMILY_PRICE_ID;
+  if (planId === "family") {
+    return env.STRIPE_FAMILY_PRICE_ID_USD ?? env.STRIPE_FAMILY_PRICE_ID;
+  }
+
+  if (currency === "AUD") return env.STRIPE_LIFETIME_PRICE_ID_AUD ?? env.STRIPE_LIFETIME_PRICE_ID;
+  if (currency === "GBP") return env.STRIPE_LIFETIME_PRICE_ID_GBP ?? env.STRIPE_LIFETIME_PRICE_ID;
+  if (currency === "EUR") return env.STRIPE_LIFETIME_PRICE_ID_EUR ?? env.STRIPE_LIFETIME_PRICE_ID;
+  return env.STRIPE_LIFETIME_PRICE_ID_USD ?? env.STRIPE_LIFETIME_PRICE_ID;
 }
 
 export async function getPlanPriceDisplay(planId: MembershipPlan["id"], currency: CurrencyCode) {
@@ -46,7 +53,7 @@ export async function getPlanPriceDisplay(planId: MembershipPlan["id"], currency
   }
 
   const formatted = formatMoney(price.unit_amount / 100, currency);
-  const cadence = price.recurring?.interval === "year" ? "/year" : "/month";
+  const cadence = price.recurring ? (price.recurring.interval === "year" ? "/year" : "/month") : "one-time";
   const result = { priceLabel: formatted, cadence };
   priceCache.set(priceId, result);
   return result;

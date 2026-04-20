@@ -50,11 +50,14 @@ export default async function SettingsPage(props: SettingsPageProps) {
   const currencyParam = typeof searchParams.currency === "string" ? searchParams.currency : null;
   const detectedCurrency = getCurrencyFromHeaders(await headers(), currencyParam);
   const familyCheckoutEnabled = Boolean(env.STRIPE_SECRET_KEY && getStripePriceId("family", detectedCurrency));
+  const lifetimeCheckoutEnabled = Boolean(env.STRIPE_SECRET_KEY && getStripePriceId("lifetime", detectedCurrency));
   const premiumDisplay = await getPlanPriceDisplay("premium", detectedCurrency);
   const familyDisplay = await getPlanPriceDisplay("family", detectedCurrency);
+  const lifetimeDisplay = await getPlanPriceDisplay("lifetime", detectedCurrency);
   const priceOverrides: Record<string, { priceLabel: string; cadence: string } | null> = {
     premium: premiumDisplay ?? null,
     family: familyDisplay ?? null,
+    lifetime: lifetimeDisplay ?? null,
   };
 
   return (
@@ -87,6 +90,7 @@ export default async function SettingsPage(props: SettingsPageProps) {
           billingSuccess={resolvedBillingSuccess}
           billingPlan={billingPlan}
           familyCheckoutEnabled={familyCheckoutEnabled}
+          lifetimeCheckoutEnabled={lifetimeCheckoutEnabled}
           priceOverrides={priceOverrides}
           currency={detectedCurrency}
         />

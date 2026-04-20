@@ -49,12 +49,38 @@ export function resolveEntitledPlan(plan?: string | null, status?: string | null
 export function getMembershipPlanForPrice(priceId?: string | null) {
   const { env } = require("@/lib/env") as typeof import("@/lib/env");
 
-  if (priceId && env.STRIPE_PREMIUM_PRICE_ID && priceId === env.STRIPE_PREMIUM_PRICE_ID) {
+  const premiumPriceIds = [
+    env.STRIPE_PREMIUM_PRICE_ID,
+    env.STRIPE_PREMIUM_PRICE_ID_AUD,
+    env.STRIPE_PREMIUM_PRICE_ID_USD,
+    env.STRIPE_PREMIUM_PRICE_ID_GBP,
+    env.STRIPE_PREMIUM_PRICE_ID_EUR,
+  ].filter(Boolean);
+  const familyPriceIds = [
+    env.STRIPE_FAMILY_PRICE_ID,
+    env.STRIPE_FAMILY_PRICE_ID_AUD,
+    env.STRIPE_FAMILY_PRICE_ID_USD,
+    env.STRIPE_FAMILY_PRICE_ID_GBP,
+    env.STRIPE_FAMILY_PRICE_ID_EUR,
+  ].filter(Boolean);
+  const lifetimePriceIds = [
+    env.STRIPE_LIFETIME_PRICE_ID,
+    env.STRIPE_LIFETIME_PRICE_ID_AUD,
+    env.STRIPE_LIFETIME_PRICE_ID_USD,
+    env.STRIPE_LIFETIME_PRICE_ID_GBP,
+    env.STRIPE_LIFETIME_PRICE_ID_EUR,
+  ].filter(Boolean);
+
+  if (priceId && premiumPriceIds.includes(priceId)) {
     return "premium";
   }
 
-  if (priceId && env.STRIPE_FAMILY_PRICE_ID && priceId === env.STRIPE_FAMILY_PRICE_ID) {
+  if (priceId && familyPriceIds.includes(priceId)) {
     return "family";
+  }
+
+  if (priceId && lifetimePriceIds.includes(priceId)) {
+    return "lifetime";
   }
 
   return "free";
@@ -116,7 +142,7 @@ export function getPlanStorageQuotaGb(plan?: string | null, status?: string | nu
     case "family":
       return 100;
     case "lifetime":
-      return Number.POSITIVE_INFINITY;
+      return 50;
     default:
       return 1;
   }
@@ -159,7 +185,7 @@ export function getFamilyMemberLimit(plan?: string | null, status?: string | nul
   }
 
   if (entitledPlan === "lifetime") {
-    return Number.POSITIVE_INFINITY;
+    return FAMILY_MEMBER_LIMIT;
   }
 
   return 0;
@@ -202,11 +228,11 @@ export function getRichMediaUpgradeMessage() {
 }
 
 export function getFamilyInviteUpgradeMessage() {
-  return "Family invites are available on the Family plan.";
+  return "Family invites are available on the Family or Founder Lifetime plan.";
 }
 
 export function getFamilyMemberLimitMessage() {
-  return `Family includes up to ${FAMILY_MEMBER_LIMIT} people per vault. Remove a member or pending invite before adding another.`;
+  return `Family and Founder Lifetime include up to ${FAMILY_MEMBER_LIMIT} people per vault. Remove a member or pending invite before adding another.`;
 }
 
 export function getMilestoneUnlockUpgradeMessage() {
@@ -289,6 +315,31 @@ export async function syncProfileBillingFromSubscription(options: {
   }
 }
 
+export async function syncProfileBillingFromLifetimeCheckout(options: {
+  userId: string;
+  customerId?: string | null;
+  priceId?: string | null;
+}) {
+  const { supabaseAdmin } = await import("@/lib/supabase/admin");
+
+  const { error } = await supabaseAdmin
+    .from("profiles")
+    .update({
+      membership_plan: "lifetime",
+      membership_status: "active",
+      stripe_customer_id: options.customerId ?? null,
+      stripe_subscription_id: null,
+      stripe_price_id: options.priceId ?? null,
+      stripe_current_period_end: null,
+      downgrade_grace_until: null,
+    })
+    .eq("id", options.userId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+}
+
 export async function syncProfileBillingFromCanceledSubscription(customerId: string, subscriptionId: string) {
   const { supabaseAdmin } = await import("@/lib/supabase/admin");
 
@@ -322,10 +373,6 @@ export async function verifyCheckoutSessionAndSync(options: {
     expand: ["subscription"],
   });
 
-  if (session.mode !== "subscription") {
-    throw new Error("Stripe returned a non-subscription checkout session.");
-  }
-
   if (session.status !== "complete") {
     throw new Error("Stripe checkout has not completed yet.");
   }
@@ -336,19 +383,6 @@ export async function verifyCheckoutSessionAndSync(options: {
   }
 
   const customerId = typeof session.customer === "string" ? session.customer : null;
-  const subscription = typeof session.subscription === "string"
-    ? await stripe.subscriptions.retrieve(session.subscription)
-    : session.subscription;
-
-  if (!subscription) {
-    throw new Error("Stripe checkout completed without a subscription to sync.");
-  }
-
-  const expectedPlan = normalizeMembershipPlan(options.expectedPlan);
-  const actualPlan = getMembershipPlanForPrice(subscription.items.data[0]?.price?.id ?? null);
-  if (expectedPlan !== "free" && actualPlan !== expectedPlan) {
-    throw new Error(`Stripe returned a ${getMembershipLabel(actualPlan)} subscription instead of ${getMembershipLabel(expectedPlan)}.`);
-  }
 
   if (customerId) {
     const { data: profile } = await supabaseAdmin
@@ -365,6 +399,49 @@ export async function verifyCheckoutSessionAndSync(options: {
         stripeCustomerId: customerId,
       });
     }
+  }
+
+  const expectedPlan = normalizeMembershipPlan(options.expectedPlan);
+
+  if (session.mode === "payment") {
+    const actualPlan = normalizeMembershipPlan(session.metadata?.membershipPlan ?? "free");
+    const priceId = session.metadata?.stripePriceId ?? null;
+
+    if (actualPlan !== "lifetime") {
+      throw new Error("Stripe returned a non-lifetime one-time checkout.");
+    }
+
+    if (expectedPlan !== "free" && actualPlan !== expectedPlan) {
+      throw new Error(`Stripe returned a ${getMembershipLabel(actualPlan)} checkout instead of ${getMembershipLabel(expectedPlan)}.`);
+    }
+
+    await syncProfileBillingFromLifetimeCheckout({
+      userId: options.userId,
+      customerId,
+      priceId,
+    });
+
+    return {
+      membershipPlan: actualPlan,
+      membershipStatus: "active",
+    };
+  }
+
+  if (session.mode !== "subscription") {
+    throw new Error("Stripe returned an unsupported checkout mode.");
+  }
+
+  const subscription = typeof session.subscription === "string"
+    ? await stripe.subscriptions.retrieve(session.subscription)
+    : session.subscription;
+
+  if (!subscription) {
+    throw new Error("Stripe checkout completed without a subscription to sync.");
+  }
+
+  const actualPlan = getMembershipPlanForPrice(subscription.items.data[0]?.price?.id ?? null);
+  if (expectedPlan !== "free" && actualPlan !== expectedPlan) {
+    throw new Error(`Stripe returned a ${getMembershipLabel(actualPlan)} subscription instead of ${getMembershipLabel(expectedPlan)}.`);
   }
 
   await syncProfileBillingFromSubscription({

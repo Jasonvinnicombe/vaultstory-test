@@ -15,7 +15,7 @@ export async function POST(request: Request) {
     }
 
     const body = (await request.json()) as { planId?: string; currency?: string | null };
-    const planId = body.planId === "family" ? "family" : "premium";
+    const planId = body.planId === "family" ? "family" : body.planId === "lifetime" ? "lifetime" : "premium";
     const url = await createStripeCheckoutUrl({
       user,
       planId,

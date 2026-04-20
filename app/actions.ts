@@ -441,7 +441,7 @@ export async function createCheckoutSessionAction(formData: FormData) {
   try {
     const { user } = await requireAuthenticatedUser();
     const requestedPlan = String(formData.get("planId") ?? "premium").toLowerCase();
-    const selectedPlan = requestedPlan === "family" ? "family" : "premium";
+    const selectedPlan = requestedPlan === "family" ? "family" : requestedPlan === "lifetime" ? "lifetime" : "premium";
     const currencyOverride = String(formData.get("currency") ?? "").trim().toUpperCase();
     const detectedCurrency = getCurrencyFromHeaders(await headers(), currencyOverride || null);
     const checkoutUrl = await createStripeCheckoutUrl({

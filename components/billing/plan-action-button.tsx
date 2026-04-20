@@ -24,7 +24,7 @@ export function PlanActionButton(props: {
   const [nativeLoading, setNativeLoading] = useState(false);
   const [nativeError, setNativeError] = useState<string | null>(null);
   const variant = props.highlight ? "secondary" : "default";
-  const isStripePlan = props.planId === "premium" || props.planId === "family";
+  const isStripePlan = props.planId === "premium" || props.planId === "family" || props.planId === "lifetime";
 
   useEffect(() => {
     setIsNativeApp(Capacitor.isNativePlatform());

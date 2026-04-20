@@ -160,8 +160,10 @@ Stripe powers Premium, Family, and billing management. The app is ready for live
    - `STRIPE_SECRET_KEY` using your live secret key (`sk_live_...`)
    - `STRIPE_WEBHOOK_SECRET` from the live webhook endpoint (`whsec_...`)
    - `STRIPE_PREMIUM_PRICE_ID` and `STRIPE_FAMILY_PRICE_ID` for default live prices
+   - `STRIPE_LIFETIME_PRICE_ID` for the founder lifetime one-time price
    - Optional overrides: `STRIPE_PREMIUM_PRICE_ID_AUD`, `STRIPE_PREMIUM_PRICE_ID_USD`, `STRIPE_PREMIUM_PRICE_ID_GBP`, `STRIPE_PREMIUM_PRICE_ID_EUR`
    - Optional overrides: `STRIPE_FAMILY_PRICE_ID_AUD`, `STRIPE_FAMILY_PRICE_ID_USD`, `STRIPE_FAMILY_PRICE_ID_GBP`, `STRIPE_FAMILY_PRICE_ID_EUR`
+   - Optional overrides: `STRIPE_LIFETIME_PRICE_ID_AUD`, `STRIPE_LIFETIME_PRICE_ID_USD`, `STRIPE_LIFETIME_PRICE_ID_GBP`, `STRIPE_LIFETIME_PRICE_ID_EUR`
 3. In Stripe live mode, add a webhook endpoint pointing to:
    - `/api/stripe/webhooks`
 4. Subscribe the live webhook to:
@@ -175,6 +177,7 @@ Stripe powers Premium, Family, and billing management. The app is ready for live
 
 What the integration does:
 - Premium and Family checkout from pricing/settings
+- Founder Lifetime one-time checkout from pricing/settings
 - Billing portal access for current paid members
 - Profile sync of membership plan, status, customer id, subscription id, and renewal period
 

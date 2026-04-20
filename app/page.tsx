@@ -18,6 +18,7 @@ import {
 
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
+import { FounderOfferPopup } from "@/components/marketing/founder-offer-popup";
 import { LandingHero, LandingProductPreview } from "@/components/marketing/landing-hero";
 import { PricingPlans } from "@/components/marketing/pricing-plans";
 import { Badge } from "@/components/ui/badge";
@@ -244,11 +245,14 @@ export default async function HomePage(props: HomePageProps) {
   const detectedCurrency = getCurrencyFromHeaders(await headers(), currencyParam);
   const premiumDisplay = await getPlanPriceDisplay("premium", detectedCurrency);
   const familyDisplay = await getPlanPriceDisplay("family", detectedCurrency);
+  const lifetimeDisplay = await getPlanPriceDisplay("lifetime", detectedCurrency);
   const priceOverrides = {
     premium: premiumDisplay ?? undefined,
     family: familyDisplay ?? undefined,
+    lifetime: lifetimeDisplay ?? undefined,
   };
   const familyCheckoutEnabled = Boolean(getStripePriceId("family", detectedCurrency));
+  const lifetimeCheckoutEnabled = Boolean(getStripePriceId("lifetime", detectedCurrency));
   const organizationSchema = {
     "@context": "https://schema.org",
     "@type": "Organization",
@@ -264,6 +268,7 @@ export default async function HomePage(props: HomePageProps) {
 
   return (
     <div className="grain min-h-screen overflow-x-hidden">
+      <FounderOfferPopup enabled={lifetimeCheckoutEnabled} currency={detectedCurrency} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
@@ -537,6 +542,7 @@ export default async function HomePage(props: HomePageProps) {
             title="Start simply, then grow into richer media, more family access, and a deeper archive."
             description="Start free with one meaningful vault, then upgrade when you want more storage, richer media, and family access."
             familyCheckoutEnabled={familyCheckoutEnabled}
+            lifetimeCheckoutEnabled={lifetimeCheckoutEnabled}
             priceOverrides={priceOverrides}
           />
         </section>

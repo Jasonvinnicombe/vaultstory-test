@@ -79,6 +79,24 @@ export const MEMBERSHIP_PLANS: MembershipPlan[] = [
     ctaHref: "/signup?plan=family",
     badge: "Best for families",
   },
+  {
+    id: "lifetime",
+    name: "Founder",
+    priceLabel: "$99",
+    cadence: "one-time",
+    description: "A limited founder offer for families who want to lock in shared vault access for life with a 50GB archive cap.",
+    features: [
+      "One-time payment",
+      "Unlimited family vaults",
+      "Up to 6 family members",
+      "50GB lifetime storage cap",
+      "Video, voice, and milestone unlocks",
+      "Founder pricing while it lasts",
+    ],
+    ctaLabel: "Claim founder offer",
+    ctaHref: "/signup?plan=lifetime",
+    badge: "Founder offer",
+  },
 ];
 
 export const PLAN_COMPARISON_ROWS: PlanComparisonRow[] = [
@@ -97,7 +115,7 @@ export const PLAN_COMPARISON_ROWS: PlanComparisonRow[] = [
       free: "1 vault",
       premium: "Unlimited",
       family: "Shared family vaults",
-      lifetime: "Legacy archive",
+      lifetime: "Unlimited family vaults",
     },
   },
   {
@@ -106,7 +124,7 @@ export const PLAN_COMPARISON_ROWS: PlanComparisonRow[] = [
       free: "1GB",
       premium: "50GB",
       family: "100GB",
-      lifetime: "Lifetime storage",
+      lifetime: "50GB max",
     },
   },
   {
@@ -160,7 +178,7 @@ export const PLAN_COMPARISON_ROWS: PlanComparisonRow[] = [
       free: "No",
       premium: "No",
       family: "Up to 6 members",
-      lifetime: "Included",
+      lifetime: "Up to 6 members",
     },
   },
   {

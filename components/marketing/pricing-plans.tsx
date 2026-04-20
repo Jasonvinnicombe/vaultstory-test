@@ -12,11 +12,13 @@ export function PricingPlans(props: {
   currentPlan?: string | null;
   isAuthenticated?: boolean;
   familyCheckoutEnabled?: boolean;
+  lifetimeCheckoutEnabled?: boolean;
   priceOverrides?: Partial<Record<MembershipPlan["id"], { priceLabel: string; cadence: string }>>;
   currency?: string;
 }) {
   const title = props.title ?? "Choose the membership that fits how your family preserves memories.";
   const description = props.description ?? "Start free, then move up when you want richer media, milestone unlocks, and shared family access.";
+  const visiblePlans = MEMBERSHIP_PLANS.filter((plan) => plan.id !== "lifetime" || props.lifetimeCheckoutEnabled);
 
   return (
     <div className="space-y-8">
@@ -26,9 +28,10 @@ export function PricingPlans(props: {
         <p className="text-base leading-8 text-muted-foreground sm:text-lg">{description}</p>
       </div>
 
-      <div className={props.compact ? "grid gap-4 lg:grid-cols-2" : "grid gap-4 md:grid-cols-3"}>
-        {MEMBERSHIP_PLANS.map((plan) => {
-          const isCurrent = props.currentPlan?.toLowerCase() === plan.name.toLowerCase();
+      <div className={props.compact ? "grid gap-4 lg:grid-cols-2" : "grid gap-4 md:grid-cols-2 xl:grid-cols-4"}>
+        {visiblePlans.map((plan) => {
+          const normalizedCurrentPlan = props.currentPlan?.toLowerCase();
+          const isCurrent = normalizedCurrentPlan === plan.name.toLowerCase() || normalizedCurrentPlan === plan.id;
           const override = props.priceOverrides?.[plan.id];
           const priceLabel = override?.priceLabel ?? plan.priceLabel;
           const cadence = override?.cadence ?? plan.cadence;
@@ -86,7 +89,7 @@ export function PricingPlans(props: {
                     isCurrent={isCurrent}
                     isAuthenticated={props.isAuthenticated ?? false}
                     highlight={plan.highlight}
-                    checkoutEnabled={plan.id === "family" ? props.familyCheckoutEnabled : plan.id === "premium"}
+                    checkoutEnabled={plan.id === "family" ? props.familyCheckoutEnabled : plan.id === "premium" || plan.id === "lifetime"}
                     currency={props.currency}
                   />
                 </div>

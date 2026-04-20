@@ -3,6 +3,7 @@ import { Check, LockKeyhole, Sparkles, Users, X } from "lucide-react";
 
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
+import { FounderOfferPopup } from "@/components/marketing/founder-offer-popup";
 import { PricingPlans } from "@/components/marketing/pricing-plans";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -79,15 +80,19 @@ export default async function PricingPage(props: PricingPageProps) {
   const currencyParam = typeof searchParams.currency === "string" ? searchParams.currency : null;
   const detectedCurrency = getCurrencyFromHeaders(await headers(), currencyParam);
   const familyCheckoutEnabled = Boolean(env.STRIPE_SECRET_KEY && getStripePriceId("family", detectedCurrency));
+  const lifetimeCheckoutEnabled = Boolean(env.STRIPE_SECRET_KEY && getStripePriceId("lifetime", detectedCurrency));
   const premiumDisplay = await getPlanPriceDisplay("premium", detectedCurrency);
   const familyDisplay = await getPlanPriceDisplay("family", detectedCurrency);
+  const lifetimeDisplay = await getPlanPriceDisplay("lifetime", detectedCurrency);
   const priceOverrides = {
     premium: premiumDisplay ?? undefined,
     family: familyDisplay ?? undefined,
+    lifetime: lifetimeDisplay ?? undefined,
   };
 
   return (
     <div className="grain min-h-screen overflow-x-hidden">
+      <FounderOfferPopup enabled={lifetimeCheckoutEnabled} isAuthenticated={Boolean(user)} currentPlan={profile?.membership_plan ?? null} currency={detectedCurrency} />
       <SiteHeader />
       <main>
         <section className="page-wrap section-space">
@@ -124,8 +129,9 @@ export default async function PricingPage(props: PricingPageProps) {
             currentPlan={currentPlan}
             isAuthenticated={Boolean(user)}
             familyCheckoutEnabled={familyCheckoutEnabled}
+            lifetimeCheckoutEnabled={lifetimeCheckoutEnabled}
             title="Membership plans"
-            description={familyCheckoutEnabled ? "Premium and Family are both ready to run through Stripe. Choose the plan that fits how many people will care for the archive together." : "Premium is live through Stripe today. Family is fully modelled in-product and can be switched on as soon as its Stripe price id is configured."}
+            description={lifetimeCheckoutEnabled ? "Premium, Family, and the limited Founder Lifetime offer are ready to run through Stripe. Choose the plan that fits how your archive should grow." : familyCheckoutEnabled ? "Premium and Family are both ready to run through Stripe. Choose the plan that fits how many people will care for the archive together." : "Premium is live through Stripe today. Family is fully modelled in-product and can be switched on as soon as its Stripe price id is configured."}
             priceOverrides={priceOverrides}
             currency={detectedCurrency}
           />

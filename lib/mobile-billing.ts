@@ -8,7 +8,7 @@ import { getStripe } from "@/lib/stripe";
 import { createClient } from "@/lib/supabase/server";
 
 type ReturnMode = "web" | "app";
-type StripePlan = "premium" | "family";
+type StripePlan = "premium" | "family" | "lifetime";
 
 const MOBILE_RETURN_BASE_URL = "app.vaultstory.mobile://billing-return";
 
@@ -73,7 +73,9 @@ export async function createStripeCheckoutUrl(options: {
     throw new Error(
       selectedPlan === "family"
         ? `Family checkout is not configured yet for ${currencyCode}.`
-        : `Premium checkout is not configured yet for ${currencyCode}.`,
+        : selectedPlan === "lifetime"
+          ? `Founder Lifetime checkout is not configured yet for ${currencyCode}.`
+          : `Premium checkout is not configured yet for ${currencyCode}.`,
     );
   }
 
@@ -96,10 +98,13 @@ export async function createStripeCheckoutUrl(options: {
   }
 
   if (profile?.membership_plan === selectedPlan) {
-    throw new Error(`Your account is already on ${selectedPlan === "family" ? "Family" : "Premium"}.`);
+    throw new Error(`Your account is already on ${selectedPlan === "family" ? "Family" : selectedPlan === "lifetime" ? "Founder Lifetime" : "Premium"}.`);
   }
 
   if (profile?.membership_plan && profile.membership_plan !== "free") {
+    if (selectedPlan === "lifetime") {
+      throw new Error("Founder Lifetime is only available from free accounts right now. Contact support if you need help switching from an active paid plan.");
+    }
     throw new Error("Plan changes for existing paid memberships should go through billing management.");
   }
 
@@ -146,7 +151,7 @@ export async function createStripeCheckoutUrl(options: {
       : buildWebUrl("/dashboard", cancelParams);
 
   const session = await stripe.checkout.sessions.create({
-    mode: "subscription",
+    mode: selectedPlan === "lifetime" ? "payment" : "subscription",
     customer: customerId,
     client_reference_id: options.user.id,
     success_url: successUrl,
@@ -162,14 +167,19 @@ export async function createStripeCheckoutUrl(options: {
     metadata: {
       supabaseUserId: options.user.id,
       membershipPlan: selectedPlan,
+      stripePriceId: selectedPriceId,
     },
-    subscription_data: {
-      trial_period_days: 7,
-      metadata: {
-        supabaseUserId: options.user.id,
-        membershipPlan: selectedPlan,
-      },
-    },
+    ...(selectedPlan === "lifetime"
+      ? {}
+      : {
+          subscription_data: {
+            trial_period_days: 7,
+            metadata: {
+              supabaseUserId: options.user.id,
+              membershipPlan: selectedPlan,
+            },
+          },
+        }),
   });
 
   if (!session.url) {

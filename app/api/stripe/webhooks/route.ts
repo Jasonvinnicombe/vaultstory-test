@@ -1,22 +1,16 @@
 import Stripe from "stripe";
 import { NextRequest, NextResponse } from "next/server";
 
-import { syncProfileBillingFromCanceledSubscription, syncProfileBillingFromSubscription, upsertStripeCustomer } from "@/lib/billing";
+import { syncProfileBillingFromCanceledSubscription, syncProfileBillingFromLifetimeCheckout, syncProfileBillingFromSubscription, upsertStripeCustomer } from "@/lib/billing";
 import { getStripe } from "@/lib/stripe";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
-  if (session.mode !== "subscription") {
-    return;
-  }
-
   const userId = session.client_reference_id ?? session.metadata?.supabaseUserId ?? null;
   const customerId = typeof session.customer === "string" ? session.customer : null;
-  const subscriptionId = typeof session.subscription === "string" ? session.subscription : null;
-
-  if (!customerId || !subscriptionId) {
+  if (!customerId) {
     return;
   }
 
@@ -35,6 +29,24 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
         stripeCustomerId: customerId,
       });
     }
+  }
+
+  if (session.mode === "payment") {
+    if (!userId || session.metadata?.membershipPlan !== "lifetime") {
+      return;
+    }
+
+    await syncProfileBillingFromLifetimeCheckout({
+      userId,
+      customerId,
+      priceId: session.metadata?.stripePriceId ?? null,
+    });
+    return;
+  }
+
+  const subscriptionId = typeof session.subscription === "string" ? session.subscription : null;
+  if (!subscriptionId) {
+    return;
   }
 
   const stripe = getStripe();

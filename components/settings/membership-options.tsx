@@ -13,17 +13,22 @@ export function MembershipOptions(props: {
   billingSuccess?: string | null;
   billingPlan?: string | null;
   familyCheckoutEnabled?: boolean;
+  lifetimeCheckoutEnabled?: boolean;
   priceOverrides?: Record<string, { priceLabel: string; cadence: string } | null>;
   currency?: string;
 }) {
   const hasBillingSuccess = props.billingSuccess === "1";
-  const planLabel = props.billingPlan === "family" ? "Family" : "Premium";
-  const headingCopy = props.familyCheckoutEnabled
-    ? "Premium and Family checkout are both live through Stripe today."
-    : "Premium checkout is live today, and Family will use Stripe once its price id is configured.";
-  const currentMembershipCopy = props.familyCheckoutEnabled
-    ? "Premium and Family both use the same Stripe billing flow, and your access updates as soon as checkout is confirmed."
-    : "Premium is fully wired today. Family checkout will use the same Stripe flow as soon as the Family price id is configured in the environment.";
+  const planLabel = props.billingPlan === "family" ? "Family" : props.billingPlan === "lifetime" ? "Founder Lifetime" : "Premium";
+  const headingCopy = props.lifetimeCheckoutEnabled
+    ? "Premium, Family, and the Founder Lifetime offer are all live through Stripe today."
+    : props.familyCheckoutEnabled
+      ? "Premium and Family checkout are both live through Stripe today."
+      : "Premium checkout is live today, and Family will use Stripe once its price id is configured.";
+  const currentMembershipCopy = props.lifetimeCheckoutEnabled
+    ? "Premium and Family use subscriptions, while Founder Lifetime is a one-time checkout that grants lifetime access with a 50GB storage cap."
+    : props.familyCheckoutEnabled
+      ? "Premium and Family both use the same Stripe billing flow, and your access updates as soon as checkout is confirmed."
+      : "Premium is fully wired today. Family checkout will use the same Stripe flow as soon as the Family price id is configured in the environment.";
 
   return (
     <Card className="overflow-hidden border-white/60 bg-card/88 shadow-[0_26px_80px_rgba(66,46,31,0.12)]">
@@ -72,8 +77,9 @@ export function MembershipOptions(props: {
             currentPlan={props.currentPlan ?? "Free"}
             isAuthenticated
             familyCheckoutEnabled={props.familyCheckoutEnabled ?? false}
+            lifetimeCheckoutEnabled={props.lifetimeCheckoutEnabled ?? false}
             title="Membership options"
-            description="Start free, upgrade to Premium now, and use Family when you need shared vault care across a household."
+            description={props.lifetimeCheckoutEnabled ? "Start free, upgrade to Premium or Family when you need more depth, or claim the Founder Lifetime offer for one-time family access with a 50GB cap." : "Start free, upgrade to Premium now, and use Family when you need shared vault care across a household."}
             priceOverrides={props.priceOverrides ?? undefined}
             currency={props.currency}
           />
