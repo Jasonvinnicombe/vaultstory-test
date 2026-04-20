@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { ArrowRight, HeartHandshake, Gem, ShieldCheck, Users } from "lucide-react";
 
 import { createCheckoutSessionAction } from "@/app/actions";
@@ -9,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { getUser } from "@/lib/auth";
 import { getCurrencyFromHeaders } from "@/lib/currency";
+import { createStripeCheckoutUrl } from "@/lib/mobile-billing";
 import { getPlanPriceDisplay, getStripePriceId } from "@/lib/stripe-pricing";
 import { headers } from "next/headers";
 
@@ -30,12 +32,39 @@ const founderPoints = [
   },
 ];
 
-export default async function FounderOfferPage() {
+type FounderOfferSearchParams = Record<string, string | string[] | undefined>;
+
+function getSearchValue(value: string | string[] | undefined) {
+  return typeof value === "string" ? value : null;
+}
+
+export default async function FounderOfferPage(props: {
+  searchParams?: Promise<FounderOfferSearchParams>;
+}) {
   const user = await getUser();
   const isAuthenticated = Boolean(user);
-  const detectedCurrency = getCurrencyFromHeaders(await headers(), null);
+  const [requestHeaders, searchParams] = await Promise.all([
+    headers(),
+    props.searchParams ?? Promise.resolve({}),
+  ]);
+  const detectedCurrency = getCurrencyFromHeaders(requestHeaders, null);
   const founderDisplay = await getPlanPriceDisplay("lifetime", detectedCurrency);
   const founderCheckoutEnabled = Boolean(getStripePriceId("lifetime", detectedCurrency));
+  const autoCheckout = getSearchValue(searchParams.checkout) === "1";
+  const billingCanceled = getSearchValue(searchParams.billingCanceled) === "1";
+  const billingError = getSearchValue(searchParams.billingError);
+  const founderAuthNext = "/founder-offer?checkout=1";
+
+  if (user && founderCheckoutEnabled && autoCheckout && !billingCanceled && !billingError) {
+    const checkoutUrl = await createStripeCheckoutUrl({
+      user,
+      planId: "lifetime",
+      currency: detectedCurrency,
+      returnMode: "web",
+      webCancelPath: "/founder-offer",
+    });
+    redirect(checkoutUrl);
+  }
 
   return (
     <div className="grain min-h-screen overflow-x-hidden">
@@ -125,13 +154,13 @@ export default async function FounderOfferPage() {
                       ) : (
                         <>
                           <Button asChild className="h-12 w-full">
-                            <Link href="/signup?plan=lifetime">
+                            <Link href={`/signup?plan=lifetime&next=${encodeURIComponent(founderAuthNext)}`}>
                               Create account to claim founder offer
                               <ArrowRight className="h-4 w-4" />
                             </Link>
                           </Button>
                           <Button asChild variant="outline" className="h-12 w-full">
-                            <Link href="/login?next=/founder-offer">Already have an account? Log in</Link>
+                            <Link href={`/login?next=${encodeURIComponent(founderAuthNext)}`}>Already have an account? Log in</Link>
                           </Button>
                         </>
                       )}

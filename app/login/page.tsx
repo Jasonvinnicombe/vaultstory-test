@@ -3,7 +3,13 @@ import Link from "next/link";
 import { AuthForm } from "@/components/forms/auth-form";
 import { Badge } from "@/components/ui/badge";
 
-export default function LoginPage() {
+export default async function LoginPage(props: {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const searchParams = props.searchParams ? await props.searchParams : {};
+  const nextPath = typeof searchParams.next === "string" ? searchParams.next : null;
+  const signupHref = nextPath ? `/signup?next=${encodeURIComponent(nextPath)}` : "/signup";
+
   return (
     <main className="mx-auto flex min-h-screen max-w-7xl items-center px-6 py-16 lg:px-8">
       <div className="grid w-full gap-12 lg:grid-cols-[0.95fr_0.8fr] lg:items-center">
@@ -17,7 +23,7 @@ export default function LoginPage() {
           </p>
           <p className="mt-8 text-sm text-muted-foreground">
             New here?{" "}
-            <Link href="/signup" className="text-primary underline-offset-4 hover:underline">
+            <Link href={signupHref} className="text-primary underline-offset-4 hover:underline">
               Create an account
             </Link>
           </p>
