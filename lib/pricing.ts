@@ -84,18 +84,18 @@ export const MEMBERSHIP_PLANS: MembershipPlan[] = [
     name: "Founder",
     priceLabel: "$99",
     cadence: "one-time",
-    description: "A limited founder offer for families who want to lock in shared vault access for life with a 50GB archive cap.",
+    description: "Limited time only: lock in shared vault access for life with a 50GB archive cap.",
     features: [
       "One-time payment",
       "Unlimited family vaults",
       "Up to 6 family members",
       "50GB lifetime storage cap",
       "Video, voice, and milestone unlocks",
-      "Founder pricing while it lasts",
+      "Limited time founder pricing",
     ],
     ctaLabel: "Claim founder offer",
     ctaHref: "/signup?plan=lifetime",
-    badge: "Founder offer",
+    badge: "Limited time only",
   },
 ];
 

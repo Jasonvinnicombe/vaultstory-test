@@ -35,6 +35,7 @@ export function PricingPlans(props: {
           const override = props.priceOverrides?.[plan.id];
           const priceLabel = override?.priceLabel ?? plan.priceLabel;
           const cadence = override?.cadence ?? plan.cadence;
+          const isFounderOffer = plan.id === "lifetime";
 
           return (
             <Card
@@ -63,6 +64,16 @@ export function PricingPlans(props: {
                   <span className={`font-display text-4xl ${plan.highlight ? "text-white" : "text-foreground"}`}>{priceLabel}</span>
                   <span className={plan.highlight ? "pb-1 text-white/62" : "pb-1 text-muted-foreground"}>{cadence}</span>
                 </div>
+                {isFounderOffer ? (
+                  <div className="mt-4 rounded-[22px] border border-primary/18 bg-primary/8 px-4 py-3">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+                      Limited time only
+                    </p>
+                    <p className="mt-1 text-sm leading-6 text-foreground/82">
+                      This one-time founder price is available for a limited launch window and may be removed when standard pricing takes over.
+                    </p>
+                  </div>
+                ) : null}
                 {plan.annualLabel ? (
                   <p className={`mt-2 text-sm ${plan.highlight ? "text-white/88" : "text-muted-foreground"}`}>{plan.annualLabel}</p>
                 ) : null}
