@@ -66,11 +66,8 @@ export function PricingPlans(props: {
                 </div>
                 {isFounderOffer ? (
                   <div className="mt-4 rounded-[22px] border border-primary/18 bg-primary/8 px-4 py-3">
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+                    <p className="text-sm font-bold uppercase tracking-[0.2em] text-primary">
                       Limited time only
-                    </p>
-                    <p className="mt-1 text-sm leading-6 text-foreground/82">
-                      This one-time founder price is available for a limited launch window and may be removed when standard pricing takes over.
                     </p>
                   </div>
                 ) : null}
