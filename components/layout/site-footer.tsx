@@ -18,10 +18,14 @@ const footerGroups = [
   {
     title: "Vault uses",
     links: [
+      { href: "/family-memory-vault", label: "Family memory vault" },
+      { href: "/digital-time-capsule", label: "Digital time capsule" },
+      { href: "/legacy-messages", label: "Legacy messages" },
+      { href: "/future-messages-for-family", label: "Future family messages" },
+      { href: "/voice-messages-for-loved-ones", label: "Voice messages" },
       { href: "/vault-uses#ages", label: "Age milestones" },
       { href: "/vault-uses#life", label: "Life milestones" },
       { href: "/vault-uses#family-legacy", label: "Family legacy" },
-      { href: "/vault-uses#personal-journaling", label: "Personal journaling" },
     ],
   },
   {
