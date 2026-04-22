@@ -15,6 +15,7 @@ const publicRoutes = [
   { path: "/reviews", priority: 0.75 },
   { path: "/founder-offer", priority: 0.7 },
   { path: "/support", priority: 0.55 },
+  { path: "/security", priority: 0.5 },
   { path: "/privacy", priority: 0.35 },
   { path: "/terms", priority: 0.35 },
 ];
