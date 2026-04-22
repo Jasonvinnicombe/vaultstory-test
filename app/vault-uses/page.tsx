@@ -10,12 +10,29 @@ import {
   Video,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import type { Metadata } from "next";
 
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { SITE_URL } from "@/lib/site";
+
+export const metadata: Metadata = {
+  title: "Vault Uses | Digital Time Capsule Ideas for Families",
+  description:
+    "Explore ways to use Vault Story for age milestones, family legacy, future-self notes, wedding messages, voice memories, photo stories, and private family archives.",
+  alternates: {
+    canonical: "/vault-uses",
+  },
+  openGraph: {
+    title: "Vault Story Use Cases",
+    description:
+      "Digital time capsule ideas for family legacy, age milestones, future messages, voice memories, photo stories, and private archives.",
+    url: `${SITE_URL}/vault-uses`,
+  },
+};
 
 const vaultUses = [
   {

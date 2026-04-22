@@ -3,10 +3,21 @@ import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | Vault Story",
-  description: "Privacy policy for Vault Story.",
+  title: "Privacy Policy",
+  description:
+    "Read the Vault Story privacy policy for private family memory vaults, account data, media uploads, storage, security, and third-party services.",
+  alternates: {
+    canonical: "/privacy",
+  },
+  openGraph: {
+    title: "Vault Story Privacy Policy",
+    description:
+      "Privacy details for private family memory vaults, account data, media uploads, storage, security, and third-party services.",
+    url: `${SITE_URL}/privacy`,
+  },
 };
 
 const sections = [

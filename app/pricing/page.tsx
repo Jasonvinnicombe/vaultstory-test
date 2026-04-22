@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { Check, LockKeyhole, Sparkles, Users, X } from "lucide-react";
+import type { Metadata } from "next";
 
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { FounderOfferPopup } from "@/components/marketing/founder-offer-popup";
 import { PricingPlans } from "@/components/marketing/pricing-plans";
+import { JsonLd } from "@/components/seo/json-ld";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,12 +15,28 @@ import { getUser } from "@/lib/auth";
 import { getCurrencyFromHeaders } from "@/lib/currency";
 import { env } from "@/lib/env";
 import { MEMBERSHIP_PLANS, PLAN_COMPARISON_ROWS } from "@/lib/pricing";
+import { SITE_NAME, SITE_URL } from "@/lib/site";
 import { getPlanPriceDisplay, getStripePriceId } from "@/lib/stripe-pricing";
 import { createClient } from "@/lib/supabase/server";
 import { headers } from "next/headers";
 import type { Database } from "@/types/database";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Pricing | Family Memory Vault Plans",
+  description:
+    "Compare Vault Story pricing for private family memory vaults, digital time capsules, timed unlocks, video memories, voice notes, and family access.",
+  alternates: {
+    canonical: "/pricing",
+  },
+  openGraph: {
+    title: "Vault Story Pricing",
+    description:
+      "Compare plans for private family memory vaults, timed unlocks, video memories, voice notes, and family access.",
+    url: `${SITE_URL}/pricing`,
+  },
+};
 
 const comparisonPoints = [
   {
@@ -89,9 +107,28 @@ export default async function PricingPage(props: PricingPageProps) {
     family: familyDisplay ?? undefined,
     lifetime: lifetimeDisplay ?? undefined,
   };
+  const productSchema = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: SITE_NAME,
+    description: "Private family memory vault plans for preserving letters, photos, voice notes, and videos with timed unlocks.",
+    brand: {
+      "@type": "Brand",
+      name: SITE_NAME,
+    },
+    offers: {
+      "@type": "AggregateOffer",
+      priceCurrency: detectedCurrency,
+      lowPrice: "0",
+      highPrice: lifetimeDisplay?.priceLabel?.replace(/[^0-9.]/g, "") || familyDisplay?.priceLabel?.replace(/[^0-9.]/g, "") || "99",
+      offerCount: lifetimeCheckoutEnabled ? 4 : 3,
+      url: `${SITE_URL}/pricing`,
+    },
+  };
 
   return (
     <div className="grain min-h-screen overflow-x-hidden">
+      <JsonLd data={productSchema} />
       <FounderOfferPopup enabled={lifetimeCheckoutEnabled} isAuthenticated={Boolean(user)} currentPlan={profile?.membership_plan ?? null} currency={detectedCurrency} />
       <SiteHeader />
       <main>

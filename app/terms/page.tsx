@@ -3,10 +3,21 @@ import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Terms & Conditions | Vault Story",
-  description: "Terms & Conditions for using Vault Story.",
+  title: "Terms & Conditions",
+  description:
+    "Vault Story terms for private family memory vaults, account access, content ownership, sharing, billing, and acceptable use.",
+  alternates: {
+    canonical: "/terms",
+  },
+  openGraph: {
+    title: "Vault Story Terms & Conditions",
+    description:
+      "Terms for private family memory vaults, account access, content ownership, sharing, billing, and acceptable use.",
+    url: `${SITE_URL}/terms`,
+  },
 };
 
 const sections = [

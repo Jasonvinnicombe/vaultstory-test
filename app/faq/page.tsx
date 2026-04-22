@@ -1,11 +1,29 @@
 import Link from "next/link";
 import { ChevronRight, HelpCircle, LockKeyhole, ShieldCheck, Sparkles } from "lucide-react";
+import type { Metadata } from "next";
 
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
+import { JsonLd } from "@/components/seo/json-ld";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { SITE_URL } from "@/lib/site";
+
+export const metadata: Metadata = {
+  title: "FAQ | Family Memory Vault Questions",
+  description:
+    "Answers about Vault Story, private memory vaults, digital time capsules, future unlocks, family access, pricing, and storage.",
+  alternates: {
+    canonical: "/faq",
+  },
+  openGraph: {
+    title: "Vault Story FAQ",
+    description:
+      "Answers about private memory vaults, digital time capsules, future unlocks, family access, pricing, and storage.",
+    url: `${SITE_URL}/faq`,
+  },
+};
 
 type FaqItem = {
   question: string;
@@ -289,8 +307,24 @@ const faqCategories: FaqCategory[] = [
 ];
 
 export default function FaqPage() {
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqCategories.flatMap((category) =>
+      category.items.map((item) => ({
+        "@type": "Question",
+        name: item.question,
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: item.answer,
+        },
+      })),
+    ),
+  };
+
   return (
     <div className="grain min-h-screen overflow-x-hidden">
+      <JsonLd data={faqSchema} />
       <SiteHeader />
       <main>
         <section className="page-wrap section-space">

@@ -4,13 +4,31 @@ import "./globals.css";
 
 import { CurrencyDetect } from "@/components/layout/currency-detect";
 import { Toaster } from "@/components/ui/sonner";
+import { SITE_DESCRIPTION, SITE_KEYWORDS, SITE_NAME, SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://www.vaultstory.app"),
-  title: "Vault Story",
-  description: "Capture a moment, a belief, a promise, or a prediction and send it forward in time.",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: `${SITE_NAME} | Private Family Memory Vault & Digital Time Capsule`,
+    template: `%s | ${SITE_NAME}`,
+  },
+  description: SITE_DESCRIPTION,
+  keywords: SITE_KEYWORDS,
+  applicationName: SITE_NAME,
+  category: "family memory preservation",
   alternates: {
     canonical: "/",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
   },
   icons: {
     icon: [
@@ -19,19 +37,26 @@ export const metadata: Metadata = {
     ],
   },
   openGraph: {
-    title: "Vault Story",
-    description: "Capture a moment, a belief, a promise, or a prediction and send it forward in time.",
-    url: "https://www.vaultstory.app",
-    siteName: "Vault Story",
+    title: `${SITE_NAME} | Private Family Memory Vault & Digital Time Capsule`,
+    description: SITE_DESCRIPTION,
+    url: SITE_URL,
+    siteName: SITE_NAME,
     images: [
       {
         url: "/Vaultstory.png",
         width: 2736,
         height: 1388,
-        alt: "Vault Story logo",
+        alt: "Vault Story private family memory vault",
       },
     ],
+    locale: "en_US",
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${SITE_NAME} | Private Family Memory Vault`,
+    description: SITE_DESCRIPTION,
+    images: ["/Vaultstory.png"],
   },
 };
 

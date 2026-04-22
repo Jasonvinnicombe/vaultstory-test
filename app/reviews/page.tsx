@@ -7,12 +7,29 @@ import {
   Sparkles,
   Video,
 } from "lucide-react";
+import type { Metadata } from "next";
 
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { SITE_URL } from "@/lib/site";
+
+export const metadata: Metadata = {
+  title: "Reviews | Family Memory Vault Stories",
+  description:
+    "Read Vault Story reviews and family memory vault stories about future messages, voice notes, legacy memories, and private digital time capsules.",
+  alternates: {
+    canonical: "/reviews",
+  },
+  openGraph: {
+    title: "Vault Story Reviews",
+    description:
+      "Family memory vault stories about future messages, voice notes, legacy memories, and private digital time capsules.",
+    url: `${SITE_URL}/reviews`,
+  },
+};
 
 const reviewHighlights = [
   {

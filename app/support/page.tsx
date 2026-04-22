@@ -7,10 +7,19 @@ import { SiteHeader } from "@/components/layout/site-header";
 import { SupportForm } from "@/components/forms/support-form";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Support | Vault Story",
-  description: "Get support for Vault Story, submit a help request, or email support@vaultstory.app.",
+  title: "Support",
+  description: "Get Vault Story support for account access, billing, invites, uploads, private vaults, and family memory archives.",
+  alternates: {
+    canonical: "/support",
+  },
+  openGraph: {
+    title: "Vault Story Support",
+    description: "Get support for account access, billing, invites, uploads, private vaults, and family memory archives.",
+    url: `${SITE_URL}/support`,
+  },
 };
 
 const supportEmail = "support@vaultstory.app";

@@ -1,7 +1,16 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 
 import { AuthForm } from "@/components/forms/auth-form";
 import { Badge } from "@/components/ui/badge";
+
+export const metadata: Metadata = {
+  title: "Create account",
+  robots: {
+    index: false,
+    follow: true,
+  },
+};
 
 export default async function SignupPage(props: {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;

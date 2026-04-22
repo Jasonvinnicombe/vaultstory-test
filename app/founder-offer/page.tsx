@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowRight, HeartHandshake, Gem, ShieldCheck, Users } from "lucide-react";
+import type { Metadata } from "next";
 
 import { createCheckoutSessionAction } from "@/app/actions";
 import { SiteFooter } from "@/components/layout/site-footer";
@@ -11,8 +12,24 @@ import { Card, CardContent } from "@/components/ui/card";
 import { getUser } from "@/lib/auth";
 import { getCurrencyFromHeaders } from "@/lib/currency";
 import { createStripeCheckoutUrl } from "@/lib/mobile-billing";
+import { SITE_URL } from "@/lib/site";
 import { getPlanPriceDisplay, getStripePriceId } from "@/lib/stripe-pricing";
 import { headers } from "next/headers";
+
+export const metadata: Metadata = {
+  title: "Founder Offer | Lifetime Family Vault Access",
+  description:
+    "Claim the limited-time Vault Story founder offer: lifetime family vault access for a one-time payment with a 50GB storage cap.",
+  alternates: {
+    canonical: "/founder-offer",
+  },
+  openGraph: {
+    title: "Vault Story Founder Offer",
+    description:
+      "Limited-time lifetime family vault access for a one-time payment with a 50GB storage cap.",
+    url: `${SITE_URL}/founder-offer`,
+  },
+};
 
 const founderPoints = [
   {

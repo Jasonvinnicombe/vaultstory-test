@@ -15,20 +15,36 @@ import {
   Users,
   Video,
 } from "lucide-react";
+import type { Metadata } from "next";
 
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { FounderOfferPopup } from "@/components/marketing/founder-offer-popup";
 import { LandingHero, LandingProductPreview } from "@/components/marketing/landing-hero";
 import { PricingPlans } from "@/components/marketing/pricing-plans";
+import { JsonLd } from "@/components/seo/json-ld";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { getCurrencyFromHeaders } from "@/lib/currency";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 import { getPlanPriceDisplay, getStripePriceId } from "@/lib/stripe-pricing";
 import { headers } from "next/headers";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Private Family Memory Vault & Digital Time Capsule",
+  description: SITE_DESCRIPTION,
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: "Vault Story | Private Family Memory Vault & Digital Time Capsule",
+    description: SITE_DESCRIPTION,
+    url: SITE_URL,
+  },
+};
 
 const coreHighlights = [
   {
@@ -256,23 +272,42 @@ export default async function HomePage(props: HomePageProps) {
   const organizationSchema = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: "Vault Story",
-    url: "https://www.vaultstory.app",
+    name: SITE_NAME,
+    url: SITE_URL,
     logo: {
       "@type": "ImageObject",
-      url: "https://www.vaultstory.app/Vaultstory.png",
+      url: `${SITE_URL}/Vaultstory.png`,
       width: 2736,
       height: 1388,
+    },
+  };
+  const websiteSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: SITE_NAME,
+    url: SITE_URL,
+    description: SITE_DESCRIPTION,
+  };
+  const softwareSchema = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: SITE_NAME,
+    applicationCategory: "LifestyleApplication",
+    operatingSystem: "Web, Android",
+    url: SITE_URL,
+    description: SITE_DESCRIPTION,
+    offers: {
+      "@type": "AggregateOffer",
+      priceCurrency: detectedCurrency,
+      lowPrice: "0",
+      highPrice: lifetimeDisplay?.priceLabel?.replace(/[^0-9.]/g, "") || familyDisplay?.priceLabel?.replace(/[^0-9.]/g, "") || "99",
     },
   };
 
   return (
     <div className="grain min-h-screen overflow-x-hidden">
       <FounderOfferPopup enabled={lifetimeCheckoutEnabled} currency={detectedCurrency} />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
-      />
+      <JsonLd data={[organizationSchema, websiteSchema, softwareSchema]} />
       <SiteHeader />
       <main>
         <LandingHero />
