@@ -16,6 +16,9 @@ export const metadata: Metadata = {
   keywords: SITE_KEYWORDS,
   applicationName: SITE_NAME,
   category: "family memory preservation",
+  verification: {
+    google: "jdmtIskM8a2Q6aOkx-BqiATNWnkwCkeLXWRZNs-Acjg",
+  },
   alternates: {
     canonical: "/",
   },
