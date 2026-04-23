@@ -111,11 +111,36 @@ export default async function PricingPage(props: PricingPageProps) {
     "@context": "https://schema.org",
     "@type": "Product",
     name: SITE_NAME,
+    url: `${SITE_URL}/pricing`,
+    image: `${SITE_URL}/Vaultstory.png`,
+    sku: "vault-story-membership",
+    category: "Family memory vault software",
     description: "Private family memory vault plans for preserving letters, photos, voice notes, and videos with timed unlocks.",
     brand: {
       "@type": "Brand",
       name: SITE_NAME,
     },
+    audience: {
+      "@type": "Audience",
+      audienceType: "Families, parents, grandparents, and people preserving private memories",
+    },
+    additionalProperty: [
+      {
+        "@type": "PropertyValue",
+        name: "Supported media",
+        value: "Letters, photos, voice notes, and videos",
+      },
+      {
+        "@type": "PropertyValue",
+        name: "Unlock options",
+        value: "Date, age, and milestone unlocks",
+      },
+      {
+        "@type": "PropertyValue",
+        name: "Plan types",
+        value: lifetimeCheckoutEnabled ? "Free, Premium, Family, and Founder Lifetime" : "Free, Premium, and Family",
+      },
+    ],
     offers: {
       "@type": "AggregateOffer",
       priceCurrency: detectedCurrency,
@@ -123,6 +148,10 @@ export default async function PricingPage(props: PricingPageProps) {
       highPrice: lifetimeDisplay?.priceLabel?.replace(/[^0-9.]/g, "") || familyDisplay?.priceLabel?.replace(/[^0-9.]/g, "") || "99",
       offerCount: lifetimeCheckoutEnabled ? 4 : 3,
       url: `${SITE_URL}/pricing`,
+      seller: {
+        "@type": "Organization",
+        name: SITE_NAME,
+      },
     },
   };
 
