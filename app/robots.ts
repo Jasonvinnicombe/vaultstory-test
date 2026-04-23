@@ -27,6 +27,7 @@ export default function robots(): MetadataRoute.Robots {
           "/mobile-home",
           "/mobile-login",
           "/mobile-signup",
+          "/node_modules",
           "/settings",
           "/vaults",
         ],

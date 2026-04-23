@@ -274,6 +274,14 @@ export default async function HomePage(props: HomePageProps) {
     "@type": "Organization",
     name: SITE_NAME,
     url: SITE_URL,
+    email: "support@vaultstory.app",
+    contactPoint: {
+      "@type": "ContactPoint",
+      contactType: "customer support",
+      email: "support@vaultstory.app",
+      url: `${SITE_URL}/support`,
+      availableLanguage: "en",
+    },
     logo: {
       "@type": "ImageObject",
       url: `${SITE_URL}/Vaultstory.png`,

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -145,10 +146,13 @@ function VaultTimelinePreview() {
       <CardContent className="p-4 sm:p-5">
         <div className="overflow-hidden rounded-[30px] border border-white/10 bg-[rgba(70,36,22,0.22)]">
           <div className="relative h-[700px] sm:h-[760px] md:h-[640px] lg:h-[600px] xl:h-[640px]">
-            <img
+            <Image
               src="https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=1400&q=80"
               alt="A family memory preserved inside a vault"
-              className="h-full w-full object-cover"
+              fill
+              priority
+              sizes="(max-width: 767px) 100vw, (max-width: 1279px) 42vw, 38vw"
+              className="object-cover"
             />
             <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(66,35,24,0.08),rgba(66,35,24,0.22)_28%,rgba(66,35,24,0.52)_62%,rgba(66,35,24,0.88))]" />
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(216,161,91,0.18),transparent_24%)]" />
@@ -230,10 +234,12 @@ export function LandingProductPreview() {
             <div className="space-y-3">
               <div className="overflow-hidden rounded-[24px] border border-white/10 bg-[rgba(70,36,22,0.22)]">
                 <div className="relative h-40 overflow-hidden border-b border-white/10 sm:h-48 lg:h-44 xl:h-48">
-                  <img
+                  <Image
                     src="https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=1200&q=80"
                     alt="A family memory used as a vault cover"
-                    className="h-full w-full object-cover"
+                    fill
+                    sizes="(max-width: 1023px) 100vw, 50vw"
+                    className="object-cover"
                   />
                   <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(66,35,24,0.08),rgba(66,35,24,0.75))]" />
                   <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5">
