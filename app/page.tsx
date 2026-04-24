@@ -34,14 +34,16 @@ import { headers } from "next/headers";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Private Family Memory Vault & Digital Time Capsule",
-  description: SITE_DESCRIPTION,
+  title: "Family Memory Vault, Digital Time Capsule & Future Messages",
+  description:
+    "Vault Story is a private family memory vault and digital time capsule for future messages, voice notes, video messages, family stories, and milestone memories.",
   alternates: {
     canonical: "/",
   },
   openGraph: {
-    title: "Vault Story | Private Family Memory Vault & Digital Time Capsule",
-    description: SITE_DESCRIPTION,
+    title: "Vault Story | Family Memory Vault, Digital Time Capsule & Future Messages",
+    description:
+      "A private family memory vault for future messages, voice notes, video messages, family stories, and milestone memories.",
     url: SITE_URL,
   },
 };
@@ -325,10 +327,10 @@ export default async function HomePage(props: HomePageProps) {
             <div className="section-stack max-w-2xl">
               <p className="text-sm uppercase tracking-[0.22em] text-muted-foreground">What Vault Story does</p>
               <h2 className="text-balance font-display text-4xl leading-tight text-foreground sm:text-5xl">
-                A private vault for the memories that matter later.
+                A private family memory vault for future messages, family stories, and milestone memories.
               </h2>
               <p className="text-base leading-8 text-muted-foreground sm:text-lg">
-                Save meaningful messages and moments today, then choose exactly when they should be opened in the future.
+                Save letters, photos, voice notes, and video messages today, then choose exactly when they should be opened in the future.
               </p>
               <div className="flex flex-col gap-3 pt-2 sm:flex-row">
                 <Button asChild>
@@ -413,10 +415,10 @@ export default async function HomePage(props: HomePageProps) {
             <div className="section-stack max-w-3xl">
               <p className="text-sm uppercase tracking-[0.22em] text-muted-foreground">What you can save</p>
               <h2 className="text-balance font-display text-4xl leading-tight text-foreground sm:text-5xl">
-                What you can save in Vault Story
+                Save future messages, family stories, voice notes, photos, and video in one place.
               </h2>
               <p className="text-base leading-8 text-muted-foreground sm:text-lg">
-                Keep the words, voices, images, and videos that deserve more context than a camera roll or notes app can give them.
+                Keep the words, voices, images, and videos that deserve more context than a camera roll, notes app, or generic cloud folder can give them.
               </p>
 
               <div className="grid gap-4 sm:grid-cols-2">
@@ -473,10 +475,10 @@ export default async function HomePage(props: HomePageProps) {
             <div className="section-stack max-w-3xl">
               <p className="text-sm uppercase tracking-[0.22em] text-muted-foreground">Who Vault Story is for</p>
               <h2 className="text-balance font-display text-4xl sm:text-5xl">
-                Built for the people who want memories to land with meaning, not just sit in storage.
+                Built for parents, grandparents, families, and anyone creating future messages with meaning.
               </h2>
               <p className="text-base leading-8 text-muted-foreground sm:text-lg">
-                The strongest use cases are easy to understand: parents preserving the years ahead, grandparents saving family history, and households building a shared archive over time.
+                The strongest use cases are easy to understand: parents preserving the years ahead, grandparents saving family history, households building a shared archive, and people recording future messages for children or their future self.
               </p>
 
               <Card className="overflow-hidden border-white/65 bg-[linear-gradient(180deg,rgba(255,250,244,0.97),rgba(245,234,222,0.84))] shadow-[0_18px_48px_rgba(143,71,43,0.08)]">

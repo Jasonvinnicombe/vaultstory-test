@@ -86,10 +86,10 @@ export function LandingHero() {
 
             <motion.div variants={fadeUp} transition={{ duration: 0.55, ease: "easeOut" }} className="space-y-5 sm:space-y-6">
               <h1 className="max-w-4xl text-balance font-display text-5xl leading-[0.96] tracking-[-0.03em] text-foreground sm:text-6xl md:max-w-[9ch] md:text-[4.55rem] lg:max-w-[10ch] lg:text-[5rem] xl:max-w-4xl xl:text-[5.8rem]">
-                Private family memories, delivered at the right moment.
+                A private family memory vault for future messages, voice notes, and video memories.
               </h1>
               <p className="max-w-2xl text-lg leading-8 text-muted-foreground sm:text-xl sm:leading-9 md:max-w-[29rem] md:text-[1.1rem] md:leading-8 lg:max-w-[34rem] xl:max-w-2xl xl:text-xl xl:leading-9">
-                Vault Story lets you save letters, photos, voice notes, and videos for your children, partner, family, or future self, then unlock them on a date, age, or milestone that matters.
+                Vault Story is a digital time capsule for families who want to save future messages, family stories, letters, voice notes, photos, and video messages for children, loved ones, or their future self.
               </p>
             </motion.div>
 
