@@ -15,6 +15,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { resolveAppUrl } from "@/lib/app-url";
 import { createClient } from "@/lib/supabase/client";
 import { signInSchema, signUpSchema } from "@/lib/validations/auth";
 
@@ -128,6 +129,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
   const inviteMode = searchParams.get("invite");
   const nextPath = searchParams.get("next") || "/dashboard";
   const alternateAuthHref = buildAuthHref(currentMode === "login" ? "signup" : "login", inviteEmail, inviteMode, nextPath);
+  const appUrl = resolveAppUrl(typeof window === "undefined" ? undefined : window.location.origin);
 
   useEffect(() => {
     setSupabase(createClient());
@@ -156,7 +158,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
     setResetSending(true);
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
+      redirectTo: `${appUrl}/reset-password`,
     });
 
     setResetSending(false);
@@ -184,7 +186,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
     }
 
     setOtpSending(true);
-    const redirectTo = `${window.location.origin}${buildAuthCallbackHref(nextPath, inviteMode, email)}`;
+    const redirectTo = `${appUrl}${buildAuthCallbackHref(nextPath, inviteMode, email)}`;
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
@@ -213,7 +215,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
     setOauthLoading(provider);
 
     const email = form.getValues("email").trim() || inviteEmail;
-    const redirectTo = `${window.location.origin}${buildAuthCallbackHref(nextPath, inviteMode, email)}`;
+    const redirectTo = `${appUrl}${buildAuthCallbackHref(nextPath, inviteMode, email)}`;
     const providerOptions: Record<OAuthProvider, { scopes?: string; queryParams?: Record<string, string> }> = {
       google: {
         scopes: "email profile",
@@ -262,7 +264,10 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
     const { data, error } = await supabase.auth.signUp({
       email: signUpValues.email,
       password: signUpValues.password,
-      options: { data: { full_name: signUpValues.fullName } },
+      options: {
+        data: { full_name: signUpValues.fullName },
+        emailRedirectTo: `${appUrl}${buildAuthCallbackHref(nextPath, inviteMode, signUpValues.email)}`,
+      },
     });
 
     setLoading(false);
