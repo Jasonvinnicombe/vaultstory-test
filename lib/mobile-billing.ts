@@ -34,8 +34,16 @@ function buildWebUrl(pathname: string, params?: Record<string, string>) {
   return url.toString();
 }
 
+function buildStripeSuccessUrl(pathname: string, params: Record<string, string>) {
+  const sessionPlaceholder = "{CHECKOUT_SESSION_ID}";
+  const encodedPlaceholder = encodeURIComponent(sessionPlaceholder);
+  const url = buildWebUrl(pathname, params);
+
+  return url.replace(encodedPlaceholder, sessionPlaceholder);
+}
+
 function buildMobileHostedReturnUrl(params: Record<string, string>) {
-  return buildWebUrl("/mobile-billing/return", params);
+  return buildStripeSuccessUrl("/mobile-billing/return", params);
 }
 
 function buildMobileDeepLink(params: Record<string, string>) {
@@ -145,7 +153,7 @@ export async function createStripeCheckoutUrl(options: {
   const successUrl =
     options.returnMode === "app"
       ? getMobileReturnTargets(successParams).hostedReturnUrl
-      : buildWebUrl("/settings", successParams);
+      : buildStripeSuccessUrl("/settings", successParams);
   const cancelUrl =
     options.returnMode === "app"
       ? getMobileReturnTargets(cancelParams).hostedReturnUrl
